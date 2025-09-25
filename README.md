@@ -1,4 +1,4 @@
-# 🔐 System Logowania - Frontend & Backend
+# 🧱 Projekt Lego - System Logowania
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
@@ -18,7 +18,7 @@ Kompletny system logowania z funkcjonalnościami rejestracji, logowania, resetu 
 ## 📁 Struktura Projektu
 
 ```
-Projekt AI/
+Projekt-Lego/
 ├── frontend/                 # Aplikacja frontend (HTML, CSS, JS)
 │   ├── index.html           # Główna strona logowania
 │   ├── styles.css           # Style CSS
@@ -45,8 +45,8 @@ Projekt AI/
 
 ### 1. Clone repozytorium
 ```bash
-git clone https://github.com/TWOJA-NAZWA/auth-system.git
-cd auth-system
+git clone https://github.com/Urubaal/Projekt-Lego.git
+cd Projekt-Lego
 ```
 
 ### 2. Backend Setup
@@ -196,16 +196,16 @@ Ten projekt jest licencjonowany na licencji MIT - zobacz [LICENSE](LICENSE) dla 
 
 ## 🐛 Zgłaszanie błędów
 
-Jeśli znalazłeś błąd, otwórz [Issue](https://github.com/TWOJA-NAZWA/auth-system/issues) z opisem problemu.
+Jeśli znalazłeś błąd, otwórz [Issue](https://github.com/Urubaal/Projekt-Lego/issues) z opisem problemu.
 
 ## ✨ Propozycje funkcji
 
-Masz pomysł na nową funkcję? Otwórz [Feature Request](https://github.com/TWOJA-NAZWA/auth-system/issues/new/choose)!
+Masz pomysł na nową funkcję? Otwórz [Feature Request](https://github.com/Urubaal/Projekt-Lego/issues/new/choose)!
 
 ## 🆘 Wsparcie
 
 Jeśli masz pytania lub problemy:
-1. Sprawdź [Issues](https://github.com/TWOJA-NAZWA/auth-system/issues)
+1. Sprawdź [Issues](https://github.com/Urubaal/Projekt-Lego/issues)
 2. Sprawdź logi serwera w konsoli
 3. Otwórz narzędzia deweloperskie w przeglądarce
 4. Upewnij się, że wszystkie zależności są zainstalowane
