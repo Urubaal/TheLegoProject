@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strona Logowania</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>Zaloguj się</h1>
+                <p>Witaj z powrotem! Zaloguj się do swojego konta</p>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <span class="error-message" id="emailError"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Hasło</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" required>
+                        <button type="button" class="toggle-password" id="togglePassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <span class="error-message" id="passwordError"></span>
+                </div>
+
+                <div class="form-options">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="rememberMe">
+                        <span class="checkmark"></span>
+                        Zapamiętaj mnie
+                    </label>
+                    <a href="#" class="forgot-password" id="forgotPasswordLink">Zapomniałeś hasła?</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Zaloguj się</button>
+            </form>
+
+            <!-- Forgot Password Form -->
+            <form id="forgotPasswordForm" class="form hidden">
+                <div class="form-group">
+                    <label for="forgotEmail">Email</label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="forgotEmail" name="forgotEmail" required>
+                    </div>
+                    <span class="error-message" id="forgotEmailError"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Wyślij link resetujący</button>
+                <button type="button" class="btn btn-secondary" id="backToLogin">Powrót do logowania</button>
+            </form>
+
+            <!-- Reset Password Form -->
+            <form id="resetPasswordForm" class="form hidden">
+                <div class="form-group">
+                    <label for="newPassword">Nowe hasło</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="newPassword" name="newPassword" required>
+                        <button type="button" class="toggle-password" id="toggleNewPassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <span class="error-message" id="newPasswordError"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Potwierdź hasło</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="confirmPassword" name="confirmPassword" required>
+                        <button type="button" class="toggle-password" id="toggleConfirmPassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <span class="error-message" id="confirmPasswordError"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Zresetuj hasło</button>
+                <button type="button" class="btn btn-secondary" id="backToLoginFromReset">Powrót do logowania</button>
+            </form>
+
+            <div class="login-footer">
+                <p>Nie masz konta? <a href="#" id="signUpLink">Zarejestruj się</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="message-container hidden">
+        <div class="message" id="message">
+            <i class="fas fa-check-circle"></i>
+            <span id="messageText"></span>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
