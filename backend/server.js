@@ -21,12 +21,12 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// CORS configuration
+// CORS configuration - allows requests from multiple frontend ports
 app.use(cors({
   origin: [
-    'http://localhost:8080',
-    'http://localhost:5500',
-    'http://localhost:3000'
+    'http://localhost:8080', // Main frontend port
+    'http://localhost:5500', // Alternative frontend port
+    'http://localhost:3000'  // Development port
   ],
   credentials: true
 }));

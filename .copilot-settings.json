@@ -1,0 +1,19 @@
+{
+  "language_preferences": {
+    "conversation": "polish",
+    "code_comments": "english",
+    "documentation": "english",
+    "commit_messages": "english"
+  },
+  "coding_standards": {
+    "comment_style": "english",
+    "variable_naming": "english",
+    "function_naming": "english",
+    "readme_sections": "english"
+  },
+  "project_context": {
+    "description": "LEGO Purchase Suggestion System with AI integration",
+    "tech_stack": ["Node.js", "PostgreSQL", "Express", "Jest", "ESLint"],
+    "target_audience": "Polish users, international codebase"
+  }
+}

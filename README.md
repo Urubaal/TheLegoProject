@@ -214,6 +214,26 @@ psql -U lego_user -d lego_purchase_system < backup.sql
 4. **Backup** - Automatyczne kopie zapasowe
 5. **Skalowanie** - Optymalizacja dla większej liczby użytkowników
 
+## 🤖 Konfiguracja Copilota
+
+Projekt używa następujących konwencji językowych:
+
+### Języki:
+- **Konwersacje z użytkownikiem**: Polski 🇵🇱
+- **Komentarze w kodzie**: English 🇺🇸
+- **Dokumentacja**: English 🇺🇸
+- **Commit messages**: English 🇺🇸
+- **README**: Polish 🇵🇱
+
+### Przykład konfiguracji Copilota:
+```json
+{
+  "conversation_language": "polish",
+  "code_comments_language": "english",
+  "documentation_language": "english"
+}
+```
+
 ## 🔧 Narzędzia weryfikacji
 
 Projekt zawiera kompletny system weryfikacji jakości kodu:
