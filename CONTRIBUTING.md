@@ -1,35 +1,35 @@
-# Contributing to Authentication System
+# Contributing to TheLegoProject
 
-Dziękujemy za zainteresowanie projektem! Oto jak możesz przyczynić się do rozwoju systemu logowania.
+Thank you for your interest in the project! Here's how you can contribute to the development of the authentication system.
 
-## 🚀 Jak zacząć
+## 🚀 Getting Started
 
-1. **Fork** repozytorium
-2. **Clone** swoje fork:
+1. **Fork** the repository
+2. **Clone** your fork:
    ```bash
-   git clone https://github.com/TWOJA-NAZWA/auth-system.git
-   cd auth-system
+   git clone https://github.com/YOUR-USERNAME/TheLegoProject.git
+   cd TheLegoProject
    ```
-3. **Utwórz branch** dla swojej funkcji:
+3. **Create branch** for your feature:
    ```bash
-   git checkout -b feature/nazwa-funkcji
+   git checkout -b feature/feature-name
    ```
 
-## 📝 Proces rozwoju
+## 📝 Development Process
 
 ### Backend
-1. Przejdź do folderu `backend/`
-2. Zainstaluj zależności: `npm install`
-3. Skopiuj `env.example` do `.env` i skonfiguruj
-4. Uruchom serwer: `npm run dev`
+1. Go to `backend/` folder
+2. Install dependencies: `npm install`
+3. Copy `env.example` to `.env` and configure
+4. Run server: `npm run dev`
 
 ### Frontend
-1. Otwórz `frontend/index.html` w przeglądarce
-2. Lub uruchom lokalny serwer HTTP
+1. Open `frontend/index.html` in browser
+2. Or run local HTTP server
 
-## 🧪 Testowanie
+## 🧪 Testing
 
-Przed wysłaniem Pull Request:
+Before submitting Pull Request:
 
 1. **Backend:**
    ```bash
@@ -38,62 +38,62 @@ Przed wysłaniem Pull Request:
    ```
 
 2. **Frontend:**
-   - Przetestuj wszystkie formularze
-   - Sprawdź responsywność
-   - Przetestuj na różnych przeglądarkach
+   - Test all forms
+   - Check responsiveness
+   - Test on different browsers
 
-## 📋 Zasady
+## 📋 Guidelines
 
-### Kod
-- Używaj **angielskich komentarzy** w kodzie
-- **Polskie** nazwy zmiennych i funkcji są OK
-- Zgodność z istniejącym stylem kodu
-- Dodaj testy dla nowych funkcji
+### Code
+- Use **English comments** in code
+- **Polish** variable and function names are OK
+- Follow existing code style
+- Add tests for new features
 
 ### Commits
-- Używaj konwencji: `feat:`, `fix:`, `docs:`, `style:`, `refactor:`, `test:`
-- Przykłady:
+- Use conventions: `feat:`, `fix:`, `docs:`, `style:`, `refactor:`, `test:`
+- Examples:
   - `feat: add user registration endpoint`
   - `fix: resolve password validation bug`
   - `docs: update API documentation`
 
 ### Pull Requests
-1. Opisz co robi PR
-2. Wymień zmiany
-3. Dodaj screenshoty jeśli dotyczy UI
-4. Upewnij się, że kod się kompiluje
+1. Describe what the PR does
+2. List changes
+3. Add screenshots if UI related
+4. Make sure code compiles
 
-## 🐛 Zgłaszanie błędów
+## 🐛 Bug Reports
 
-Użyj szablonu Issue:
-- **Opis problemu**
-- **Kroki do reprodukcji**
-- **Oczekiwane vs rzeczywiste zachowanie**
-- **Środowisko** (OS, przeglądarka, wersja Node.js)
+Use Issue template:
+- **Problem description**
+- **Steps to reproduce**
+- **Expected vs actual behavior**
+- **Environment** (OS, browser, Node.js version)
 
-## ✨ Propozycje funkcji
+## ✨ Feature Requests
 
-Przed implementacją:
-1. Sprawdź czy nie ma już podobnego Issue
-2. Opisz funkcję szczegółowo
-3. Wyjaśnij korzyści
-4. Rozważ wpływ na istniejący kod
+Before implementation:
+1. Check if similar Issue already exists
+2. Describe feature in detail
+3. Explain benefits
+4. Consider impact on existing code
 
-## 📞 Pomoc
+## 📞 Help
 
-- Otwórz Issue z pytaniem
-- Sprawdź dokumentację w README.md
-- Przejrzyj istniejące Issues
+- Open Issue with question
+- Check documentation in README.md
+- Review existing Issues
 
-## 🎯 Obszary do rozwoju
+## 🎯 Development Areas
 
-- [ ] Dodanie bazy danych (MongoDB/PostgreSQL)
-- [ ] Testy jednostkowe i integracyjne
+- [ ] Add database (MongoDB/PostgreSQL)
+- [ ] Unit and integration tests
 - [ ] Docker containerization
 - [ ] CI/CD pipeline
-- [ ] Dodanie 2FA
+- [ ] Add 2FA
 - [ ] Social login (Google, Facebook)
-- [ ] Dashboard użytkownika
+- [ ] User dashboard
 - [ ] Admin panel
 
-Dziękujemy za wkład w projekt! 🎉
+Thank you for contributing to the project! 🎉

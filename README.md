@@ -1,52 +1,52 @@
-# 🧱 Projekt Lego - System Logowania
+# 🧱 TheLegoProject - Authentication System
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![Express](https://img.shields.io/badge/Express-4.x-blue.svg)](https://expressjs.com/)
 
-Kompletny system logowania z funkcjonalnościami rejestracji, logowania, resetu i odzyskiwania hasła. Nowoczesny frontend z responsywnym designem i bezpieczny backend API.
+Complete authentication system with registration, login, password reset and recovery functionality. Modern frontend with responsive design and secure backend API.
 
-## 🌟 Funkcjonalności
+## 🌟 Features
 
-- ✅ **Logowanie i rejestracja** użytkowników
-- ✅ **Reset hasła** przez email
-- ✅ **Odzyskiwanie hasła** z tokenem bezpieczeństwa
-- ✅ **Responsywny design** - działa na wszystkich urządzeniach
-- ✅ **Bezpieczeństwo** - JWT, hashowanie haseł, rate limiting
-- ✅ **Nowoczesny UI** z animacjami i walidacją w czasie rzeczywistym
+- ✅ **User registration and login** with validation
+- ✅ **Password reset** via email
+- ✅ **Password recovery** with secure tokens
+- ✅ **Responsive design** - works on all devices
+- ✅ **Security** - JWT, password hashing, rate limiting
+- ✅ **Modern UI** with animations and real-time validation
 
-## 📁 Struktura Projektu
+## 📁 Project Structure
 
 ```
-Projekt-Lego/
-├── frontend/                 # Aplikacja frontend (HTML, CSS, JS)
-│   ├── index.html           # Główna strona logowania
-│   ├── styles.css           # Style CSS
-│   └── script.js            # Logika JavaScript
-├── backend/                 # API Backend (Node.js/Express)
-│   ├── server.js            # Główny serwer
-│   ├── package.json         # Zależności Node.js
-│   ├── env.example          # Przykład konfiguracji
-│   ├── routes/              # Definicje tras API
-│   │   └── auth.js          # Trasy autoryzacji
-│   ├── controllers/         # Kontrolery
-│   │   └── authController.js # Kontroler autoryzacji
+TheLegoProject/
+├── frontend/                 # Frontend application (HTML, CSS, JS)
+│   ├── index.html           # Main login page
+│   ├── styles.css           # CSS styles
+│   └── script.js            # JavaScript logic
+├── backend/                 # Backend API (Node.js/Express)
+│   ├── server.js            # Main server
+│   ├── package.json         # Node.js dependencies
+│   ├── env.example          # Configuration example
+│   ├── routes/              # API route definitions
+│   │   └── auth.js          # Authentication routes
+│   ├── controllers/         # Controllers
+│   │   └── authController.js # Authentication controller
 │   ├── middleware/          # Middleware
-│   │   ├── auth.js          # Middleware autoryzacji
-│   │   └── errorHandler.js  # Obsługa błędów
-│   ├── models/              # Modele danych
-│   ├── utils/               # Narzędzia pomocnicze
-│   │   └── emailService.js  # Serwis email
-│   └── tests/               # Testy
-└── README.md               # Ten plik
+│   │   ├── auth.js          # Authentication middleware
+│   │   └── errorHandler.js  # Error handling
+│   ├── models/              # Data models
+│   ├── utils/               # Utility tools
+│   │   └── emailService.js  # Email service
+│   └── tests/               # Tests
+└── README.md               # This file
 ```
 
-## 🚀 Szybki Start
+## 🚀 Quick Start
 
-### 1. Clone repozytorium
+### 1. Clone repository
 ```bash
-git clone https://github.com/Urubaal/Projekt-Lego.git
-cd Projekt-Lego
+git clone https://github.com/Urubaal/TheLegoProject.git
+cd TheLegoProject
 ```
 
 ### 2. Backend Setup
@@ -54,25 +54,25 @@ cd Projekt-Lego
 cd backend
 npm install
 cp env.example .env
-# Edytuj .env z konfiguracją
+# Edit .env with your configuration
 npm run dev
 ```
 
 ### 3. Frontend Setup
 ```bash
-# Otwórz frontend/index.html w przeglądarce
-# Lub uruchom lokalny serwer HTTP
+# Open frontend/index.html in browser
+# Or run local HTTP server
 python -m http.server 8000
 ```
 
-## 📋 Wymagania
+## 📋 Requirements
 
 - **Node.js** 18+ 
 - **npm** 8+
-- **Przeglądarka** z obsługą ES6+
-- **Email SMTP** (opcjonalnie dla resetu hasła)
+- **Browser** with ES6+ support
+- **Email SMTP** (optional for password reset)
 
-## ⚙️ Konfiguracja
+## ⚙️ Configuration
 
 ### Backend (.env)
 ```env
@@ -88,128 +88,124 @@ FRONTEND_URL=http://localhost:8000
 const API_BASE_URL = 'http://localhost:3000/api';
 ```
 
-## 🔧 Funkcjonalności
+## 🔧 Features
 
 ### Frontend
-- ✅ **Formularz logowania** z walidacją
-- ✅ **Reset hasła** - wysyłanie linku na email
-- ✅ **Odzyskiwanie hasła** - ustawianie nowego hasła
-- ✅ **Responsywny design** - działa na wszystkich urządzeniach
-- ✅ **Walidacja w czasie rzeczywistym**
-- ✅ **Animacje i efekty wizualne**
-- ✅ **Zapamiętywanie użytkownika**
+- ✅ **Login form** with validation
+- ✅ **Password reset** - sending reset link via email
+- ✅ **Password recovery** - setting new password
+- ✅ **Responsive design** - works on all devices
+- ✅ **Real-time validation**
+- ✅ **Animations and visual effects**
+- ✅ **Remember user** functionality
 
 ### Backend API
-- ✅ **POST /api/auth/register** - Rejestracja użytkownika
-- ✅ **POST /api/auth/login** - Logowanie
-- ✅ **POST /api/auth/forgot-password** - Reset hasła
-- ✅ **POST /api/auth/reset-password** - Ustawienie nowego hasła
-- ✅ **GET /api/auth/profile** - Profil użytkownika
-- ✅ **POST /api/auth/logout** - Wylogowanie
-- ✅ **GET /api/health** - Status serwera
+- ✅ **POST /api/auth/register** - User registration
+- ✅ **POST /api/auth/login** - User login
+- ✅ **POST /api/auth/forgot-password** - Password reset
+- ✅ **POST /api/auth/reset-password** - Set new password
+- ✅ **GET /api/auth/profile** - User profile
+- ✅ **POST /api/auth/logout** - User logout
+- ✅ **GET /api/health** - Server status
 
-### Bezpieczeństwo
-- ✅ **Hashowanie haseł** (bcrypt)
-- ✅ **JWT tokens** z wygaśnięciem
-- ✅ **Rate limiting** - ograniczenie liczby żądań
-- ✅ **CORS** - konfiguracja cross-origin
-- ✅ **Helmet** - nagłówki bezpieczeństwa
-- ✅ **Walidacja danych** wejściowych
+### Security
+- ✅ **Password hashing** (bcrypt)
+- ✅ **JWT tokens** with expiration
+- ✅ **Rate limiting** - request throttling
+- ✅ **CORS** - cross-origin configuration
+- ✅ **Helmet** - security headers
+- ✅ **Input validation** and sanitization
 
-## 📧 Konfiguracja Email
+## 📧 Email Configuration
 
-Aby wysyłać emaile z resetem hasła, skonfiguruj w pliku `.env`:
+To send password reset emails, configure in `.env` file:
 
 ```env
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
-EMAIL_USER=twoj-email@gmail.com
-EMAIL_PASS=twoje-haslo-aplikacji
-EMAIL_FROM=noreply@twoja-domena.com
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
+EMAIL_FROM=noreply@yourdomain.com
 ```
 
-**Uwaga:** Dla Gmail użyj hasła aplikacji, nie zwykłego hasła.
+**Note:** For Gmail, use app password, not regular password.
 
-## 🧪 Testowanie
+## 🧪 Testing
 
-### Testowanie API
+### API Testing
 ```bash
-# Test logowania
+# Test login
 curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"password123"}'
 
-# Test resetu hasła
+# Test password reset
 curl -X POST http://localhost:3000/api/auth/forgot-password \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com"}'
 ```
 
-### Testowanie Frontendu
-1. Otwórz `frontend/index.html` w przeglądarce
-2. Przetestuj wszystkie formularze
-3. Sprawdź responsywność na różnych urządzeniach
+### Frontend Testing
+1. Open `frontend/index.html` in browser
+2. Test all forms
+3. Check responsiveness on different devices
 
-## 🔄 Przepływ Aplikacji
+## 🔄 Application Flow
 
-1. **Logowanie:**
-   - Użytkownik wprowadza email i hasło
-   - Frontend wysyła żądanie do `/api/auth/login`
-   - Backend weryfikuje dane i zwraca JWT token
-   - Token jest zapisywany w localStorage
+1. **Login:**
+   - User enters email and password
+   - Frontend sends request to `/api/auth/login`
+   - Backend verifies data and returns JWT token
+   - Token is stored in localStorage
 
-2. **Reset hasła:**
-   - Użytkownik klika "Zapomniałeś hasła?"
-   - Wprowadza email i wysyła formularz
-   - Backend generuje token resetujący i wysyła email
-   - Użytkownik klika link w emailu
+2. **Password Reset:**
+   - User clicks "Forgot password?"
+   - Enters email and submits form
+   - Backend generates reset token and sends email
+   - User clicks link in email
 
-3. **Odzyskiwanie hasła:**
-   - Użytkownik jest przekierowany na stronę z tokenem
-   - Wprowadza nowe hasło
-   - Backend weryfikuje token i aktualizuje hasło
+3. **Password Recovery:**
+   - User is redirected to page with token
+   - Enters new password
+   - Backend verifies token and updates password
 
-## 🛠️ Rozwój
+## 🛠️ Development
 
-### Dodawanie nowych funkcji
-1. **Backend:** Dodaj nowe endpointy w `routes/auth.js`
-2. **Frontend:** Zaktualizuj `script.js` z nowymi funkcjami
-3. **Styling:** Modyfikuj `styles.css` dla nowych elementów
+### Adding New Features
+1. **Backend:** Add new endpoints in `routes/auth.js`
+2. **Frontend:** Update `script.js` with new functions
+3. **Styling:** Modify `styles.css` for new elements
 
-### Baza danych
-Obecnie używana jest pamięć (in-memory storage). Aby dodać prawdziwą bazę danych:
-1. Zainstaluj ORM (np. Mongoose dla MongoDB)
-2. Zaktualizuj `models/` z schematami
-3. Zmodyfikuj kontrolery do pracy z bazą danych
+### Database
+Currently using in-memory storage. To add real database:
+1. Install ORM (e.g., Mongoose for MongoDB)
+2. Update `models/` with schemas
+3. Modify controllers to work with database
 
-## 📝 Licencja
+## 📝 License
 
-MIT License - możesz swobodnie używać i modyfikować kod.
+MIT License - you can freely use and modify the code.
 
 ## 🤝 Contributing
 
-Zapraszamy do współpracy! Sprawdź [CONTRIBUTING.md](CONTRIBUTING.md) aby dowiedzieć się jak możesz pomóc.
+We welcome contributions! Check [CONTRIBUTING.md](CONTRIBUTING.md) to learn how you can help.
 
-## 📄 Licencja
+## 🐛 Bug Reports
 
-Ten projekt jest licencjonowany na licencji MIT - zobacz [LICENSE](LICENSE) dla szczegółów.
+If you found a bug, open an [Issue](https://github.com/Urubaal/TheLegoProject/issues) with problem description.
 
-## 🐛 Zgłaszanie błędów
+## ✨ Feature Requests
 
-Jeśli znalazłeś błąd, otwórz [Issue](https://github.com/Urubaal/Projekt-Lego/issues) z opisem problemu.
+Have an idea for a new feature? Open a [Feature Request](https://github.com/Urubaal/TheLegoProject/issues/new/choose)!
 
-## ✨ Propozycje funkcji
+## 🆘 Support
 
-Masz pomysł na nową funkcję? Otwórz [Feature Request](https://github.com/Urubaal/Projekt-Lego/issues/new/choose)!
+If you have questions or problems:
+1. Check [Issues](https://github.com/Urubaal/TheLegoProject/issues)
+2. Check server logs in console
+3. Open developer tools in browser
+4. Make sure all dependencies are installed
 
-## 🆘 Wsparcie
+## 🌟 Stars
 
-Jeśli masz pytania lub problemy:
-1. Sprawdź [Issues](https://github.com/Urubaal/Projekt-Lego/issues)
-2. Sprawdź logi serwera w konsoli
-3. Otwórz narzędzia deweloperskie w przeglądarce
-4. Upewnij się, że wszystkie zależności są zainstalowane
-
-## 🌟 Gwiazdki
-
-Jeśli projekt Ci się podoba, zostaw ⭐ na GitHubie!
+If you like the project, leave a ⭐ on GitHub!
