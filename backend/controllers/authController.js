@@ -2,10 +2,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const { sendPasswordResetEmail } = require('../utils/emailService');
+const User = require('../models/User');
 
-// In-memory storage for demo purposes
-// In production, use a proper database
-const users = [];
+// In-memory storage for password reset tokens
 const passwordResetTokens = new Map();
 
 // Generate JWT token
@@ -32,7 +31,7 @@ const register = async (req, res) => {
     const { email, password, name } = req.body;
 
     // Check if user already exists
-    const existingUser = users.find(user => user.email === email);
+    const existingUser = await User.findByEmail(email);
     if (existingUser) {
       return res.status(400).json({
         success: false,
@@ -44,17 +43,12 @@ const register = async (req, res) => {
     const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create user
-    const newUser = {
-      id: Date.now().toString(),
+    // Create user in database
+    const newUser = await User.create({
       email,
       password: hashedPassword,
-      name: name || email.split('@')[0],
-      createdAt: new Date(),
-      isEmailVerified: false
-    };
-
-    users.push(newUser);
+      name: name || email.split('@')[0]
+    });
 
     // Generate token
     const token = generateToken(newUser.id);
@@ -66,8 +60,8 @@ const register = async (req, res) => {
         user: {
           id: newUser.id,
           email: newUser.email,
-          name: newUser.name,
-          createdAt: newUser.createdAt
+          name: newUser.first_name,
+          createdAt: newUser.created_at
         },
         token
       }
@@ -95,8 +89,8 @@ const login = async (req, res) => {
 
     const { email, password, rememberMe } = req.body;
 
-    // Find user
-    const user = users.find(u => u.email === email);
+    // Find user in database
+    const user = await User.findByEmail(email);
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -105,7 +99,7 @@ const login = async (req, res) => {
     }
 
     // Check password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
@@ -128,8 +122,8 @@ const login = async (req, res) => {
         user: {
           id: user.id,
           email: user.email,
-          name: user.name,
-          createdAt: user.createdAt
+          name: user.first_name,
+          createdAt: user.created_at
         },
         token,
         expiresIn: tokenExpiry
@@ -158,8 +152,8 @@ const forgotPassword = async (req, res) => {
 
     const { email } = req.body;
 
-    // Find user
-    const user = users.find(u => u.email === email);
+    // Find user in database
+    const user = await User.findByEmail(email);
     if (!user) {
       // Don't reveal if user exists or not for security
       return res.json({
@@ -245,8 +239,8 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    // Find user
-    const user = users.find(u => u.id === decoded.userId);
+    // Find user in database
+    const user = await User.findById(decoded.userId);
     if (!user) {
       return res.status(400).json({
         success: false,
@@ -258,9 +252,8 @@ const resetPassword = async (req, res) => {
     const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
-    // Update user password
-    user.password = hashedPassword;
-    user.updatedAt = new Date();
+    // Update user password in database
+    await User.updatePassword(decoded.userId, hashedPassword);
 
     // Mark token as used
     resetData.used = true;
@@ -282,7 +275,7 @@ const resetPassword = async (req, res) => {
 // Get current user profile
 const getProfile = async (req, res) => {
   try {
-    const user = users.find(u => u.id === req.user.userId);
+    const user = await User.findById(req.user.userId);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -296,9 +289,9 @@ const getProfile = async (req, res) => {
         user: {
           id: user.id,
           email: user.email,
-          name: user.name,
-          createdAt: user.createdAt,
-          isEmailVerified: user.isEmailVerified
+          name: user.first_name,
+          createdAt: user.created_at,
+          isEmailVerified: user.is_active
         }
       }
     });
@@ -319,11 +312,30 @@ const logout = async (req, res) => {
   });
 };
 
+// Test database connection
+const testDatabase = async (req, res) => {
+  try {
+    const result = await User.testConnection();
+    res.json({
+      success: result.success,
+      message: result.success ? 'Database connection successful' : 'Database connection failed',
+      data: result
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Database connection test failed',
+      details: error.message
+    });
+  }
+};
+
 module.exports = {
   register,
   login,
   forgotPassword,
   resetPassword,
   getProfile,
-  logout
+  logout,
+  testDatabase
 };

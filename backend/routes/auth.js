@@ -7,7 +7,8 @@ const {
   forgotPassword,
   resetPassword,
   getProfile,
-  logout
+  logout,
+  testDatabase
 } = require('../controllers/authController');
 
 const router = express.Router();
@@ -61,5 +62,6 @@ router.post('/forgot-password', forgotPasswordValidation, forgotPassword);
 router.post('/reset-password', resetPasswordValidation, resetPassword);
 router.get('/profile', authenticateToken, getProfile);
 router.post('/logout', authenticateToken, logout);
+router.get('/test-database', testDatabase);
 
 module.exports = router;

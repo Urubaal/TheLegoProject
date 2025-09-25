@@ -23,7 +23,7 @@ app.use(limiter);
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5500',
+  origin: process.env.FRONTEND_URL || 'http://localhost:8080',
   credentials: true
 }));
 
@@ -57,8 +57,9 @@ app.use(errorHandler);
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📱 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5500'}`);
+  console.log(`📱 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:8080'}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🗄️  Database: ${process.env.POSTGRES_DB || 'lego_purchase_system'}`);
 });
 
 module.exports = app;
