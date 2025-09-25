@@ -1,0 +1,110 @@
+# Docker Compose configuration for LEGO Purchase Suggestion System
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  database:
+    image: postgres:15-alpine
+    container_name: lego-database
+    environment:
+      POSTGRES_DB: lego_purchase_system
+      POSTGRES_USER: lego_user
+      POSTGRES_PASSWORD: Gitf%$hM9#475fMv
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./lego_database_schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - lego-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lego_user -d lego_purchase_system"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: lego-backend
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://lego_user:Gitf%$hM9%23475fMv@database:5432/lego_purchase_system
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      JWT_EXPIRES_IN: 24h
+      FRONTEND_URL: http://localhost:5500
+      EMAIL_HOST: smtp.gmail.com
+      EMAIL_PORT: 587
+      EMAIL_USER: your-email@gmail.com
+      EMAIL_PASS: your-app-password
+    ports:
+      - "3000:3000"
+    networks:
+      - lego-network
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: lego-frontend
+    ports:
+      - "5500:80"
+    networks:
+      - lego-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # TablePlus Database Management (Optional)
+  tableplus:
+    image: postgres:15-alpine
+    container_name: lego-tableplus
+    environment:
+      POSTGRES_DB: lego_purchase_system
+      POSTGRES_USER: lego_user
+      POSTGRES_PASSWORD: Gitf%$hM9#475fMv
+    ports:
+      - "5433:5432"
+    networks:
+      - lego-network
+    depends_on:
+      - database
+    restart: unless-stopped
+    command: >
+      sh -c "
+        echo 'TablePlus connection details:'
+        echo 'Host: localhost'
+        echo 'Port: 5433'
+        echo 'User: lego_user'
+        echo 'Password: Gitf%$hM9#475fMv'
+        echo 'Database: lego_purchase_system'
+        echo ''
+        echo 'Waiting for database to be ready...'
+        until pg_isready -h database -p 5432 -U lego_user; do
+          echo 'Waiting for database...'
+          sleep 2
+        done
+        echo 'Database is ready!'
+        tail -f /dev/null
+      "
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  lego-network:
+    driver: bridge
