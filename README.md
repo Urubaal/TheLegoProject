@@ -1,211 +1,209 @@
-# 🧱 TheLegoProject - Authentication System
+# LEGO Purchase Suggestion System - Baza Danych
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
-[![Express](https://img.shields.io/badge/Express-4.x-blue.svg)](https://expressjs.com/)
+System AI do sugestii zakupu zestawów LEGO z integracją scraperów, zarządzaniem użytkownikami i analizą cen.
 
-Complete authentication system with registration, login, password reset and recovery functionality. Modern frontend with responsive design and secure backend API.
+## 🎯 Przegląd systemu
 
-## 🌟 Features
+System składa się z:
+- **Baza danych PostgreSQL** - przechowywanie danych o zestawach, użytkownikach, cenach
+- **Scrapery** - zbieranie danych z różnych sklepów internetowych
+- **AI** - generowanie inteligentnych sugestii zakupu
+- **TablePlus** - narzędzie do eksploracji danych
 
-- ✅ **User registration and login** with validation
-- ✅ **Password reset** via email
-- ✅ **Password recovery** with secure tokens
-- ✅ **Responsive design** - works on all devices
-- ✅ **Security** - JWT, password hashing, rate limiting
-- ✅ **Modern UI** with animations and real-time validation
+## 🗄️ Architektura bazy danych
 
-## 📁 Project Structure
+### Główne tabele:
 
-```
-TheLegoProject/
-├── frontend/                 # Frontend application (HTML, CSS, JS)
-│   ├── index.html           # Main login page
-│   ├── styles.css           # CSS styles
-│   └── script.js            # JavaScript logic
-├── backend/                 # Backend API (Node.js/Express)
-│   ├── server.js            # Main server
-│   ├── package.json         # Node.js dependencies
-│   ├── env.example          # Configuration example
-│   ├── routes/              # API route definitions
-│   │   └── auth.js          # Authentication routes
-│   ├── controllers/         # Controllers
-│   │   └── authController.js # Authentication controller
-│   ├── middleware/          # Middleware
-│   │   ├── auth.js          # Authentication middleware
-│   │   └── errorHandler.js  # Error handling
-│   ├── models/              # Data models
-│   ├── utils/               # Utility tools
-│   │   └── emailService.js  # Email service
-│   └── tests/               # Tests
-└── README.md               # This file
-```
+1. **`users`** - Konta użytkowników z preferencjami i budżetami
+2. **`lego_sets`** - Katalog zestawów LEGO z metadanymi
+3. **`stores`** - Sklepy internetowe i konfiguracje scraperów
+4. **`price_history`** - Historia cen z wszystkich sklepów
+5. **`user_wishlists`** - Listy życzeń użytkowników
+6. **`ai_recommendations`** - Rekomendacje generowane przez AI
+7. **`scraper_logs`** - Logi działania scraperów
+8. **`user_sessions`** - Sesje użytkowników dla kontekstu AI
 
-## 🚀 Quick Start
+### Kluczowe funkcje:
 
-### 1. Clone repository
+- **UUID** - Unikalne identyfikatory dla lepszej skalowalności
+- **JSONB** - Elastyczne przechowywanie preferencji i metadanych
+- **Indeksy GIN** - Szybkie wyszukiwanie w polach JSON i tablicach
+- **Generated columns** - Automatyczne obliczanie całkowitej ceny
+- **Triggers** - Automatyczne aktualizowanie timestampów
+
+## 🚀 Szybki start
+
+### 1. Instalacja PostgreSQL
 ```bash
-git clone https://github.com/Urubaal/TheLegoProject.git
-cd TheLegoProject
+# Windows - pobierz z postgresql.org
+# macOS
+brew install postgresql
+brew services start postgresql
+
+# Linux
+sudo apt install postgresql postgresql-contrib
+sudo systemctl start postgresql
 ```
 
-### 2. Backend Setup
+### 2. Konfiguracja bazy danych
+```sql
+-- Utwórz bazę danych
+CREATE DATABASE lego_purchase_system;
+CREATE USER lego_user WITH PASSWORD 'Gitf%$hM9#475fMv';
+GRANT ALL PRIVILEGES ON DATABASE lego_purchase_system TO lego_user;
+```
+
+### 3. Załaduj schemat
 ```bash
-cd backend
-npm install
-cp env.example .env
-# Edit .env with your configuration
-npm run dev
+psql -U lego_user -d lego_purchase_system -f lego_database_schema.sql
 ```
 
-### 3. Frontend Setup
+### 4. Konfiguracja TablePlus
+- Host: localhost
+- Port: 5432
+- User: lego_user
+- Password: Gitf%$hM9#475fMv
+- Database: lego_purchase_system
+
+## 📊 Eksploracja danych
+
+### Przydatne widoki:
+- **`current_best_prices`** - Najlepsze ceny dla każdego zestawu
+- **`user_wishlist_prices`** - Listy życzeń z aktualnymi cenami
+- **`ai_recommendations_summary`** - Podsumowanie rekomendacji AI
+
+### Przykładowe zapytania:
+```sql
+-- Zestawy w budżecie użytkowników
+SELECT * FROM user_wishlist_prices 
+WHERE budget_status = 'Within Budget';
+
+-- Rekomendacje AI z wysoką pewnością
+SELECT * FROM ai_recommendations_summary 
+WHERE confidence_score >= 0.8;
+
+-- Trendy cenowe dla konkretnego zestawu
+SELECT set_number, store_name, price, scraped_at 
+FROM price_history ph 
+JOIN lego_sets ls ON ph.lego_set_id = ls.id 
+WHERE ls.set_number = '75309' 
+ORDER BY scraped_at DESC;
+```
+
+## 🔧 Konfiguracja scraperów
+
+### Dodawanie nowego sklepu:
+```sql
+INSERT INTO stores (name, website_url, country, currency, shipping_info, scraper_config) 
+VALUES (
+    'Nowy Sklep',
+    'https://www.example.com',
+    'PL',
+    'PLN',
+    '{"free_shipping_threshold": 150, "standard_shipping": 12}',
+    '{"base_url": "https://www.example.com", "selectors": {"price": ".price", "availability": ".stock"}}'
+);
+```
+
+### Konfiguracja scrapera:
+- **`base_url`** - Podstawowy URL sklepu
+- **`selectors`** - Selektory CSS dla cen i dostępności
+- **`shipping_info`** - Informacje o kosztach przesyłki
+
+## 🤖 Integracja z AI
+
+### Struktura rekomendacji:
+```sql
+-- Typy rekomendacji:
+-- 'buy_now' - Kup teraz
+-- 'wait' - Czekaj na lepszą cenę
+-- 'avoid' - Unikaj
+-- 'alternative' - Znajdź alternatywę
+```
+
+### Przykład rekomendacji:
+```sql
+INSERT INTO ai_recommendations (
+    user_id, lego_set_id, recommendation_type, 
+    confidence_score, reasoning, price_analysis
+) VALUES (
+    'user-uuid',
+    'set-uuid',
+    'buy_now',
+    0.85,
+    'Price is below your budget and availability is good',
+    '{"current_price": 365.00, "price_trend": "stable", "best_deal": "Allegro"}'
+);
+```
+
+## 📈 Monitoring i analiza
+
+### Kluczowe metryki:
+- Liczba aktywnych użytkowników
+- Liczba zestawów w systemie
+- Średnia cena zestawów
+- Wydajność scraperów
+- Jakość rekomendacji AI
+
+### Zapytania monitorujące:
+```sql
+-- Aktywni użytkownicy
+SELECT COUNT(*) FROM users WHERE is_active = true;
+
+-- Wydajność scraperów
+SELECT s.name, AVG(sl.items_scraped) as avg_items
+FROM scraper_logs sl
+JOIN stores s ON sl.store_id = s.id
+WHERE sl.started_at >= CURRENT_DATE - INTERVAL '7 days'
+GROUP BY s.name;
+```
+
+## 🔒 Bezpieczeństwo
+
+### Zalecenia:
+- Używaj silnych haseł dla użytkowników bazy danych
+- Regularnie aktualizuj PostgreSQL
+- Konfiguruj backup bazy danych
+- Monitoruj logi dostępu
+- Używaj SSL dla połączeń
+
+### Backup:
 ```bash
-# Open frontend/index.html in browser
-# Or run local HTTP server
-python -m http.server 8000
+# Tworzenie backupu
+pg_dump -U lego_user -d lego_purchase_system > backup.sql
+
+# Przywracanie backupu
+psql -U lego_user -d lego_purchase_system < backup.sql
 ```
 
-## 📋 Requirements
+## 📁 Struktura plików
 
-- **Node.js** 18+ 
-- **npm** 8+
-- **Browser** with ES6+ support
-- **Email SMTP** (optional for password reset)
-
-## ⚙️ Configuration
-
-### Backend (.env)
-```env
-PORT=3000
-JWT_SECRET=your-super-secret-jwt-key
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-app-password
-FRONTEND_URL=http://localhost:8000
+```
+├── lego_database_schema.sql      # Główny schemat bazy danych
+├── database_setup_instructions.md # Instrukcje instalacji
+├── tableplus_queries.sql         # Przykładowe zapytania
+└── README.md                     # Ten plik
 ```
 
-### Frontend (script.js)
-```javascript
-const API_BASE_URL = 'http://localhost:3000/api';
-```
+## 🚀 Następne kroki
 
-## 🔧 Features
+1. **Konfiguracja scraperów** - Dodaj więcej sklepów
+2. **Integracja AI** - Skonfiguruj endpointy AI
+3. **Monitoring** - Skonfiguruj alerty i dashboardy
+4. **Backup** - Automatyczne kopie zapasowe
+5. **Skalowanie** - Optymalizacja dla większej liczby użytkowników
 
-### Frontend
-- ✅ **Login form** with validation
-- ✅ **Password reset** - sending reset link via email
-- ✅ **Password recovery** - setting new password
-- ✅ **Responsive design** - works on all devices
-- ✅ **Real-time validation**
-- ✅ **Animations and visual effects**
-- ✅ **Remember user** functionality
+## 🤝 Wsparcie
 
-### Backend API
-- ✅ **POST /api/auth/register** - User registration
-- ✅ **POST /api/auth/login** - User login
-- ✅ **POST /api/auth/forgot-password** - Password reset
-- ✅ **POST /api/auth/reset-password** - Set new password
-- ✅ **GET /api/auth/profile** - User profile
-- ✅ **POST /api/auth/logout** - User logout
-- ✅ **GET /api/health** - Server status
+W przypadku problemów:
+1. Sprawdź logi PostgreSQL
+2. Zweryfikuj konfigurację sieci
+3. Sprawdź uprawnienia użytkowników
+4. Upewnij się, że używasz PostgreSQL 13+
 
-### Security
-- ✅ **Password hashing** (bcrypt)
-- ✅ **JWT tokens** with expiration
-- ✅ **Rate limiting** - request throttling
-- ✅ **CORS** - cross-origin configuration
-- ✅ **Helmet** - security headers
-- ✅ **Input validation** and sanitization
+## 📚 Źródła
 
-## 📧 Email Configuration
-
-To send password reset emails, configure in `.env` file:
-
-```env
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-app-password
-EMAIL_FROM=noreply@yourdomain.com
-```
-
-**Note:** For Gmail, use app password, not regular password.
-
-## 🧪 Testing
-
-### API Testing
-```bash
-# Test login
-curl -X POST http://localhost:3000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password123"}'
-
-# Test password reset
-curl -X POST http://localhost:3000/api/auth/forgot-password \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com"}'
-```
-
-### Frontend Testing
-1. Open `frontend/index.html` in browser
-2. Test all forms
-3. Check responsiveness on different devices
-
-## 🔄 Application Flow
-
-1. **Login:**
-   - User enters email and password
-   - Frontend sends request to `/api/auth/login`
-   - Backend verifies data and returns JWT token
-   - Token is stored in localStorage
-
-2. **Password Reset:**
-   - User clicks "Forgot password?"
-   - Enters email and submits form
-   - Backend generates reset token and sends email
-   - User clicks link in email
-
-3. **Password Recovery:**
-   - User is redirected to page with token
-   - Enters new password
-   - Backend verifies token and updates password
-
-## 🛠️ Development
-
-### Adding New Features
-1. **Backend:** Add new endpoints in `routes/auth.js`
-2. **Frontend:** Update `script.js` with new functions
-3. **Styling:** Modify `styles.css` for new elements
-
-### Database
-Currently using in-memory storage. To add real database:
-1. Install ORM (e.g., Mongoose for MongoDB)
-2. Update `models/` with schemas
-3. Modify controllers to work with database
-
-## 📝 License
-
-MIT License - you can freely use and modify the code.
-
-## 🤝 Contributing
-
-We welcome contributions! Check [CONTRIBUTING.md](CONTRIBUTING.md) to learn how you can help.
-
-## 🐛 Bug Reports
-
-If you found a bug, open an [Issue](https://github.com/Urubaal/TheLegoProject/issues) with problem description.
-
-## ✨ Feature Requests
-
-Have an idea for a new feature? Open a [Feature Request](https://github.com/Urubaal/TheLegoProject/issues/new/choose)!
-
-## 🆘 Support
-
-If you have questions or problems:
-1. Check [Issues](https://github.com/Urubaal/TheLegoProject/issues)
-2. Check server logs in console
-3. Open developer tools in browser
-4. Make sure all dependencies are installed
-
-## 🌟 Stars
-
-If you like the project, leave a ⭐ on GitHub!
+- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+- [TablePlus Documentation](https://tableplus.com/docs)
+- [JSON in PostgreSQL](https://www.postgresql.org/docs/current/datatype-json.html)
+- [PostgreSQL Performance Tuning](https://wiki.postgresql.org/wiki/Performance_Optimization)
