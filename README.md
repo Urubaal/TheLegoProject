@@ -1,48 +1,48 @@
-# LEGO Purchase Suggestion System - Baza Danych
+# LEGO Purchase Suggestion System - Database
 
-System AI do sugestii zakupu zestawów LEGO z integracją scraperów, zarządzaniem użytkownikami i analizą cen.
+AI system for LEGO set purchase suggestions with scraper integration, user management, and price analysis.
 
-## 🎯 Przegląd systemu
+## 🎯 System Overview
 
-System składa się z:
-- **Baza danych PostgreSQL** - przechowywanie danych o zestawach, użytkownikach, cenach
-- **Scrapery** - zbieranie danych z różnych sklepów internetowych
-- **AI** - generowanie inteligentnych sugestii zakupu
-- **TablePlus** - narzędzie do eksploracji danych
+The system consists of:
+- **PostgreSQL Database** - storing data about sets, users, prices
+- **Scrapers** - collecting data from various online stores
+- **AI** - generating intelligent purchase suggestions
+- **TablePlus** - data exploration tool
 
-## 🗄️ Architektura bazy danych
+## 🗄️ Database Architecture
 
-### Główne tabele:
+### Main Tables:
 
-1. **`users`** - Konta użytkowników z preferencjami i budżetami
-2. **`lego_sets`** - Katalog zestawów LEGO z metadanymi
-3. **`stores`** - Sklepy internetowe i konfiguracje scraperów
-4. **`price_history`** - Historia cen z wszystkich sklepów
-5. **`user_wishlists`** - Listy życzeń użytkowników
-6. **`ai_recommendations`** - Rekomendacje generowane przez AI
-7. **`scraper_logs`** - Logi działania scraperów
-8. **`user_sessions`** - Sesje użytkowników dla kontekstu AI
+1. **`users`** - User accounts with preferences and budgets
+2. **`lego_sets`** - LEGO sets catalog with metadata
+3. **`stores`** - Online stores and scraper configurations
+4. **`price_history`** - Price history from all stores
+5. **`user_wishlists`** - User wishlists
+6. **`ai_recommendations`** - AI-generated recommendations
+7. **`scraper_logs`** - Scraper operation logs
+8. **`user_sessions`** - User sessions for AI context
 
-### Kluczowe funkcje:
+### Key Features:
 
-- **UUID** - Unikalne identyfikatory dla lepszej skalowalności
-- **JSONB** - Elastyczne przechowywanie preferencji i metadanych
-- **Indeksy GIN** - Szybkie wyszukiwanie w polach JSON i tablicach
-- **Generated columns** - Automatyczne obliczanie całkowitej ceny
-- **Triggers** - Automatyczne aktualizowanie timestampów
+- **UUID** - Unique identifiers for better scalability
+- **JSONB** - Flexible storage of preferences and metadata
+- **GIN Indexes** - Fast searching in JSON fields and arrays
+- **Generated columns** - Automatic calculation of total price
+- **Triggers** - Automatic timestamp updates
 
-## 🚀 Szybki start
+## 🚀 Quick Start
 
-### 0. Konfiguracja środowiska
+### 0. Environment Configuration
 ```bash
-# Skopiuj szablon konfiguracji
+# Copy configuration template
 copy env.example .env
 
-# Edytuj plik .env z odpowiednimi wartościami
-# Szczegółowe instrukcje: ENVIRONMENT_SETUP.md
+# Edit .env file with appropriate values
+# Detailed instructions: ENVIRONMENT_SETUP.md
 ```
 
-### 1. Instalacja PostgreSQL
+### 1. PostgreSQL Installation
 ```bash
 # Windows - pobierz z postgresql.org
 # macOS
@@ -54,56 +54,56 @@ sudo apt install postgresql postgresql-contrib
 sudo systemctl start postgresql
 ```
 
-### 2. Konfiguracja bazy danych
+### 2. Database Configuration
 ```sql
--- Utwórz bazę danych
+-- Create database
 CREATE DATABASE lego_purchase_system;
 CREATE USER lego_user WITH PASSWORD 'Gitf%$hM9#475fMv';
 GRANT ALL PRIVILEGES ON DATABASE lego_purchase_system TO lego_user;
 ```
 
-### 3. Załaduj schemat
+### 3. Load Schema
 ```bash
 psql -U lego_user -d lego_purchase_system -f lego_database_schema.sql
 ```
 
-### 4. Konfiguracja TablePlus
+### 4. TablePlus Configuration
 - Host: localhost
 - Port: 5432
 - User: lego_user
 - Password: Gitf%$hM9#475fMv
 - Database: lego_purchase_system
 
-### 5. Weryfikacja projektu
+### 5. Project Verification
 ```bash
-# Sprawdź czy wszystko działa poprawnie
+# Check if everything works correctly
 node verify.js
 
-# Uruchom testy backendu
+# Run backend tests
 cd backend && npm test
 
-# Sprawdź jakość kodu
+# Check code quality
 cd backend && npm run lint
 ```
 
-## 📊 Eksploracja danych
+## 📊 Data Exploration
 
-### Przydatne widoki:
-- **`current_best_prices`** - Najlepsze ceny dla każdego zestawu
-- **`user_wishlist_prices`** - Listy życzeń z aktualnymi cenami
-- **`ai_recommendations_summary`** - Podsumowanie rekomendacji AI
+### Useful Views:
+- **`current_best_prices`** - Best prices for each set
+- **`user_wishlist_prices`** - Wishlists with current prices
+- **`ai_recommendations_summary`** - AI recommendations summary
 
-### Przykładowe zapytania:
+### Sample Queries:
 ```sql
--- Zestawy w budżecie użytkowników
+-- Sets within user budgets
 SELECT * FROM user_wishlist_prices 
 WHERE budget_status = 'Within Budget';
 
--- Rekomendacje AI z wysoką pewnością
+-- AI recommendations with high confidence
 SELECT * FROM ai_recommendations_summary 
 WHERE confidence_score >= 0.8;
 
--- Trendy cenowe dla konkretnego zestawu
+-- Price trends for specific set
 SELECT set_number, store_name, price, scraped_at 
 FROM price_history ph 
 JOIN lego_sets ls ON ph.lego_set_id = ls.id 
@@ -111,13 +111,13 @@ WHERE ls.set_number = '75309'
 ORDER BY scraped_at DESC;
 ```
 
-## 🔧 Konfiguracja scraperów
+## 🔧 Scraper Configuration
 
-### Dodawanie nowego sklepu:
+### Adding New Store:
 ```sql
 INSERT INTO stores (name, website_url, country, currency, shipping_info, scraper_config) 
 VALUES (
-    'Nowy Sklep',
+    'New Store',
     'https://www.example.com',
     'PL',
     'PLN',
@@ -214,18 +214,18 @@ psql -U lego_user -d lego_purchase_system < backup.sql
 4. **Backup** - Automatyczne kopie zapasowe
 5. **Skalowanie** - Optymalizacja dla większej liczby użytkowników
 
-## 🤖 Konfiguracja Copilota
+## 🤖 Copilot Configuration
 
-Projekt używa następujących konwencji językowych:
+The project uses the following language conventions:
 
-### Języki:
-- **Konwersacje z użytkownikiem**: Polski 🇵🇱
-- **Komentarze w kodzie**: English 🇺🇸
-- **Dokumentacja**: English 🇺🇸
+### Languages:
+- **User conversations**: Polish 🇵🇱
+- **Code comments**: English 🇺🇸
+- **Documentation**: English 🇺🇸
 - **Commit messages**: English 🇺🇸
-- **README**: Polish 🇵🇱
+- **README**: English 🇺🇸
 
-### Przykład konfiguracji Copilota:
+### Copilot Configuration Example:
 ```json
 {
   "conversation_language": "polish",
@@ -234,56 +234,56 @@ Projekt używa następujących konwencji językowych:
 }
 ```
 
-## 🔧 Narzędzia weryfikacji
+## 🔧 Verification Tools
 
-Projekt zawiera kompletny system weryfikacji jakości kodu:
+The project includes a comprehensive code quality verification system:
 
-### Dostępne skrypty:
+### Available Scripts:
 ```bash
-# Weryfikacja całego projektu
+# Full project verification
 node verify.js
 
-# Backend - sprawdzenie jakości kodu
+# Backend - code quality check
 cd backend && npm run lint
 
-# Backend - uruchomienie testów
+# Backend - run tests
 cd backend && npm run test
 
-# Backend - pełna weryfikacja (linting + testy)
+# Backend - full verification (linting + tests)
 cd backend && npm run check
 
-# Backend - formatowanie kodu
+# Backend - code formatting
 cd backend && npm run format
 
-# Backend - sprawdzenie czy serwer działa
+# Backend - check if server is running
 cd backend && npm run health
 ```
 
-### Narzędzia:
-- **ESLint** - sprawdzanie jakości kodu JavaScript
-- **Prettier** - automatyczne formatowanie kodu
-- **Jest** - testy jednostkowe i integracyjne
-- **Supertest** - testy API endpoints
-- **Custom verification** - kompleksowa weryfikacja projektu
+### Tools:
+- **ESLint** - JavaScript code quality checking
+- **Prettier** - automatic code formatting
+- **Jest** - unit and integration tests
+- **Supertest** - API endpoint tests
+- **Custom verification** - comprehensive project verification
 
-### Testy obejmują:
+### Tests Include:
 - ✅ Health check endpoint
-- ✅ Konfiguracja CORS
-- ✅ Obsługa błędów 404
+- ✅ CORS configuration
+- ✅ 404 error handling
 - ✅ Rate limiting
-- ✅ Struktura projektu
-- ✅ Konfiguracja środowiska
+- ✅ Project structure
+- ✅ Environment configuration
 
-## 🤝 Wsparcie
+## 🤝 Support
 
-W przypadku problemów:
-1. Uruchom `node verify.js` - sprawdź status projektu
-2. Sprawdź logi PostgreSQL
-3. Zweryfikuj konfigurację sieci
-4. Sprawdź uprawnienia użytkowników
-5. Upewnij się, że używasz PostgreSQL 13+
+In case of problems:
+1. Run `node verify.js` - check project status
+2. Check PostgreSQL logs
+3. Verify network configuration
+4. Check user permissions
+5. Make sure you're using PostgreSQL 13+
 
-## 📚 Źródła
+## 📚 Sources
 
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [TablePlus Documentation](https://tableplus.com/docs)
