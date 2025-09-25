@@ -74,6 +74,18 @@ psql -U lego_user -d lego_purchase_system -f lego_database_schema.sql
 - Password: Gitf%$hM9#475fMv
 - Database: lego_purchase_system
 
+### 5. Weryfikacja projektu
+```bash
+# Sprawdź czy wszystko działa poprawnie
+node verify.js
+
+# Uruchom testy backendu
+cd backend && npm test
+
+# Sprawdź jakość kodu
+cd backend && npm run lint
+```
+
 ## 📊 Eksploracja danych
 
 ### Przydatne widoki:
@@ -202,13 +214,54 @@ psql -U lego_user -d lego_purchase_system < backup.sql
 4. **Backup** - Automatyczne kopie zapasowe
 5. **Skalowanie** - Optymalizacja dla większej liczby użytkowników
 
+## 🔧 Narzędzia weryfikacji
+
+Projekt zawiera kompletny system weryfikacji jakości kodu:
+
+### Dostępne skrypty:
+```bash
+# Weryfikacja całego projektu
+node verify.js
+
+# Backend - sprawdzenie jakości kodu
+cd backend && npm run lint
+
+# Backend - uruchomienie testów
+cd backend && npm run test
+
+# Backend - pełna weryfikacja (linting + testy)
+cd backend && npm run check
+
+# Backend - formatowanie kodu
+cd backend && npm run format
+
+# Backend - sprawdzenie czy serwer działa
+cd backend && npm run health
+```
+
+### Narzędzia:
+- **ESLint** - sprawdzanie jakości kodu JavaScript
+- **Prettier** - automatyczne formatowanie kodu
+- **Jest** - testy jednostkowe i integracyjne
+- **Supertest** - testy API endpoints
+- **Custom verification** - kompleksowa weryfikacja projektu
+
+### Testy obejmują:
+- ✅ Health check endpoint
+- ✅ Konfiguracja CORS
+- ✅ Obsługa błędów 404
+- ✅ Rate limiting
+- ✅ Struktura projektu
+- ✅ Konfiguracja środowiska
+
 ## 🤝 Wsparcie
 
 W przypadku problemów:
-1. Sprawdź logi PostgreSQL
-2. Zweryfikuj konfigurację sieci
-3. Sprawdź uprawnienia użytkowników
-4. Upewnij się, że używasz PostgreSQL 13+
+1. Uruchom `node verify.js` - sprawdź status projektu
+2. Sprawdź logi PostgreSQL
+3. Zweryfikuj konfigurację sieci
+4. Sprawdź uprawnienia użytkowników
+5. Upewnij się, że używasz PostgreSQL 13+
 
 ## 📚 Źródła
 
