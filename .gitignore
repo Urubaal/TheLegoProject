@@ -81,6 +81,10 @@ build/
 *.sqlite
 *.sqlite3
 
+# Database credentials and sensitive data
+database_credentials.txt
+db_config.json
+
 # Cache directories
 .cache/
 .parcel-cache/
