@@ -1,16 +1,22 @@
 // DOM Elements
 const loginForm = document.getElementById('loginForm');
+const registerForm = document.getElementById('registerForm');
 const forgotPasswordForm = document.getElementById('forgotPasswordForm');
 const resetPasswordForm = document.getElementById('resetPasswordForm');
 const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+const signUpLink = document.getElementById('signUpLink');
+const signInLink = document.getElementById('signInLink');
 const backToLogin = document.getElementById('backToLogin');
 const backToLoginFromReset = document.getElementById('backToLoginFromReset');
+const backToLoginFromRegister = document.getElementById('backToLoginFromRegister');
 const messageContainer = document.getElementById('messageContainer');
 const message = document.getElementById('message');
 const messageText = document.getElementById('messageText');
 
 // Toggle password visibility
 const togglePassword = document.getElementById('togglePassword');
+const toggleRegisterPassword = document.getElementById('toggleRegisterPassword');
+const toggleConfirmRegisterPassword = document.getElementById('toggleConfirmRegisterPassword');
 const toggleNewPassword = document.getElementById('toggleNewPassword');
 const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
 
@@ -32,13 +38,17 @@ class AuthManager {
     setupEventListeners() {
         // Form submissions
         loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+        registerForm.addEventListener('submit', (e) => this.handleRegister(e));
         forgotPasswordForm.addEventListener('submit', (e) => this.handleForgotPassword(e));
         resetPasswordForm.addEventListener('submit', (e) => this.handleResetPassword(e));
 
         // Navigation
         forgotPasswordLink.addEventListener('click', (e) => this.showForgotPassword(e));
+        signUpLink.addEventListener('click', (e) => this.showRegister(e));
+        signInLink.addEventListener('click', (e) => this.showLogin(e));
         backToLogin.addEventListener('click', (e) => this.showLogin(e));
         backToLoginFromReset.addEventListener('click', (e) => this.showLogin(e));
+        backToLoginFromRegister.addEventListener('click', (e) => this.showLogin(e));
 
         // Real-time validation
         this.setupRealTimeValidation();
@@ -46,24 +56,37 @@ class AuthManager {
 
     setupPasswordToggles() {
         togglePassword.addEventListener('click', () => this.togglePasswordVisibility('password'));
+        toggleRegisterPassword.addEventListener('click', () => this.togglePasswordVisibility('registerPassword'));
+        toggleConfirmRegisterPassword.addEventListener('click', () => this.togglePasswordVisibility('confirmRegisterPassword'));
         toggleNewPassword.addEventListener('click', () => this.togglePasswordVisibility('newPassword'));
         toggleConfirmPassword.addEventListener('click', () => this.togglePasswordVisibility('confirmPassword'));
     }
 
     setupRealTimeValidation() {
-        // Email validation
+        // Login form validation
         const emailInput = document.getElementById('email');
         emailInput.addEventListener('blur', () => this.validateEmail(emailInput.value, 'emailError'));
 
-        // Password validation
         const passwordInput = document.getElementById('password');
         passwordInput.addEventListener('input', () => this.validatePassword(passwordInput.value, 'passwordError'));
 
-        // New password validation
+        // Register form validation
+        const registerNameInput = document.getElementById('registerName');
+        registerNameInput.addEventListener('blur', () => this.validateName(registerNameInput.value, 'registerNameError'));
+
+        const registerEmailInput = document.getElementById('registerEmail');
+        registerEmailInput.addEventListener('blur', () => this.validateEmail(registerEmailInput.value, 'registerEmailError'));
+
+        const registerPasswordInput = document.getElementById('registerPassword');
+        registerPasswordInput.addEventListener('input', () => this.validatePassword(registerPasswordInput.value, 'registerPasswordError'));
+
+        const confirmRegisterPasswordInput = document.getElementById('confirmRegisterPassword');
+        confirmRegisterPasswordInput.addEventListener('input', () => this.validateConfirmRegisterPassword());
+
+        // Reset password validation
         const newPasswordInput = document.getElementById('newPassword');
         newPasswordInput.addEventListener('input', () => this.validatePassword(newPasswordInput.value, 'newPasswordError'));
 
-        // Confirm password validation
         const confirmPasswordInput = document.getElementById('confirmPassword');
         confirmPasswordInput.addEventListener('input', () => this.validateConfirmPassword());
     }
@@ -84,6 +107,16 @@ class AuthManager {
         }
     }
 
+    showRegister(e) {
+        e.preventDefault();
+        this.hideAllForms();
+        registerForm.classList.remove('hidden');
+        this.currentForm = 'register';
+        this.clearAllErrors();
+        this.updateHeader('Zarejestruj się', 'Utwórz nowe konto');
+        this.updateFooter('register');
+    }
+
     showForgotPassword(e) {
         e.preventDefault();
         this.hideAllForms();
@@ -97,6 +130,8 @@ class AuthManager {
         loginForm.classList.remove('hidden');
         this.currentForm = 'login';
         this.clearAllErrors();
+        this.updateHeader('Zaloguj się', 'Witaj z powrotem! Zaloguj się do swojego konta');
+        this.updateFooter('login');
     }
 
     showResetPassword() {
@@ -107,8 +142,29 @@ class AuthManager {
 
     hideAllForms() {
         loginForm.classList.add('hidden');
+        registerForm.classList.add('hidden');
         forgotPasswordForm.classList.add('hidden');
         resetPasswordForm.classList.add('hidden');
+    }
+
+    updateHeader(title, subtitle) {
+        const headerTitle = document.querySelector('.login-header h1');
+        const headerSubtitle = document.querySelector('.login-header p');
+        headerTitle.textContent = title;
+        headerSubtitle.textContent = subtitle;
+    }
+
+    updateFooter(type) {
+        const loginFooter = document.getElementById('loginFooterText');
+        const registerFooter = document.getElementById('registerFooterText');
+        
+        if (type === 'login') {
+            loginFooter.classList.remove('hidden');
+            registerFooter.classList.add('hidden');
+        } else if (type === 'register') {
+            loginFooter.classList.add('hidden');
+            registerFooter.classList.remove('hidden');
+        }
     }
 
     clearAllErrors() {
@@ -129,6 +185,23 @@ class AuthManager {
         const errorElement = document.getElementById(fieldId);
         errorElement.classList.remove('show');
         errorElement.textContent = '';
+    }
+
+    validateName(name, errorId) {
+        if (!name) {
+            this.showError(errorId, 'Imię i nazwisko jest wymagane');
+            return false;
+        }
+        if (name.length < 2) {
+            this.showError(errorId, 'Imię i nazwisko musi mieć co najmniej 2 znaki');
+            return false;
+        }
+        if (name.length > 50) {
+            this.showError(errorId, 'Imię i nazwisko nie może mieć więcej niż 50 znaków');
+            return false;
+        }
+        this.hideError(errorId);
+        return true;
     }
 
     validateEmail(email, errorId) {
@@ -155,6 +228,22 @@ class AuthManager {
             return false;
         }
         this.hideError(errorId);
+        return true;
+    }
+
+    validateConfirmRegisterPassword() {
+        const registerPassword = document.getElementById('registerPassword').value;
+        const confirmRegisterPassword = document.getElementById('confirmRegisterPassword').value;
+        
+        if (!confirmRegisterPassword) {
+            this.showError('confirmRegisterPasswordError', 'Potwierdzenie hasła jest wymagane');
+            return false;
+        }
+        if (registerPassword !== confirmRegisterPassword) {
+            this.showError('confirmRegisterPasswordError', 'Hasła nie są identyczne');
+            return false;
+        }
+        this.hideError('confirmRegisterPasswordError');
         return true;
     }
 
@@ -199,6 +288,64 @@ class AuthManager {
         } else {
             button.classList.remove('loading');
             button.disabled = false;
+        }
+    }
+
+    async handleRegister(e) {
+        e.preventDefault();
+        this.clearAllErrors();
+
+        const name = document.getElementById('registerName').value;
+        const email = document.getElementById('registerEmail').value;
+        const password = document.getElementById('registerPassword').value;
+        const confirmPassword = document.getElementById('confirmRegisterPassword').value;
+
+        // Validate inputs
+        const isNameValid = this.validateName(name, 'registerNameError');
+        const isEmailValid = this.validateEmail(email, 'registerEmailError');
+        const isPasswordValid = this.validatePassword(password, 'registerPasswordError');
+        const isConfirmPasswordValid = this.validateConfirmRegisterPassword();
+
+        if (!isNameValid || !isEmailValid || !isPasswordValid || !isConfirmPasswordValid) {
+            return;
+        }
+
+        const submitButton = e.target.querySelector('button[type="submit"]');
+        this.setLoading(submitButton, true);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name,
+                    email,
+                    password
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Store token in localStorage
+                localStorage.setItem('authToken', data.data.token);
+                
+                this.showMessage('Konto zostało utworzone pomyślnie!', false);
+                
+                // Redirect to dashboard or main page
+                setTimeout(() => {
+                    window.location.href = '/dashboard.html';
+                }, 1500);
+            } else {
+                this.showMessage(data.error || 'Błąd rejestracji', true);
+            }
+        } catch (error) {
+            console.error('Register error:', error);
+            this.showMessage('Błąd połączenia z serwerem. Sprawdź połączenie internetowe.', true);
+        } finally {
+            this.setLoading(submitButton, false);
         }
     }
 

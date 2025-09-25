@@ -318,3 +318,28 @@ body {
     0% { transform: translate(-50%, -50%) rotate(0deg); }
     100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
+
+/* Form transitions */
+.form {
+    transition: opacity 0.3s ease;
+}
+
+.form.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Button spacing for register form */
+.btn + .btn {
+    margin-top: 10px;
+}
+
+/* Footer text transitions */
+.login-footer p {
+    transition: opacity 0.3s ease;
+}
+
+.login-footer p.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
