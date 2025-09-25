@@ -33,6 +33,15 @@ System składa się z:
 
 ## 🚀 Szybki start
 
+### 0. Konfiguracja środowiska
+```bash
+# Skopiuj szablon konfiguracji
+copy env.example .env
+
+# Edytuj plik .env z odpowiednimi wartościami
+# Szczegółowe instrukcje: ENVIRONMENT_SETUP.md
+```
+
 ### 1. Instalacja PostgreSQL
 ```bash
 # Windows - pobierz z postgresql.org
