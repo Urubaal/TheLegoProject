@@ -1,42 +1,36 @@
 const User = require('../models/User');
 const UserCollection = require('../models/UserCollection');
 const BricksEconomyService = require('../utils/bricksEconomyService');
+const { AppError, asyncHandler } = require('../middleware/errorHandler');
+const { error: logError } = require('../utils/logger');
 
 const bricksEconomy = new BricksEconomyService();
 
 class ProfileController {
   // Get user profile
-  static async getProfile(req, res) {
-    try {
+  static getProfile(req, res) {
+    return asyncHandler(async (req, res) => {
       const userId = req.user.userId;
-      console.log('Profile request for user ID:', userId);
       
       if (!userId) {
-        console.error('No user ID in token');
-        return res.status(401).json({ 
-          success: false, 
-          error: 'Invalid token - no user ID' 
-        });
+        throw new AppError('Invalid token - no user ID', 401);
       }
       
       const user = await User.findById(userId);
       
       if (!user) {
-        console.error('User not found in database:', userId);
-        return res.status(404).json({ 
-          success: false, 
-          error: 'User not found' 
-        });
+        throw new AppError('User not found', 404);
       }
-
-      console.log('User found:', user.email);
 
       // Get collection statistics (make it optional to avoid blocking)
       let stats = {};
       try {
         stats = await UserCollection.getCollectionStats(userId);
       } catch (statsError) {
-        console.warn('Could not fetch collection stats:', statsError.message);
+        logError('Could not fetch collection stats', { 
+          error: statsError.message,
+          userId 
+        });
         stats = { owned_sets: 0, wanted_sets: 0, owned_minifigs: 0, wanted_minifigs: 0 };
       }
 
@@ -56,33 +50,25 @@ class ProfileController {
         }
       };
 
-      console.log('Sending profile response:', JSON.stringify(response, null, 2));
       res.json(response);
-    } catch (error) {
-      console.error('Error getting profile:', error);
-      res.status(500).json({ 
-        success: false, 
-        error: 'Internal server error',
-        details: error.message 
-      });
-    }
+    })(req, res);
   }
 
   // Update user profile
-  static async updateProfile(req, res) {
-    try {
+  static updateProfile(req, res) {
+    return asyncHandler(async (req, res) => {
       const userId = req.user.userId;
       const { name, username, country } = req.body;
 
       // Validate required fields
       if (!name || !username) {
-        return res.status(400).json({ error: 'Name and username are required' });
+        throw new AppError('Name and username are required', 400);
       }
 
       // Check if username is already taken by another user
       const existingUser = await User.findByUsername(username);
       if (existingUser && existingUser.id !== userId) {
-        return res.status(400).json({ error: 'Username already taken' });
+        throw new AppError('Username already taken', 400);
       }
 
       const updatedUser = await User.updateProfile(userId, { name, username, country });
@@ -97,15 +83,12 @@ class ProfileController {
           country: updatedUser.country
         }
       });
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
+    })(req, res);
   }
 
   // Get user's collection
-  static async getCollection(req, res) {
-    try {
+  static getCollection(req, res) {
+    return asyncHandler(async (req, res) => {
       const userId = req.user.userId;
       const { type } = req.query;
 
@@ -122,20 +105,17 @@ class ProfileController {
       }
 
       res.json(collection);
-    } catch (error) {
-      console.error('Error getting collection:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
+    })(req, res);
   }
 
   // Add set to collection
-  static async addSet(req, res) {
-    try {
+  static addSet(req, res) {
+    return asyncHandler(async (req, res) => {
       const userId = req.user.userId;
       const { set_number, condition_status, purchase_price, purchase_currency, notes } = req.body;
 
       if (!set_number) {
-        return res.status(400).json({ error: 'Set number is required' });
+        throw new AppError('Set number is required', 400);
       }
 
       // Try to get set info from BricksEconomy
@@ -143,7 +123,11 @@ class ProfileController {
       try {
         setInfo = await bricksEconomy.getSetInfo(set_number);
       } catch (error) {
-        console.log('Could not fetch set info from BricksEconomy:', error.message);
+        logError('Could not fetch set info from BricksEconomy', { 
+          error: error.message,
+          set_number,
+          userId 
+        });
       }
 
       const setData = {
@@ -162,20 +146,17 @@ class ProfileController {
         message: 'Set added to collection successfully',
         set: addedSet
       });
-    } catch (error) {
-      console.error('Error adding set:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
+    })(req, res);
   }
 
   // Add wanted set
-  static async addWantedSet(req, res) {
-    try {
+  static addWantedSet(req, res) {
+    return asyncHandler(async (req, res) => {
       const userId = req.user.userId;
       const { set_number, max_price, max_currency, priority, notes } = req.body;
 
       if (!set_number) {
-        return res.status(400).json({ error: 'Set number is required' });
+        throw new AppError('Set number is required', 400);
       }
 
       // Try to get set info from BricksEconomy
@@ -183,7 +164,11 @@ class ProfileController {
       try {
         setInfo = await bricksEconomy.getSetInfo(set_number);
       } catch (error) {
-        console.log('Could not fetch set info from BricksEconomy:', error.message);
+        logError('Could not fetch set info from BricksEconomy', { 
+          error: error.message,
+          set_number,
+          userId 
+        });
       }
 
       const setData = {
@@ -202,20 +187,17 @@ class ProfileController {
         message: 'Set added to wanted list successfully',
         set: addedSet
       });
-    } catch (error) {
-      console.error('Error adding wanted set:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
+    })(req, res);
   }
 
   // Add minifig to collection
-  static async addMinifig(req, res) {
-    try {
+  static addMinifig(req, res) {
+    return asyncHandler(async (req, res) => {
       const userId = req.user.userId;
       const { minifig_name, minifig_number, condition_status, purchase_price, purchase_currency, notes } = req.body;
 
       if (!minifig_name) {
-        return res.status(400).json({ error: 'Minifig name is required' });
+        throw new AppError('Minifig name is required', 400);
       }
 
       // Try to get minifig info from BricksEconomy if number provided
@@ -224,7 +206,11 @@ class ProfileController {
         try {
           minifigInfo = await bricksEconomy.getMinifigInfo(minifig_number);
         } catch (error) {
-          console.log('Could not fetch minifig info from BricksEconomy:', error.message);
+          logError('Could not fetch minifig info from BricksEconomy', { 
+            error: error.message,
+            minifig_number,
+            userId 
+          });
         }
       }
 
@@ -243,20 +229,17 @@ class ProfileController {
         message: 'Minifig added to collection successfully',
         minifig: addedMinifig
       });
-    } catch (error) {
-      console.error('Error adding minifig:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
+    })(req, res);
   }
 
   // Add wanted minifig
-  static async addWantedMinifig(req, res) {
-    try {
+  static addWantedMinifig(req, res) {
+    return asyncHandler(async (req, res) => {
       const userId = req.user.userId;
       const { minifig_name, minifig_number, max_price, max_currency, priority, notes } = req.body;
 
       if (!minifig_name) {
-        return res.status(400).json({ error: 'Minifig name is required' });
+        throw new AppError('Minifig name is required', 400);
       }
 
       const minifigData = {
@@ -274,19 +257,16 @@ class ProfileController {
         message: 'Minifig added to wanted list successfully',
         minifig: addedMinifig
       });
-    } catch (error) {
-      console.error('Error adding wanted minifig:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
+    })(req, res);
   }
 
   // Search sets
-  static async searchSets(req, res) {
-    try {
+  static searchSets(req, res) {
+    return asyncHandler(async (req, res) => {
       const { q, limit = 10 } = req.query;
 
       if (!q) {
-        return res.status(400).json({ error: 'Search query is required' });
+        throw new AppError('Search query is required', 400);
       }
 
       const results = await bricksEconomy.searchSets(q, parseInt(limit));
@@ -295,19 +275,16 @@ class ProfileController {
         query: q,
         results: results
       });
-    } catch (error) {
-      console.error('Error searching sets:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
+    })(req, res);
   }
 
   // Search minifigs
-  static async searchMinifigs(req, res) {
-    try {
+  static searchMinifigs(req, res) {
+    return asyncHandler(async (req, res) => {
       const { q, limit = 10 } = req.query;
 
       if (!q) {
-        return res.status(400).json({ error: 'Search query is required' });
+        throw new AppError('Search query is required', 400);
       }
 
       const results = await bricksEconomy.searchMinifigs(q, parseInt(limit));
@@ -316,15 +293,12 @@ class ProfileController {
         query: q,
         results: results
       });
-    } catch (error) {
-      console.error('Error searching minifigs:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
+    })(req, res);
   }
 
   // Update collection item
-  static async updateCollectionItem(req, res) {
-    try {
+  static updateCollectionItem(req, res) {
+    return asyncHandler(async (req, res) => {
       const userId = req.user.userId;
       const { type, id } = req.params;
       const updateData = req.body;
@@ -339,26 +313,23 @@ class ProfileController {
           updatedItem = await UserCollection.updateWantedSet(userId, id, updateData);
           break;
         default:
-          return res.status(400).json({ error: 'Invalid collection type' });
+          throw new AppError('Invalid collection type', 400);
       }
 
       if (!updatedItem) {
-        return res.status(404).json({ error: 'Item not found' });
+        throw new AppError('Item not found', 404);
       }
 
       res.json({
         message: 'Item updated successfully',
         item: updatedItem
       });
-    } catch (error) {
-      console.error('Error updating collection item:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
+    })(req, res);
   }
 
   // Delete collection item
-  static async deleteCollectionItem(req, res) {
-    try {
+  static deleteCollectionItem(req, res) {
+    return asyncHandler(async (req, res) => {
       const userId = req.user.userId;
       const { type, id } = req.params;
 
@@ -372,20 +343,17 @@ class ProfileController {
           deleted = await UserCollection.deleteWantedSet(userId, id);
           break;
         default:
-          return res.status(400).json({ error: 'Invalid collection type' });
+          throw new AppError('Invalid collection type', 400);
       }
 
       if (!deleted) {
-        return res.status(404).json({ error: 'Item not found' });
+        throw new AppError('Item not found', 404);
       }
 
       res.json({
         message: 'Item deleted successfully'
       });
-    } catch (error) {
-      console.error('Error deleting collection item:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
+    })(req, res);
   }
 }
 

@@ -1,51 +1,82 @@
-// Error handling middleware
-const errorHandler = (err, req, res, next) => {
-  console.error('Error:', err);
+const { error: logError } = require('../utils/logger');
 
-  // Default error
-  let error = {
-    message: err.message || 'Internal Server Error',
-    status: err.status || 500
-  };
+// Custom error class for operational errors
+class AppError extends Error {
+  constructor(message, statusCode) {
+    super(message);
+    this.statusCode = statusCode;
+    this.isOperational = true;
+
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+// Central error handling middleware
+const errorHandler = (err, req, res) => {
+  let error = { ...err };
+  error.message = err.message;
+
+  // Log error with context
+  logError('Application error', {
+    error: error.message,
+    stack: error.stack,
+    statusCode: error.statusCode || 500,
+    url: req.url,
+    method: req.method,
+    ip: req.ip || req.connection.remoteAddress,
+    userAgent: req.get('User-Agent'),
+    userId: req.user?.userId || null
+  });
 
   // Mongoose validation error
   if (err.name === 'ValidationError') {
     const message = Object.values(err.errors).map(val => val.message).join(', ');
-    error = {
-      message,
-      status: 400
-    };
+    error = new AppError(message, 400);
   }
 
   // Mongoose duplicate key error
   if (err.code === 11000) {
     const field = Object.keys(err.keyValue)[0];
-    error = {
-      message: `${field} already exists`,
-      status: 400
-    };
+    error = new AppError(`${field} already exists`, 400);
   }
 
   // JWT errors
   if (err.name === 'JsonWebTokenError') {
-    error = {
-      message: 'Invalid token',
-      status: 401
-    };
+    error = new AppError('Invalid token', 401);
   }
 
   if (err.name === 'TokenExpiredError') {
-    error = {
-      message: 'Token expired',
-      status: 401
-    };
+    error = new AppError('Token expired', 401);
   }
 
-  res.status(error.status).json({
+  // Cast error (invalid ObjectId)
+  if (err.name === 'CastError') {
+    error = new AppError('Invalid ID format', 400);
+  }
+
+  // Default to 500 server error
+  const statusCode = error.statusCode || 500;
+  const message = error.isOperational ? error.message : 'Internal Server Error';
+
+  res.status(statusCode).json({
     success: false,
-    error: error.message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    error: message,
+    ...(process.env.NODE_ENV === 'development' && { 
+      stack: error.stack,
+      details: error.message 
+    })
   });
 };
 
-module.exports = { errorHandler };
+// Async error wrapper
+const asyncHandler = (fn) => {
+  return (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
+};
+
+module.exports = { 
+  errorHandler, 
+  AppError, 
+  asyncHandler 
+};
