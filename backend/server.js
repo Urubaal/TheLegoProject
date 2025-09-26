@@ -80,7 +80,7 @@ app.use('*', (req, res) => {
   });
 });
 
-// Error handling middleware
+// Error handling middleware - order matters!
 app.use(errorLogger);
 app.use(errorHandler);
 
