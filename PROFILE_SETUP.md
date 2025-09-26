@@ -58,8 +58,10 @@ cd frontend
 - `user_wanted_minifigs` - poszukiwane minifigurki
 
 ### Rozszerzona tabela users:
-- `name` - wyświetlana nazwa użytkownika
+- `username` - nazwa użytkownika (nie unikalna)
+- `display_name` - wyświetlana nazwa użytkownika
 - `country` - kraj użytkownika
+- `email` - unikalny email użytkownika
 
 ## 🔧 Nowe API Endpoints
 
@@ -100,7 +102,8 @@ cd frontend
 
 ### 1. Rejestracja/Logowanie
 - Po rejestracji użytkownik zostanie przekierowany do dashboard
-- Podczas rejestracji automatycznie generowany jest username
+- Podczas rejestracji automatycznie generowany jest username z emaila (jeśli nie podano)
+- Email musi być unikalny, username może być duplikowany
 
 ### 2. Edycja profilu
 - Kliknij "Edytuj Profil" w sekcji profilu

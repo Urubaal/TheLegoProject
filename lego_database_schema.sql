@@ -11,13 +11,11 @@ CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 -- =============================================
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    username VARCHAR(50) UNIQUE NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
+    username VARCHAR(30) NOT NULL, -- Not unique - multiple users can have same username
+    email VARCHAR(255) UNIQUE NOT NULL, -- Unique - one email per user
     password_hash VARCHAR(255) NOT NULL,
-    first_name VARCHAR(100),
-    last_name VARCHAR(100),
-    name VARCHAR(100), -- Display name for profile
-    country VARCHAR(100), -- User's country
+    display_name VARCHAR(50) NOT NULL, -- Display name for profile (defaults to username)
+    country VARCHAR(50), -- User's country
     preferences JSONB DEFAULT '{}',
     budget_min DECIMAL(10,2),
     budget_max DECIMAL(10,2),
@@ -231,6 +229,7 @@ CREATE TABLE user_wanted_minifigs (
 -- Users indexes
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_username ON users(username);
+CREATE INDEX idx_users_display_name ON users(display_name);
 CREATE INDEX idx_users_active ON users(is_active);
 
 -- LEGO sets indexes
@@ -333,10 +332,10 @@ INSERT INTO lego_sets (set_number, name, description, theme, subtheme, year_rele
 ('75313', 'AT-AT', 'Star Wars AT-AT Walker', 'Star Wars', 'Original Trilogy', 2020, 1267, 4, '9+', 3, '{"length": 40, "width": 20, "height": 50}', 2000, 159.99, ARRAY['Star Wars', 'AT-AT', 'Walker', 'Empire']);
 
 -- Insert sample users
-INSERT INTO users (username, email, password_hash, first_name, last_name, preferences, budget_min, budget_max, preferred_currency) VALUES
-('lego_fan_2024', 'jan.kowalski@email.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/8QzQz2', 'Jan', 'Kowalski', '{"themes": ["Star Wars", "Creator Expert"], "max_pieces": 5000, "prefer_minifigures": true}', 100.00, 500.00, 'PLN'),
-('ninjago_lover', 'anna.nowak@email.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/8QzQz2', 'Anna', 'Nowak', '{"themes": ["Ninjago", "City"], "max_pieces": 3000, "prefer_minifigures": true}', 50.00, 300.00, 'PLN'),
-('collector_pro', 'piotr.wisniewski@email.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/8QzQz2', 'Piotr', 'Wiśniewski', '{"themes": ["Creator Expert", "Architecture"], "max_pieces": 10000, "prefer_minifigures": false}', 200.00, 1000.00, 'PLN');
+INSERT INTO users (username, email, password_hash, display_name, country, preferences, budget_min, budget_max, preferred_currency) VALUES
+('lego_fan_2024', 'jan.kowalski@email.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/8QzQz2', 'Jan Kowalski', 'Polska', '{"themes": ["Star Wars", "Creator Expert"], "max_pieces": 5000, "prefer_minifigures": true}', 100.00, 500.00, 'PLN'),
+('ninjago_lover', 'anna.nowak@email.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/8QzQz2', 'Anna Nowak', 'Polska', '{"themes": ["Ninjago", "City"], "max_pieces": 3000, "prefer_minifigures": true}', 50.00, 300.00, 'PLN'),
+('collector_pro', 'piotr.wisniewski@email.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/8QzQz2', 'Piotr Wiśniewski', 'Polska', '{"themes": ["Creator Expert", "Architecture"], "max_pieces": 10000, "prefer_minifigures": false}', 200.00, 1000.00, 'PLN');
 
 -- Insert sample wishlists
 INSERT INTO user_wishlists (user_id, lego_set_id, priority, max_price, notes) VALUES
