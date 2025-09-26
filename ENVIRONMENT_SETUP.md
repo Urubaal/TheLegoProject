@@ -38,6 +38,7 @@ POSTGRES_USER=lego_user
 # POSTGRES_PASSWORD= (no password required - using trust authentication)
 
 # CORS Configuration
+ALLOWED_ORIGINS=http://localhost:8080,http://localhost:5500,http://localhost:3000
 CORS_ORIGIN=http://localhost:8080
 ```
 
@@ -67,3 +68,11 @@ CORS_ORIGIN=http://localhost:8080
 - **NIGDY** nie commituj pliku `.env` do repozytorium
 - Używaj silnych haseł w środowisku produkcyjnym
 - Zmień domyślne klucze JWT w środowisku produkcyjnym
+- W środowisku produkcyjnym ustaw `ALLOWED_ORIGINS` na rzeczywiste domeny (np. `https://yourdomain.com,https://app.yourdomain.com`)
+
+## Konfiguracja CORS
+
+System używa zmiennej środowiskowej `ALLOWED_ORIGINS` do konfiguracji dozwolonych domen. 
+- **Development:** Używa domyślnych localhost portów jako fallback
+- **Production:** Ustaw `ALLOWED_ORIGINS` na rzeczywiste domeny aplikacji
+- **Format:** Oddzielone przecinkami (np. `https://example.com,https://app.example.com`)

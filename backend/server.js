@@ -26,9 +26,9 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// CORS configuration - allows requests from multiple frontend ports
+// CORS configuration - allows requests from configured origins
 app.use(cors({
-  origin: [
+  origin: process.env.ALLOWED_ORIGINS?.split(',') || [
     'http://localhost:8080', // Main frontend port
     'http://localhost:5500', // Alternative frontend port
     'http://localhost:3000'  // Development port

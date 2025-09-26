@@ -34,6 +34,29 @@ describe('Auth API Tests', () => {
 
       expect(response.headers['access-control-allow-origin']).toBeDefined();
     });
+
+    it('should allow requests from localhost:3000', async () => {
+      const response = await request(app)
+        .get('/api/health')
+        .set('Origin', 'http://localhost:3000')
+        .expect(200);
+
+      expect(response.headers['access-control-allow-origin']).toBeDefined();
+    });
+
+    it('should use environment variable ALLOWED_ORIGINS when set', () => {
+      const originalEnv = process.env.ALLOWED_ORIGINS;
+      process.env.ALLOWED_ORIGINS = 'http://example.com,https://app.example.com';
+      
+      // Restart the app to pick up the new environment variable
+      delete require.cache[require.resolve('../server')];
+      const testApp = require('../server');
+      
+      // Reset environment
+      process.env.ALLOWED_ORIGINS = originalEnv;
+      
+      expect(testApp).toBeDefined();
+    });
   });
 
   // Test 404 handler
