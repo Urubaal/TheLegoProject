@@ -106,10 +106,12 @@ if (!scriptsOK) {
 // 6. Check CORS configuration
 log('6. 🌐 Checking CORS configuration...', 'blue');
 const serverContent = fs.readFileSync('backend/server.js', 'utf8');
-if (serverContent.includes('localhost:8080') && serverContent.includes('localhost:5500')) {
-  log('   ✅ CORS configured for both ports', 'green');
+if (serverContent.includes('process.env.ALLOWED_ORIGINS?.split')) {
+  log('   ✅ CORS configured to use environment variables', 'green');
+} else if (serverContent.includes('localhost:8080') && serverContent.includes('localhost:5500')) {
+  log('   ⚠️  CORS using hardcoded localhost origins - consider using ALLOWED_ORIGINS env var', 'yellow');
 } else {
-  log('   ⚠️  CORS configuration may need updating', 'yellow');
+  log('   ❌ CORS configuration may need updating', 'red');
 }
 
 log('\n🎉 Project verification completed successfully!', 'green');
