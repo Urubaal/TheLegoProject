@@ -44,7 +44,7 @@ copy env.example .env
 
 ### 1. PostgreSQL Installation
 ```bash
-# Windows - pobierz z postgresql.org
+# Windows - download from postgresql.org
 # macOS
 brew install postgresql
 brew services start postgresql
@@ -126,23 +126,23 @@ VALUES (
 );
 ```
 
-### Konfiguracja scrapera:
-- **`base_url`** - Podstawowy URL sklepu
-- **`selectors`** - Selektory CSS dla cen i dostępności
-- **`shipping_info`** - Informacje o kosztach przesyłki
+### Scraper Configuration:
+- **`base_url`** - Store's base URL
+- **`selectors`** - CSS selectors for prices and availability
+- **`shipping_info`** - Shipping cost information
 
-## 🤖 Integracja z AI
+## 🤖 AI Integration
 
-### Struktura rekomendacji:
+### Recommendation Structure:
 ```sql
--- Typy rekomendacji:
--- 'buy_now' - Kup teraz
--- 'wait' - Czekaj na lepszą cenę
--- 'avoid' - Unikaj
--- 'alternative' - Znajdź alternatywę
+-- Recommendation types:
+-- 'buy_now' - Buy now
+-- 'wait' - Wait for better price
+-- 'avoid' - Avoid
+-- 'alternative' - Find alternative
 ```
 
-### Przykład rekomendacji:
+### Recommendation Example:
 ```sql
 INSERT INTO ai_recommendations (
     user_id, lego_set_id, recommendation_type, 
@@ -157,21 +157,21 @@ INSERT INTO ai_recommendations (
 );
 ```
 
-## 📈 Monitoring i analiza
+## 📈 Monitoring and Analysis
 
-### Kluczowe metryki:
-- Liczba aktywnych użytkowników
-- Liczba zestawów w systemie
-- Średnia cena zestawów
-- Wydajność scraperów
-- Jakość rekomendacji AI
+### Key Metrics:
+- Number of active users
+- Number of sets in the system
+- Average set prices
+- Scraper performance
+- AI recommendation quality
 
-### Zapytania monitorujące:
+### Monitoring Queries:
 ```sql
--- Aktywni użytkownicy
+-- Active users
 SELECT COUNT(*) FROM users WHERE is_active = true;
 
--- Wydajność scraperów
+-- Scraper performance
 SELECT s.name, AVG(sl.items_scraped) as avg_items
 FROM scraper_logs sl
 JOIN stores s ON sl.store_id = s.id
@@ -179,40 +179,40 @@ WHERE sl.started_at >= CURRENT_DATE - INTERVAL '7 days'
 GROUP BY s.name;
 ```
 
-## 🔒 Bezpieczeństwo
+## 🔒 Security
 
-### Zalecenia:
-- Używaj silnych haseł dla użytkowników bazy danych
-- Regularnie aktualizuj PostgreSQL
-- Konfiguruj backup bazy danych
-- Monitoruj logi dostępu
-- Używaj SSL dla połączeń
+### Recommendations:
+- Use strong passwords for database users
+- Regularly update PostgreSQL
+- Configure database backups
+- Monitor access logs
+- Use SSL for connections
 
 ### Backup:
 ```bash
-# Tworzenie backupu
+# Creating backup
 pg_dump -U lego_user -d lego_purchase_system > backup.sql
 
-# Przywracanie backupu
+# Restoring backup
 psql -U lego_user -d lego_purchase_system < backup.sql
 ```
 
-## 📁 Struktura plików
+## 📁 File Structure
 
 ```
-├── lego_database_schema.sql      # Główny schemat bazy danych
-├── database_setup_instructions.md # Instrukcje instalacji
-├── tableplus_queries.sql         # Przykładowe zapytania
-└── README.md                     # Ten plik
+├── lego_database_schema.sql      # Main database schema
+├── database_setup_instructions.md # Installation instructions
+├── tableplus_queries.sql         # Sample queries
+└── README.md                     # This file
 ```
 
-## 🚀 Następne kroki
+## 🚀 Next Steps
 
-1. **Konfiguracja scraperów** - Dodaj więcej sklepów
-2. **Integracja AI** - Skonfiguruj endpointy AI
-3. **Monitoring** - Skonfiguruj alerty i dashboardy
-4. **Backup** - Automatyczne kopie zapasowe
-5. **Skalowanie** - Optymalizacja dla większej liczby użytkowników
+1. **Scraper Configuration** - Add more stores
+2. **AI Integration** - Configure AI endpoints
+3. **Monitoring** - Set up alerts and dashboards
+4. **Backup** - Automated backups
+5. **Scaling** - Optimization for more users
 
 ## 🤖 Copilot Configuration
 
