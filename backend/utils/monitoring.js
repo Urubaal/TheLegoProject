@@ -134,50 +134,25 @@ class SystemMonitor {
     }
   }
 
-  // Wyczyść stare pliki logów (starsze niż 2 dni)
-  cleanupOldLogs() {
+  // Wyczyść stare logi z bazy danych
+  async cleanupOldLogs() {
     try {
-      const logsDir = path.join(__dirname, '..', 'logs');
+      // Użyj nowego systemu logowania do czyszczenia bazy danych
+      const { cleanupLogs } = require('./logger');
+      const deletedCount = await cleanupLogs();
       
-      if (!fs.existsSync(logsDir)) {
-        return { message: 'Logs directory does not exist' };
-      }
-
-      const files = fs.readdirSync(logsDir);
-      const twoDaysAgo = Date.now() - (2 * 24 * 60 * 60 * 1000);
-      let deletedCount = 0;
-      const deletedFiles = [];
-
-      files.forEach(file => {
-        if (file.endsWith('.log')) {
-          const filePath = path.join(logsDir, file);
-          const stats = fs.statSync(filePath);
-          
-          if (stats.mtime.getTime() < twoDaysAgo) {
-            fs.unlinkSync(filePath);
-            deletedCount++;
-            deletedFiles.push({
-              file,
-              size: Math.round(stats.size / 1024), // w KB
-              age: Math.round((Date.now() - stats.mtime.getTime()) / (24 * 60 * 60 * 1000)) // w dniach
-            });
-            info('Deleted old log file', { 
-              file, 
-              age: `${Math.round((Date.now() - stats.mtime.getTime()) / (24 * 60 * 60 * 1000))} days`,
-              size: `${Math.round(stats.size / 1024)}KB`
-            });
-          }
-        }
+      info('Database log cleanup completed', { 
+        deletedCount,
+        message: 'Cleaned up expired logs from database'
       });
 
       return {
-        message: 'Cleanup completed - removed files older than 2 days',
+        message: 'Database log cleanup completed',
         deletedFiles: deletedCount,
-        deletedFilesList: deletedFiles,
-        remainingFiles: files.length - deletedCount
+        storage: 'database'
       };
     } catch (err) {
-      error('Log cleanup failed', { error: err.message });
+      error('Database log cleanup failed', { error: err.message });
       return { error: err.message };
     }
   }
@@ -302,9 +277,9 @@ const getMetricsEndpoint = (req, res) => {
 };
 
 // Endpoint do czyszczenia logów
-const cleanupLogsEndpoint = (req, res) => {
+const cleanupLogsEndpoint = async (req, res) => {
   try {
-    const result = systemMonitor.cleanupOldLogs();
+    const result = await systemMonitor.cleanupOldLogs();
     
     res.json({
       success: true,

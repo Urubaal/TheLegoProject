@@ -2,6 +2,7 @@ const winston = require('winston');
 const DailyRotateFile = require('winston-daily-rotate-file');
 const path = require('path');
 const { createCloudLogger, createDatadogLogger } = require('./cloudLogger');
+const DatabaseTransport = require('./databaseTransport');
 
 // Definicja formatów logów
 const logFormat = winston.format.combine(
@@ -33,38 +34,50 @@ const transports = [
   new winston.transports.Console({
     level: process.env.NODE_ENV === 'production' ? 'warn' : 'debug',
     format: consoleFormat
-  }),
+  })
+];
 
-  // Plik ogólny - wszystkie logi
-  new DailyRotateFile({
+// Dodaj transport bazy danych jako główny (tylko jeśli baza danych jest dostępna)
+let databaseTransport = null;
+if (process.env.LOG_STORAGE === 'database' && process.env.DATABASE_URL) {
+  try {
+    databaseTransport = new DatabaseTransport({
+      level: 'info',
+      service: 'lego-backend',
+      environment: process.env.NODE_ENV || 'development',
+      retentionDays: parseInt(process.env.LOG_RETENTION_DAYS) || 30
+    });
+    transports.push(databaseTransport);
+    console.log('✅ Database logging enabled');
+  } catch (error) {
+    console.log('⚠️  Database logging disabled - database not available');
+  }
+} else {
+  console.log('⚠️  Database logging disabled - using file logging only');
+}
+
+// Dodaj pliki jako fallback tylko w development
+if (process.env.NODE_ENV !== 'production') {
+  // Plik ogólny - wszystkie logi (fallback)
+  transports.push(new DailyRotateFile({
     filename: path.join('logs', 'application-%DATE%.log'),
     datePattern: 'YYYY-MM-DD',
     maxSize: '20m',
-    maxFiles: '14d',
+    maxFiles: '7d',
     level: 'info',
     format: logFormat
-  }),
+  }));
 
-  // Plik błędów - tylko błędy
-  new DailyRotateFile({
+  // Plik błędów - tylko błędy (fallback)
+  transports.push(new DailyRotateFile({
     filename: path.join('logs', 'error-%DATE%.log'),
     datePattern: 'YYYY-MM-DD',
     maxSize: '20m',
-    maxFiles: '30d',
+    maxFiles: '7d',
     level: 'error',
     format: logFormat
-  }),
-
-  // Plik audytu - operacje użytkowników
-  new DailyRotateFile({
-    filename: path.join('logs', 'audit-%DATE%.log'),
-    datePattern: 'YYYY-MM-DD',
-    maxSize: '20m',
-    maxFiles: '90d',
-    level: 'info',
-    format: logFormat
-  })
-];
+  }));
+}
 
 // Dodaj chmurowe logowanie jeśli dostępne
 const cloudLogger = createCloudLogger();
@@ -114,7 +127,7 @@ const logMethods = {
 
   // Logi audytu - operacje użytkowników
   audit: (action, userId, details = {}) => {
-    auditLogger.info('AUDIT', {
+    logger.info('AUDIT', {
       action,
       userId,
       timestamp: new Date().toISOString(),
@@ -151,6 +164,37 @@ const logMethods = {
       userAgent: req.get('User-Agent'),
       ip: req.ip || req.connection.remoteAddress
     });
+  },
+
+  // Metody do zarządzania bazą danych logów
+  getDatabaseTransport: () => databaseTransport,
+  
+  // Pobierz statystyki logów z bazy danych
+  getLogStats: async () => {
+    if (!databaseTransport) {
+      console.log('Database logging not available');
+      return [];
+    }
+    try {
+      return await databaseTransport.getStats();
+    } catch (error) {
+      console.error('Failed to get log stats:', error.message);
+      return [];
+    }
+  },
+
+  // Wyczyść stare logi z bazy danych
+  cleanupLogs: async () => {
+    if (!databaseTransport) {
+      console.log('Database logging not available');
+      return 0;
+    }
+    try {
+      return await databaseTransport.cleanup();
+    } catch (error) {
+      console.error('Failed to cleanup logs:', error.message);
+      return 0;
+    }
   }
 };
 
