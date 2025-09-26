@@ -16,6 +16,8 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     first_name VARCHAR(100),
     last_name VARCHAR(100),
+    name VARCHAR(100), -- Display name for profile
+    country VARCHAR(100), -- User's country
     preferences JSONB DEFAULT '{}',
     budget_min DECIMAL(10,2),
     budget_max DECIMAL(10,2),
@@ -147,6 +149,82 @@ CREATE TABLE user_sessions (
 );
 
 -- =============================================
+-- 9. USER COLLECTION - OWNED SETS
+-- =============================================
+CREATE TABLE user_owned_sets (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    lego_set_id UUID REFERENCES lego_sets(id) ON DELETE SET NULL,
+    set_number VARCHAR(20) NOT NULL, -- Store set number even if set is deleted
+    set_name VARCHAR(255) NOT NULL,
+    condition_status VARCHAR(20) DEFAULT 'new' CHECK (condition_status IN ('new', 'used')),
+    purchase_price DECIMAL(10,2),
+    purchase_currency VARCHAR(3) DEFAULT 'PLN',
+    current_value DECIMAL(10,2), -- Current market value
+    current_currency VARCHAR(3) DEFAULT 'PLN',
+    value_updated_at TIMESTAMP WITH TIME ZONE,
+    notes TEXT,
+    added_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, set_number)
+);
+
+-- =============================================
+-- 10. USER COLLECTION - WANTED SETS
+-- =============================================
+CREATE TABLE user_wanted_sets (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    lego_set_id UUID REFERENCES lego_sets(id) ON DELETE SET NULL,
+    set_number VARCHAR(20) NOT NULL,
+    set_name VARCHAR(255) NOT NULL,
+    max_price DECIMAL(10,2),
+    max_currency VARCHAR(3) DEFAULT 'PLN',
+    priority INTEGER DEFAULT 1 CHECK (priority BETWEEN 1 AND 5),
+    notes TEXT,
+    added_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, set_number)
+);
+
+-- =============================================
+-- 11. USER COLLECTION - OWNED MINIFIGS
+-- =============================================
+CREATE TABLE user_owned_minifigs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    minifig_name VARCHAR(255) NOT NULL,
+    minifig_number VARCHAR(20), -- If available
+    condition_status VARCHAR(20) DEFAULT 'new' CHECK (condition_status IN ('new', 'used')),
+    purchase_price DECIMAL(10,2),
+    purchase_currency VARCHAR(3) DEFAULT 'PLN',
+    current_value DECIMAL(10,2),
+    current_currency VARCHAR(3) DEFAULT 'PLN',
+    value_updated_at TIMESTAMP WITH TIME ZONE,
+    notes TEXT,
+    added_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, minifig_name, minifig_number)
+);
+
+-- =============================================
+-- 12. USER COLLECTION - WANTED MINIFIGS
+-- =============================================
+CREATE TABLE user_wanted_minifigs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    minifig_name VARCHAR(255) NOT NULL,
+    minifig_number VARCHAR(20),
+    max_price DECIMAL(10,2),
+    max_currency VARCHAR(3) DEFAULT 'PLN',
+    priority INTEGER DEFAULT 1 CHECK (priority BETWEEN 1 AND 5),
+    notes TEXT,
+    added_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, minifig_name, minifig_number)
+);
+
+-- =============================================
 -- INDEXES FOR PERFORMANCE
 -- =============================================
 
@@ -185,6 +263,27 @@ CREATE INDEX idx_scraper_logs_store ON scraper_logs(store_id);
 CREATE INDEX idx_scraper_logs_status ON scraper_logs(status);
 CREATE INDEX idx_scraper_logs_started_at ON scraper_logs(started_at);
 
+-- User collection indexes
+CREATE INDEX idx_owned_sets_user ON user_owned_sets(user_id);
+CREATE INDEX idx_owned_sets_set_number ON user_owned_sets(set_number);
+CREATE INDEX idx_owned_sets_condition ON user_owned_sets(condition_status);
+CREATE INDEX idx_owned_sets_added_at ON user_owned_sets(added_at);
+
+CREATE INDEX idx_wanted_sets_user ON user_wanted_sets(user_id);
+CREATE INDEX idx_wanted_sets_set_number ON user_wanted_sets(set_number);
+CREATE INDEX idx_wanted_sets_priority ON user_wanted_sets(priority);
+CREATE INDEX idx_wanted_sets_added_at ON user_wanted_sets(added_at);
+
+CREATE INDEX idx_owned_minifigs_user ON user_owned_minifigs(user_id);
+CREATE INDEX idx_owned_minifigs_name ON user_owned_minifigs(minifig_name);
+CREATE INDEX idx_owned_minifigs_number ON user_owned_minifigs(minifig_number);
+CREATE INDEX idx_owned_minifigs_condition ON user_owned_minifigs(condition_status);
+
+CREATE INDEX idx_wanted_minifigs_user ON user_wanted_minifigs(user_id);
+CREATE INDEX idx_wanted_minifigs_name ON user_wanted_minifigs(minifig_name);
+CREATE INDEX idx_wanted_minifigs_number ON user_wanted_minifigs(minifig_number);
+CREATE INDEX idx_wanted_minifigs_priority ON user_wanted_minifigs(priority);
+
 -- =============================================
 -- TRIGGERS FOR UPDATED_AT
 -- =============================================
@@ -201,6 +300,18 @@ CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_lego_sets_updated_at BEFORE UPDATE ON lego_sets
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_owned_sets_updated_at BEFORE UPDATE ON user_owned_sets
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_wanted_sets_updated_at BEFORE UPDATE ON user_wanted_sets
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_owned_minifigs_updated_at BEFORE UPDATE ON user_owned_minifigs
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_wanted_minifigs_updated_at BEFORE UPDATE ON user_wanted_minifigs
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- =============================================

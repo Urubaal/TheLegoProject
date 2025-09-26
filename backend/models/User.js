@@ -5,19 +5,18 @@ const pool = new Pool({
   user: process.env.POSTGRES_USER || 'lego_user',
   host: process.env.POSTGRES_HOST || 'localhost',
   database: process.env.POSTGRES_DB || 'lego_purchase_system',
-  password: process.env.POSTGRES_PASSWORD || 'Gitf%$hM9#475fMv',
   port: process.env.POSTGRES_PORT || 5432,
 });
 
 class User {
   static async create(userData) {
-    const { email, password, name } = userData;
+    const { email, password, name, username, country } = userData;
     const query = `
-      INSERT INTO users (email, password_hash, username, first_name, created_at, is_active)
-      VALUES ($1, $2, $3, $4, NOW(), $5)
-      RETURNING id, email, username, first_name, created_at, is_active
+      INSERT INTO users (email, password_hash, username, first_name, name, country, created_at, is_active)
+      VALUES ($1, $2, $3, $4, $5, $6, NOW(), $7)
+      RETURNING id, email, username, first_name, name, country, created_at, is_active
     `;
-    const values = [email, password, name, name, true];
+    const values = [email, password, username || name, name, name, country, true];
     
     try {
       const result = await pool.query(query, values);
@@ -70,6 +69,36 @@ class User {
     try {
       await pool.query(query, values);
       return true;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async updateProfile(id, profileData) {
+    const { name, username, country } = profileData;
+    const query = `
+      UPDATE users 
+      SET name = $1, username = $2, country = $3, updated_at = NOW() 
+      WHERE id = $4
+      RETURNING id, email, username, first_name, name, country, created_at, is_active
+    `;
+    const values = [name, username, country, id];
+    
+    try {
+      const result = await pool.query(query, values);
+      return result.rows[0];
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async findByUsername(username) {
+    const query = 'SELECT * FROM users WHERE username = $1';
+    const values = [username];
+    
+    try {
+      const result = await pool.query(query, values);
+      return result.rows[0] || null;
     } catch (error) {
       throw error;
     }

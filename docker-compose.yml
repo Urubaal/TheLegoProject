@@ -9,7 +9,7 @@ services:
     environment:
       POSTGRES_DB: lego_purchase_system
       POSTGRES_USER: lego_user
-      POSTGRES_PASSWORD: Gitf%$hM9#475fMv
+      POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -34,7 +34,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: postgresql://lego_user:Gitf%$hM9%23475fMv@database:5432/lego_purchase_system
+      DATABASE_URL: postgresql://lego_user@database:5432/lego_purchase_system
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
       JWT_EXPIRES_IN: 24h
       FRONTEND_URL: http://localhost:5500
@@ -75,7 +75,6 @@ services:
     environment:
       POSTGRES_DB: lego_purchase_system
       POSTGRES_USER: lego_user
-      POSTGRES_PASSWORD: Gitf%$hM9#475fMv
     ports:
       - "5433:5432"
     networks:
