@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "husky": "^9.1.7"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "pre-commit": "node verify.js && cd backend && npm run lint && npm test",
+    "check": "node verify.js",
+    "check:backend": "cd backend && npm run lint && npm test"
+  }
+}
