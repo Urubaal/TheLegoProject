@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - LEGO Collection Manager</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-brand">
+                <i class="fas fa-cube"></i>
+                <span>LEGO Collection</span>
+            </div>
+            <div class="nav-menu">
+                <a href="#profile" class="nav-link active" data-section="profile">
+                    <i class="fas fa-user"></i>
+                    <span>Profil</span>
+                </a>
+                <a href="#collection" class="nav-link" data-section="collection">
+                    <i class="fas fa-boxes"></i>
+                    <span>Kolekcja</span>
+                </a>
+                <a href="#wishlist" class="nav-link" data-section="wishlist">
+                    <i class="fas fa-heart"></i>
+                    <span>Lista życzeń</span>
+                </a>
+                <a href="#logout" class="nav-link" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Wyloguj</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Profile Section -->
+            <section id="profile-section" class="content-section active">
+                <div class="section-header">
+                    <h1>Mój Profil</h1>
+                    <button class="btn btn-primary" id="editProfileBtn">
+                        <i class="fas fa-edit"></i>
+                        Edytuj Profil
+                    </button>
+                </div>
+
+                <div class="profile-content">
+                    <!-- Profile Info -->
+                    <div class="profile-card">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="profile-info">
+                            <h2 id="profileName">Ładowanie...</h2>
+                            <p id="profileUsername">@username</p>
+                            <p id="profileEmail">email@example.com</p>
+                            <p id="profileCountry">Kraj: Ładowanie...</p>
+                            <p id="profileMemberSince">Członek od: Ładowanie...</p>
+                        </div>
+                    </div>
+
+                    <!-- Collection Stats -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="ownedSetsCount">0</h3>
+                                <p>Posiadane zestawy</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="wantedSetsCount">0</h3>
+                                <p>Poszukiwane zestawy</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-puzzle-piece"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="totalPieces">0</h3>
+                                <p>Łącznie klocków</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-user-friends"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="totalMinifigs">0</h3>
+                                <p>Minifigurki</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Collection Section -->
+            <section id="collection-section" class="content-section">
+                <div class="section-header">
+                    <h1>Moja Kolekcja</h1>
+                    <div class="section-actions">
+                        <button class="btn btn-secondary" id="addSetBtn">
+                            <i class="fas fa-plus"></i>
+                            Dodaj Zestaw
+                        </button>
+                        <button class="btn btn-secondary" id="addMinifigBtn">
+                            <i class="fas fa-plus"></i>
+                            Dodaj Minifigurkę
+                        </button>
+                    </div>
+                </div>
+
+                <div class="collection-tabs">
+                    <button class="tab-btn active" data-tab="owned-sets">Posiadane Zestawy</button>
+                    <button class="tab-btn" data-tab="owned-minifigs">Posiadane Minifigurki</button>
+                </div>
+
+                <div class="tab-content">
+                    <div id="owned-sets-tab" class="tab-panel active">
+                        <div class="collection-grid" id="ownedSetsGrid">
+                            <!-- Owned sets will be loaded here -->
+                        </div>
+                    </div>
+                    <div id="owned-minifigs-tab" class="tab-panel">
+                        <div class="collection-grid" id="ownedMinifigsGrid">
+                            <!-- Owned minifigs will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Wishlist Section -->
+            <section id="wishlist-section" class="content-section">
+                <div class="section-header">
+                    <h1>Lista Życzeń</h1>
+                    <div class="section-actions">
+                        <button class="btn btn-secondary" id="addWantedSetBtn">
+                            <i class="fas fa-plus"></i>
+                            Dodaj Zestaw
+                        </button>
+                        <button class="btn btn-secondary" id="addWantedMinifigBtn">
+                            <i class="fas fa-plus"></i>
+                            Dodaj Minifigurkę
+                        </button>
+                    </div>
+                </div>
+
+                <div class="collection-tabs">
+                    <button class="tab-btn active" data-tab="wanted-sets">Poszukiwane Zestawy</button>
+                    <button class="tab-btn" data-tab="wanted-minifigs">Poszukiwane Minifigurki</button>
+                </div>
+
+                <div class="tab-content">
+                    <div id="wanted-sets-tab" class="tab-panel active">
+                        <div class="collection-grid" id="wantedSetsGrid">
+                            <!-- Wanted sets will be loaded here -->
+                        </div>
+                    </div>
+                    <div id="wanted-minifigs-tab" class="tab-panel">
+                        <div class="collection-grid" id="wantedMinifigsGrid">
+                            <!-- Wanted minifigs will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edytuj Profil</h2>
+                <button class="close-btn" id="closeEditProfileModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="editProfileForm">
+                <div class="form-group">
+                    <label for="editName">Imię i nazwisko</label>
+                    <input type="text" id="editName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="editUsername">Nazwa użytkownika</label>
+                    <input type="text" id="editUsername" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="editCountry">Kraj</label>
+                    <select id="editCountry" name="country">
+                        <option value="">Wybierz kraj</option>
+                        <option value="Polska">Polska</option>
+                        <option value="Niemcy">Niemcy</option>
+                        <option value="Francja">Francja</option>
+                        <option value="Wielka Brytania">Wielka Brytania</option>
+                        <option value="Stany Zjednoczone">Stany Zjednoczone</option>
+                        <option value="Kanada">Kanada</option>
+                        <option value="Australia">Australia</option>
+                        <option value="Inne">Inne</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelEditProfile">Anuluj</button>
+                    <button type="submit" class="btn btn-primary">Zapisz</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Set Modal -->
+    <div id="addSetModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Dodaj Zestaw do Kolekcji</h2>
+                <button class="close-btn" id="closeAddSetModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="addSetForm">
+                <div class="form-group">
+                    <label for="setNumber">Numer zestawu</label>
+                    <input type="text" id="setNumber" name="set_number" placeholder="np. 75192" required>
+                    <button type="button" class="btn btn-secondary" id="searchSetBtn">Wyszukaj</button>
+                </div>
+                <div class="form-group">
+                    <label for="setName">Nazwa zestawu</label>
+                    <input type="text" id="setName" name="set_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="setCondition">Stan</label>
+                    <select id="setCondition" name="condition_status">
+                        <option value="new">Nowy</option>
+                        <option value="used">Używany</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="purchasePrice">Cena zakupu (opcjonalnie)</label>
+                    <input type="number" id="purchasePrice" name="purchase_price" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="setNotes">Notatki (opcjonalnie)</label>
+                    <textarea id="setNotes" name="notes" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelAddSet">Anuluj</button>
+                    <button type="submit" class="btn btn-primary">Dodaj</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Wanted Set Modal -->
+    <div id="addWantedSetModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Dodaj Zestaw do Listy Życzeń</h2>
+                <button class="close-btn" id="closeAddWantedSetModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="addWantedSetForm">
+                <div class="form-group">
+                    <label for="wantedSetNumber">Numer zestawu</label>
+                    <input type="text" id="wantedSetNumber" name="set_number" placeholder="np. 75192" required>
+                    <button type="button" class="btn btn-secondary" id="searchWantedSetBtn">Wyszukaj</button>
+                </div>
+                <div class="form-group">
+                    <label for="wantedSetName">Nazwa zestawu</label>
+                    <input type="text" id="wantedSetName" name="set_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="maxPrice">Maksymalna cena (opcjonalnie)</label>
+                    <input type="number" id="maxPrice" name="max_price" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="priority">Priorytet</label>
+                    <select id="priority" name="priority">
+                        <option value="1">1 - Najwyższy</option>
+                        <option value="2">2 - Wysoki</option>
+                        <option value="3">3 - Średni</option>
+                        <option value="4">4 - Niski</option>
+                        <option value="5">5 - Najniższy</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="wantedSetNotes">Notatki (opcjonalnie)</label>
+                    <textarea id="wantedSetNotes" name="notes" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelAddWantedSet">Anuluj</button>
+                    <button type="submit" class="btn btn-primary">Dodaj</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Message Container -->
+    <div id="messageContainer" class="message-container hidden">
+        <div class="message" id="message">
+            <i class="fas fa-check-circle"></i>
+            <span id="messageText"></span>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

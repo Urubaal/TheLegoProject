@@ -322,7 +322,9 @@ class AuthManager {
                 body: JSON.stringify({
                     name,
                     email,
-                    password
+                    password,
+                    username: name.toLowerCase().replace(/\s+/g, ''),
+                    country: 'Polska'
                 })
             });
 
