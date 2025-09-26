@@ -6,6 +6,7 @@ AI system for LEGO set purchase suggestions with scraper integration, user manag
 
 The system consists of:
 - **PostgreSQL Database** - storing data about sets, users, prices
+- **Redis Cache** - secure storage for password reset tokens with TTL
 - **Scrapers** - collecting data from various online stores
 - **AI** - generating intelligent purchase suggestions
 - **TablePlus** - data exploration tool
@@ -85,7 +86,8 @@ The system consists of:
 - ✅ Username is optional and not unique
 - ✅ Automatic username generation from email if not provided
 - ✅ JWT token-based authentication
-- ✅ Password reset functionality
+- ✅ Secure password reset with Redis TTL storage
+- ✅ Redis caching for improved security and scalability
 
 ## 🚀 Quick Start
 
@@ -110,7 +112,23 @@ sudo apt install postgresql postgresql-contrib
 sudo systemctl start postgresql
 ```
 
-### 2. Database Configuration
+### 2. Redis Installation (Required for Password Reset)
+```bash
+# Docker (Recommended)
+docker run -d --name redis-server -p 6379:6379 redis:7-alpine
+
+# macOS
+brew install redis
+brew services start redis
+
+# Linux
+sudo apt install redis-server
+sudo systemctl start redis-server
+
+# Windows - download from microsoftarchive/redis
+```
+
+### 3. Database Configuration
 ```sql
 -- Create database
 CREATE DATABASE lego_purchase_system;
@@ -118,19 +136,19 @@ CREATE USER lego_user;
 GRANT ALL PRIVILEGES ON DATABASE lego_purchase_system TO lego_user;
 ```
 
-### 3. Load Schema
+### 4. Load Schema
 ```bash
 psql -U lego_user -d lego_purchase_system -f lego_database_schema.sql
 ```
 
-### 4. TablePlus Configuration
+### 5. TablePlus Configuration
 - Host: localhost
 - Port: 5432
 - User: lego_user
 - Password: (leave empty)
 - Database: lego_purchase_system
 
-### 5. Project Verification
+### 6. Project Verification
 ```bash
 # Check if everything works correctly
 node verify.js
@@ -145,7 +163,7 @@ cd backend && npm run lint
 npm install
 ```
 
-### 6. Pre-commit Hooks Setup
+### 7. Pre-commit Hooks Setup
 The project automatically runs quality checks before each commit:
 - **Automatic verification** - No manual intervention needed
 - **Quality assurance** - Prevents broken code from being committed
@@ -368,3 +386,5 @@ In case of problems:
 - [TablePlus Documentation](https://tableplus.com/docs)
 - [JSON in PostgreSQL](https://www.postgresql.org/docs/current/datatype-json.html)
 - [PostgreSQL Performance Tuning](https://wiki.postgresql.org/wiki/Performance_Optimization)
+- [Redis Documentation](https://redis.io/docs/)
+- [Redis Setup Guide](REDIS_SETUP.md) - Detailed Redis installation and configuration

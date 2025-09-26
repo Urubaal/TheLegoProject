@@ -4,9 +4,7 @@ const { validationResult } = require('express-validator');
 const { sendPasswordResetEmail } = require('../utils/emailService');
 const User = require('../models/User');
 const { info, warn, error, audit, security, performance } = require('../utils/logger');
-
-// In-memory storage for password reset tokens
-const passwordResetTokens = new Map();
+const redisService = require('../utils/redisService');
 
 // Generate JWT token
 const generateToken = (userId) => {
@@ -239,13 +237,21 @@ const forgotPassword = async (req, res) => {
       { expiresIn: '1h' }
     );
 
-    // Store reset token
-    passwordResetTokens.set(resetToken, {
-      userId: user.id,
-      email: user.email,
-      createdAt: new Date(),
-      used: false
-    });
+    // Store reset token in Redis with TTL
+    try {
+      await redisService.storeResetToken(resetToken, {
+        userId: user.id,
+        email: user.email,
+        used: false
+      }, 3600); // 1 hour TTL
+    } catch (redisError) {
+      error('Failed to store reset token in Redis', { 
+        error: redisError.message, 
+        userId: user.id,
+        email: user.email 
+      });
+      // Continue with email sending even if Redis fails
+    }
 
     // Send reset email
     try {
@@ -300,12 +306,24 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    // Check if token exists in our storage
-    const resetData = passwordResetTokens.get(token);
-    if (!resetData || resetData.used) {
-      return res.status(400).json({
+    // Check if token exists in Redis
+    let resetData;
+    try {
+      resetData = await redisService.getResetToken(token);
+      if (!resetData || resetData.used) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid or already used reset token'
+        });
+      }
+    } catch (redisError) {
+      error('Failed to retrieve reset token from Redis', { 
+        error: redisError.message, 
+        token: token.substring(0, 10) + '...' 
+      });
+      return res.status(500).json({
         success: false,
-        error: 'Invalid or already used reset token'
+        error: 'Internal server error during token verification'
       });
     }
 
@@ -325,9 +343,17 @@ const resetPassword = async (req, res) => {
     // Update user password in database
     await User.updatePassword(decoded.userId, hashedPassword);
 
-    // Mark token as used
-    resetData.used = true;
-    passwordResetTokens.set(token, resetData);
+    // Mark token as used in Redis
+    try {
+      await redisService.markResetTokenAsUsed(token);
+    } catch (redisError) {
+      error('Failed to mark reset token as used in Redis', { 
+        error: redisError.message, 
+        token: token.substring(0, 10) + '...',
+        userId: decoded.userId 
+      });
+      // Don't fail the password reset if Redis update fails
+    }
 
     res.json({
       success: true,
