@@ -84,7 +84,16 @@ cd backend && npm test
 
 # Check code quality
 cd backend && npm run lint
+
+# Install pre-commit hooks (one-time setup)
+npm install
 ```
+
+### 6. Pre-commit Hooks Setup
+The project automatically runs quality checks before each commit:
+- **Automatic verification** - No manual intervention needed
+- **Quality assurance** - Prevents broken code from being committed
+- **Consistent standards** - All developers follow the same quality checks
 
 ## 📊 Data Exploration
 
@@ -243,6 +252,11 @@ The project includes a comprehensive code quality verification system:
 # Full project verification
 node verify.js
 
+# Root level scripts (from project root)
+npm run check              # Full project verification
+npm run check:backend      # Backend verification only
+npm run pre-commit         # Full pre-commit verification
+
 # Backend - code quality check
 cd backend && npm run lint
 
@@ -264,7 +278,16 @@ cd backend && npm run health
 - **Prettier** - automatic code formatting
 - **Jest** - unit and integration tests
 - **Supertest** - API endpoint tests
+- **Husky** - Git hooks management
 - **Custom verification** - comprehensive project verification
+
+### Pre-commit Hooks:
+The project uses **Husky** to automatically run quality checks before each commit:
+
+- **Project Verification** - Full project health check
+- **Backend Linting** - ESLint code quality check
+- **Backend Tests** - Jest test suite execution
+- **Automatic Blocking** - Commits are blocked if checks fail
 
 ### Tests Include:
 - ✅ Health check endpoint
