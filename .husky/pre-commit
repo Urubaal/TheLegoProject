@@ -1,0 +1,15 @@
+echo "🔍 Running pre-commit checks..."
+
+# Run project verification
+node verify.js
+
+# Run backend checks if backend exists
+if [ -d "backend" ]; then
+    echo "🔧 Running backend checks..."
+    cd backend
+    npm run lint
+    npm test
+    cd ..
+fi
+
+echo "✅ Pre-commit checks completed successfully!"

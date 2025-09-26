@@ -1,50 +1,53 @@
-# Frontend - System Logowania
+# Frontend - Authentication System
 
-Frontend aplikacji logowania z nowoczesnym interfejsem użytkownika.
+Frontend authentication application with modern user interface supporting login, registration, and password management.
 
-## 📁 Pliki
+## 📁 Files
 
-- `index.html` - Główna strona logowania
-- `styles.css` - Style CSS z responsywnym designem
-- `script.js` - Logika JavaScript i komunikacja z API
+- `index.html` - Main login page
+- `styles.css` - CSS styles with responsive design
+- `script.js` - JavaScript logic and API communication
 
-## 🎨 Funkcjonalności UI
+## 🎨 UI Features
 
-### Formularze
-- **Logowanie** - email i hasło z walidacją
-- **Reset hasła** - wysyłanie linku na email
-- **Odzyskiwanie hasła** - ustawianie nowego hasła
+### Forms
+- **Registration** - name, email and password with validation
+- **Login** - email and password with validation
+- **Password Reset** - sending link to email
+- **Password Recovery** - setting new password
 
-### Interakcje
-- Walidacja w czasie rzeczywistym
-- Przełączniki widoczności hasła
-- Animacje ładowania
-- Powiadomienia o sukcesie/błędach
-- Płynne przejścia między formularzami
+### Interactions
+- Real-time validation
+- Password visibility toggles
+- Loading animations
+- Success/error notifications
+- Smooth transitions between forms
 
-### Responsywność
-- Działa na desktop, tablet i mobile
-- Elastyczny layout
-- Optymalizacja dla różnych rozdzielczości
+### Responsiveness
+- Works on desktop, tablet and mobile
+- Flexible layout
+- Optimization for different resolutions
 
-## 🔧 Konfiguracja
+## 🔧 Configuration
 
 ### API Endpoint
-W pliku `script.js` ustaw URL backendu:
+In `script.js` file set the backend URL:
 ```javascript
 const API_BASE_URL = 'http://localhost:3000/api';
 ```
 
-### Funkcje
-- Automatyczne sprawdzanie statusu logowania
-- Zapamiętywanie użytkownika
-- Obsługa tokenów JWT
-- Przekierowania po logowaniu
+### Features
+- User registration with validation
+- Automatic login status checking
+- User remembering
+- JWT token handling
+- Redirects after login/registration
+- Password strength validation
 
-## 🚀 Uruchomienie
+## 🚀 Running
 
-1. **Otwórz plik `index.html` w przeglądarce**
-2. **Lub uruchom lokalny serwer:**
+1. **Open `index.html` file in browser**
+2. **Or run local server:**
    ```bash
    # Python
    python -m http.server 8000
@@ -53,29 +56,50 @@ const API_BASE_URL = 'http://localhost:3000/api';
    npx http-server . -p 8000
    ```
 
-## 🎯 Użycie
+## 🎯 Usage
 
-1. **Logowanie:** Wprowadź email i hasło
-2. **Reset hasła:** Kliknij "Zapomniałeś hasła?" i wprowadź email
-3. **Nowe hasło:** Kliknij link z emaila i ustaw nowe hasło
+1. **Registration:** Click "Sign up" link, enter name, email and password
+2. **Login:** Enter email and password
+3. **Password Reset:** Click "Forgot password?" and enter email
+4. **New Password:** Click link from email and set new password
 
-## 🔄 Integracja z Backendem
+## 🔄 Backend Integration
 
-Frontend komunikuje się z backendem przez REST API:
-- `POST /api/auth/login` - logowanie
-- `POST /api/auth/forgot-password` - reset hasła
-- `POST /api/auth/reset-password` - nowe hasło
-- `GET /api/auth/profile` - profil użytkownika
+Frontend communicates with backend via REST API:
+- `POST /api/auth/register` - user registration
+- `POST /api/auth/login` - user login
+- `POST /api/auth/forgot-password` - password reset request
+- `POST /api/auth/reset-password` - password reset with token
+- `GET /api/auth/profile` - get user profile
+- `POST /api/auth/logout` - user logout
 
-## 📱 Responsywność
+## ✅ Validation Rules
 
-- **Desktop:** Pełny layout z efektami hover
-- **Tablet:** Dostosowany do średnich ekranów
-- **Mobile:** Stosowany layout, duże przyciski
+### Registration Form:
+- **Name:** 2-50 characters, required
+- **Email:** Valid email format, required
+- **Password:** Minimum 6 characters, required
+- **Confirm Password:** Must match password, required
+
+### Login Form:
+- **Email:** Valid email format, required
+- **Password:** Required
+- **Remember Me:** Optional checkbox for extended session
+
+### Password Reset:
+- **Email:** Valid email format, required
+- **New Password:** Minimum 6 characters, required
+- **Confirm Password:** Must match new password, required
+
+## 📱 Responsiveness
+
+- **Desktop:** Full layout with hover effects
+- **Tablet:** Adapted for medium screens
+- **Mobile:** Stacked layout, large buttons
 
 ## 🎨 Styling
 
-- Nowoczesny gradient background
-- Smooth animations i transitions
+- Modern gradient background
+- Smooth animations and transitions
 - Material Design inspirations
 - Accessibility-friendly colors
