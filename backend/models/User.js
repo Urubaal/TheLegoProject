@@ -10,13 +10,13 @@ const pool = new Pool({
 
 class User {
   static async create(userData) {
-    const { email, password, name, username, country } = userData;
+    const { email, password, username, display_name, country } = userData;
     const query = `
-      INSERT INTO users (email, password_hash, username, first_name, name, country, created_at, is_active)
-      VALUES ($1, $2, $3, $4, $5, $6, NOW(), $7)
-      RETURNING id, email, username, first_name, name, country, created_at, is_active
+      INSERT INTO users (email, password_hash, username, display_name, country, created_at, is_active)
+      VALUES ($1, $2, $3, $4, $5, NOW(), $6)
+      RETURNING id, email, username, display_name, country, created_at, is_active
     `;
-    const values = [email, password, username || name, name, name, country, true];
+    const values = [email, password, username, display_name || username, country, true];
     
     try {
       const result = await pool.query(query, values);
@@ -75,14 +75,14 @@ class User {
   }
 
   static async updateProfile(id, profileData) {
-    const { name, username, country } = profileData;
+    const { username, display_name, country } = profileData;
     const query = `
       UPDATE users 
-      SET name = $1, username = $2, country = $3, updated_at = NOW() 
+      SET username = $1, display_name = $2, country = $3, updated_at = NOW() 
       WHERE id = $4
-      RETURNING id, email, username, first_name, name, country, created_at, is_active
+      RETURNING id, email, username, display_name, country, created_at, is_active
     `;
-    const values = [name, username, country, id];
+    const values = [username, display_name, country, id];
     
     try {
       const result = await pool.query(query, values);

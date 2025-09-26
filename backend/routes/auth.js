@@ -22,11 +22,21 @@ const registerValidation = [
   body('password')
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters long'),
-  body('name')
+  body('username')
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 30 })
+    .withMessage('Username must be between 2 and 30 characters'),
+  body('display_name')
     .optional()
     .trim()
     .isLength({ min: 2, max: 50 })
-    .withMessage('Name must be between 2 and 50 characters')
+    .withMessage('Display name must be between 2 and 50 characters'),
+  body('country')
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Country must be between 2 and 50 characters')
 ];
 
 const loginValidation = [

@@ -97,3 +97,5 @@ db_config.json
 *.njsproj
 *.sln
 *.sw?
+# Temporary files
+tatus

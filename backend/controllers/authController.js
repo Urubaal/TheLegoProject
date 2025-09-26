@@ -28,7 +28,7 @@ const register = async (req, res) => {
       });
     }
 
-    const { email, password, name } = req.body;
+    const { email, password, username, display_name, country } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findByEmail(email);
@@ -47,7 +47,9 @@ const register = async (req, res) => {
     const newUser = await User.create({
       email,
       password: hashedPassword,
-      name: name || email.split('@')[0]
+      username: username || email.split('@')[0],
+      display_name: display_name || username || email.split('@')[0],
+      country: country || 'Unknown'
     });
 
     // Generate token
@@ -60,7 +62,8 @@ const register = async (req, res) => {
         user: {
           id: newUser.id,
           email: newUser.email,
-          name: newUser.first_name,
+          username: newUser.username,
+          display_name: newUser.display_name,
           createdAt: newUser.created_at
         },
         token
@@ -122,7 +125,8 @@ const login = async (req, res) => {
         user: {
           id: user.id,
           email: user.email,
-          name: user.first_name,
+          username: user.username,
+          display_name: user.display_name,
           createdAt: user.created_at
         },
         token,
@@ -289,7 +293,8 @@ const getProfile = async (req, res) => {
         user: {
           id: user.id,
           email: user.email,
-          name: user.first_name,
+          username: user.username,
+          display_name: user.display_name,
           createdAt: user.created_at,
           isEmailVerified: user.is_active
         }

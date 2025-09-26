@@ -23,6 +23,25 @@ The system consists of:
 7. **`scraper_logs`** - Scraper operation logs
 8. **`user_sessions`** - User sessions for AI context
 
+### User Management Structure:
+
+**Users Table Fields:**
+- `id` (UUID) - Unique identifier
+- `email` (VARCHAR) - **Unique**, required for login
+- `username` (VARCHAR) - **Not unique**, optional (defaults to email prefix)
+- `display_name` (VARCHAR) - Display name (defaults to username)
+- `country` (VARCHAR) - User's country
+- `password_hash` (VARCHAR) - Hashed password
+- `preferences` (JSONB) - User preferences
+- `budget_min/max` (DECIMAL) - Budget constraints
+- `is_active` (BOOLEAN) - Account status
+
+**Key Changes:**
+- ✅ Email is unique (one email = one user)
+- ✅ Username is NOT unique (multiple users can have same username)
+- ✅ Simplified name structure (username + display_name only)
+- ✅ No password required for database connection
+
 ### Key Features:
 
 - **UUID** - Unique identifiers for better scalability
@@ -30,6 +49,43 @@ The system consists of:
 - **GIN Indexes** - Fast searching in JSON fields and arrays
 - **Generated columns** - Automatic calculation of total price
 - **Triggers** - Automatic timestamp updates
+
+## 🔌 API Endpoints
+
+### Authentication Endpoints:
+
+**POST `/api/auth/register`**
+```json
+{
+  "email": "user@example.com",
+  "password": "password123",
+  "username": "optional_username",
+  "display_name": "Optional Display Name",
+  "country": "Polska"
+}
+```
+
+**POST `/api/auth/login`**
+```json
+{
+  "email": "user@example.com",
+  "password": "password123",
+  "rememberMe": false
+}
+```
+
+**GET `/api/auth/profile`** (requires authentication)
+- Returns user profile information
+
+**POST `/api/auth/logout`** (requires authentication)
+- Logs out user (client-side token removal)
+
+### Key Features:
+- ✅ Email-based authentication (email is unique)
+- ✅ Username is optional and not unique
+- ✅ Automatic username generation from email if not provided
+- ✅ JWT token-based authentication
+- ✅ Password reset functionality
 
 ## 🚀 Quick Start
 
@@ -58,7 +114,7 @@ sudo systemctl start postgresql
 ```sql
 -- Create database
 CREATE DATABASE lego_purchase_system;
-CREATE USER lego_user WITH PASSWORD 'Gitf%$hM9#475fMv';
+CREATE USER lego_user;
 GRANT ALL PRIVILEGES ON DATABASE lego_purchase_system TO lego_user;
 ```
 
@@ -71,7 +127,7 @@ psql -U lego_user -d lego_purchase_system -f lego_database_schema.sql
 - Host: localhost
 - Port: 5432
 - User: lego_user
-- Password: Gitf%$hM9#475fMv
+- Password: (leave empty)
 - Database: lego_purchase_system
 
 ### 5. Project Verification

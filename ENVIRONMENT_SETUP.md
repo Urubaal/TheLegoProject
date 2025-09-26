@@ -32,10 +32,10 @@ JWT_SECRET=your-super-secret-jwt-key-change-in-production-please
 FRONTEND_URL=http://localhost:8080
 
 # Database Configuration
-DATABASE_URL=postgresql://lego_user:password@localhost:5432/lego_purchase_system
+DATABASE_URL=postgresql://lego_user@localhost:5432/lego_purchase_system
 POSTGRES_DB=lego_purchase_system
 POSTGRES_USER=lego_user
-POSTGRES_PASSWORD=your_password
+POSTGRES_PASSWORD=
 
 # CORS Configuration
 CORS_ORIGIN=http://localhost:8080
