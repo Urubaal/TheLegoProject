@@ -35,7 +35,7 @@ FRONTEND_URL=http://localhost:8080
 DATABASE_URL=postgresql://lego_user@localhost:5432/lego_purchase_system
 POSTGRES_DB=lego_purchase_system
 POSTGRES_USER=lego_user
-POSTGRES_PASSWORD=
+# POSTGRES_PASSWORD= (no password required - using trust authentication)
 
 # CORS Configuration
 CORS_ORIGIN=http://localhost:8080
