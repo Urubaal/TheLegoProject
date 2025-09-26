@@ -1,25 +1,42 @@
 const { Pool } = require('pg');
 
-// Database connection pool
+// Database connection pool with timezone setting
 const pool = new Pool({
   user: process.env.POSTGRES_USER || 'lego_user',
   host: process.env.POSTGRES_HOST || 'localhost',
   database: process.env.POSTGRES_DB || 'lego_purchase_system',
   port: process.env.POSTGRES_PORT || 5432,
+  // Force UTC timestamps and handle timezone in application
+  options: '-c timezone=UTC'
 });
+
+// Helper function to convert UTC to Poland time for display
+const formatPolishTime = (utcDate) => {
+  return new Date(utcDate).toLocaleString('pl-PL', {
+    timeZone: 'Europe/Warsaw',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+};
 
 class User {
   static async create(userData) {
     const { email, password, username, display_name, country } = userData;
     const query = `
-      INSERT INTO users (email, password_hash, username, display_name, country, created_at, is_active)
-      VALUES ($1, $2, $3, $4, $5, NOW(), $6)
+      INSERT INTO users (email, password_hash, username, display_name, country, created_at, updated_at, is_active)
+      VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw', CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw', $6)
       RETURNING id, email, username, display_name, country, created_at, is_active
     `;
     const values = [email, password, username, display_name || username, country, true];
     
     try {
+      console.log('Creating user with Poland timezone');
       const result = await pool.query(query, values);
+      console.log('User created with created_at:', result.rows[0].created_at);
       return result.rows[0];
     } catch (error) {
       throw error;
@@ -58,6 +75,31 @@ class User {
       await pool.query(query, values);
       return true;
     } catch (error) {
+      throw error;
+    }
+  }
+
+  static async updateLastLogin(id) {
+    const query = `
+      UPDATE users 
+      SET last_login = CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw', 
+          updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw' 
+      WHERE id = $1
+      RETURNING last_login, updated_at
+    `;
+    const values = [id];
+    
+    try {
+      console.log('Executing updateLastLogin query for user:', id);
+      const result = await pool.query(query, values);
+      console.log('UpdateLastLogin result:', result.rowCount, 'rows affected');
+      if (result.rows[0]) {
+        console.log('New last_login:', result.rows[0].last_login);
+        console.log('New updated_at:', result.rows[0].updated_at);
+      }
+      return true;
+    } catch (error) {
+      console.error('Error updating last_login:', error);
       throw error;
     }
   }

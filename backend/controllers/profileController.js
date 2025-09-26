@@ -8,37 +8,70 @@ class ProfileController {
   // Get user profile
   static async getProfile(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user.userId;
+      console.log('Profile request for user ID:', userId);
+      
+      if (!userId) {
+        console.error('No user ID in token');
+        return res.status(401).json({ 
+          success: false, 
+          error: 'Invalid token - no user ID' 
+        });
+      }
+      
       const user = await User.findById(userId);
       
       if (!user) {
-        return res.status(404).json({ error: 'User not found' });
+        console.error('User not found in database:', userId);
+        return res.status(404).json({ 
+          success: false, 
+          error: 'User not found' 
+        });
       }
 
-      // Get collection statistics
-      const stats = await UserCollection.getCollectionStats(userId);
+      console.log('User found:', user.email);
 
-      res.json({
-        user: {
-          id: user.id,
-          email: user.email,
-          username: user.username,
-          name: user.name,
-          country: user.country,
-          created_at: user.created_at
-        },
-        collection_stats: stats
-      });
+      // Get collection statistics (make it optional to avoid blocking)
+      let stats = {};
+      try {
+        stats = await UserCollection.getCollectionStats(userId);
+      } catch (statsError) {
+        console.warn('Could not fetch collection stats:', statsError.message);
+        stats = { owned_sets: 0, wanted_sets: 0, owned_minifigs: 0, wanted_minifigs: 0 };
+      }
+
+      const response = {
+        success: true,
+        data: {
+          user: {
+            id: user.id,
+            email: user.email,
+            username: user.username,
+            name: user.display_name,
+            country: user.country,
+            created_at: user.created_at,
+            last_login: user.last_login
+          },
+          collection_stats: stats
+        }
+      };
+
+      console.log('Sending profile response:', JSON.stringify(response, null, 2));
+      res.json(response);
     } catch (error) {
       console.error('Error getting profile:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ 
+        success: false, 
+        error: 'Internal server error',
+        details: error.message 
+      });
     }
   }
 
   // Update user profile
   static async updateProfile(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user.userId;
       const { name, username, country } = req.body;
 
       // Validate required fields
@@ -73,7 +106,7 @@ class ProfileController {
   // Get user's collection
   static async getCollection(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user.userId;
       const { type } = req.query;
 
       const collection = {};
@@ -98,7 +131,7 @@ class ProfileController {
   // Add set to collection
   static async addSet(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user.userId;
       const { set_number, condition_status, purchase_price, purchase_currency, notes } = req.body;
 
       if (!set_number) {
@@ -138,7 +171,7 @@ class ProfileController {
   // Add wanted set
   static async addWantedSet(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user.userId;
       const { set_number, max_price, max_currency, priority, notes } = req.body;
 
       if (!set_number) {
@@ -178,7 +211,7 @@ class ProfileController {
   // Add minifig to collection
   static async addMinifig(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user.userId;
       const { minifig_name, minifig_number, condition_status, purchase_price, purchase_currency, notes } = req.body;
 
       if (!minifig_name) {
@@ -219,7 +252,7 @@ class ProfileController {
   // Add wanted minifig
   static async addWantedMinifig(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user.userId;
       const { minifig_name, minifig_number, max_price, max_currency, priority, notes } = req.body;
 
       if (!minifig_name) {
@@ -292,7 +325,7 @@ class ProfileController {
   // Update collection item
   static async updateCollectionItem(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user.userId;
       const { type, id } = req.params;
       const updateData = req.body;
 
@@ -326,7 +359,7 @@ class ProfileController {
   // Delete collection item
   static async deleteCollectionItem(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user.userId;
       const { type, id } = req.params;
 
       let deleted;

@@ -42,7 +42,7 @@ psql -U postgres
 
 -- Utwórz bazę danych
 CREATE DATABASE lego_purchase_system;
-CREATE USER lego_user WITH PASSWORD 'Gitf%$hM9#475fMv';
+CREATE USER lego_user;
 GRANT ALL PRIVILEGES ON DATABASE lego_purchase_system TO lego_user;
 \q
 ```
@@ -78,7 +78,7 @@ SELECT COUNT(*) FROM price_history;
    - **Host**: localhost
    - **Port**: 5432
    - **User**: lego_user
-   - **Password**: Gitf%$hM9#475fMv
+   - **Password**: (pozostaw puste - nie wymagane)
    - **Database**: lego_purchase_system
 
 ### 2. Testuj połączenie

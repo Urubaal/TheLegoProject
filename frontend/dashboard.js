@@ -108,24 +108,29 @@ class DashboardManager {
 
     async checkAuth() {
         const token = localStorage.getItem('authToken');
+        console.log('Checking auth with token:', token ? 'exists' : 'missing');
         if (!token) {
+            console.log('No token found, redirecting to login');
             window.location.href = '/index.html';
             return;
         }
 
         try {
+            console.log('Making profile request to:', `${API_BASE_URL}/profile`);
             const response = await fetch(`${API_BASE_URL}/profile`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
 
+            console.log('Profile response status:', response.status);
             if (!response.ok) {
-                throw new Error('Unauthorized');
+                throw new Error(`Unauthorized: ${response.status}`);
             }
 
             const data = await response.json();
-            currentUser = data.user;
+            console.log('Profile response data:', data);
+            currentUser = data.data.user;
             this.updateProfileDisplay();
             this.loadCollectionData();
         } catch (error) {
@@ -436,7 +441,7 @@ class DashboardManager {
 
             if (response.ok) {
                 const data = await response.json();
-                currentUser = data.user;
+                currentUser = data.data.user;
                 this.updateProfileDisplay();
                 this.closeModal(editProfileModal);
                 this.showMessage('Profil zaktualizowany pomyślnie!', false);

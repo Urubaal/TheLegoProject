@@ -75,6 +75,7 @@ services:
     environment:
       POSTGRES_DB: lego_purchase_system
       POSTGRES_USER: lego_user
+      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5433:5432"
     networks:
@@ -88,7 +89,7 @@ services:
         echo 'Host: localhost'
         echo 'Port: 5433'
         echo 'User: lego_user'
-        echo 'Password: Gitf%$hM9#475fMv'
+        echo 'Password: (no password required)'
         echo 'Database: lego_purchase_system'
         echo ''
         echo 'Waiting for database to be ready...'

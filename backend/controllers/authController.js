@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const { sendPasswordResetEmail } = require('../utils/emailService');
 const User = require('../models/User');
+const { info, warn, error, audit, security, performance } = require('../utils/logger');
 
 // In-memory storage for password reset tokens
 const passwordResetTokens = new Map();
@@ -18,9 +19,15 @@ const generateToken = (userId) => {
 
 // Register new user
 const register = async (req, res) => {
+  const startTime = Date.now();
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      security('Registration validation failed', { 
+        email: req.body.email, 
+        errors: errors.array(),
+        ip: req.ip 
+      });
       return res.status(400).json({
         success: false,
         error: 'Validation failed',
@@ -33,6 +40,10 @@ const register = async (req, res) => {
     // Check if user already exists
     const existingUser = await User.findByEmail(email);
     if (existingUser) {
+      security('Registration attempt with existing email', { 
+        email, 
+        ip: req.ip 
+      });
       return res.status(400).json({
         success: false,
         error: 'User with this email already exists'
@@ -55,6 +66,15 @@ const register = async (req, res) => {
     // Generate token
     const token = generateToken(newUser.id);
 
+    const duration = Date.now() - startTime;
+    performance('User registration', duration, { userId: newUser.id });
+    
+    audit('User registered', newUser.id, { 
+      email: newUser.email, 
+      username: newUser.username,
+      country: newUser.country 
+    });
+
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
@@ -70,7 +90,12 @@ const register = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Registration error:', error);
+    error('Registration error', { 
+      error: error.message, 
+      stack: error.stack,
+      email: req.body.email,
+      ip: req.ip 
+    });
     res.status(500).json({
       success: false,
       error: 'Internal server error during registration'
@@ -80,9 +105,15 @@ const register = async (req, res) => {
 
 // Login user
 const login = async (req, res) => {
+  const startTime = Date.now();
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      security('Login validation failed', { 
+        email: req.body.email, 
+        errors: errors.array(),
+        ip: req.ip 
+      });
       return res.status(400).json({
         success: false,
         error: 'Validation failed',
@@ -95,6 +126,10 @@ const login = async (req, res) => {
     // Find user in database
     const user = await User.findByEmail(email);
     if (!user) {
+      security('Login attempt with non-existent email', { 
+        email, 
+        ip: req.ip 
+      });
       return res.status(401).json({
         success: false,
         error: 'Invalid email or password'
@@ -104,10 +139,27 @@ const login = async (req, res) => {
     // Check password
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
     if (!isPasswordValid) {
+      security('Login attempt with invalid password', { 
+        email, 
+        userId: user.id,
+        ip: req.ip 
+      });
       return res.status(401).json({
         success: false,
         error: 'Invalid email or password'
       });
+    }
+
+    // Update last_login timestamp
+    try {
+      await User.updateLastLogin(user.id);
+      info('Last login updated', { userId: user.id });
+    } catch (lastLoginError) {
+      warn('Failed to update last_login', { 
+        userId: user.id, 
+        error: lastLoginError.message 
+      });
+      // Don't fail the login if last_login update fails
     }
 
     // Generate token with extended expiry if remember me is checked
@@ -117,6 +169,15 @@ const login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: tokenExpiry }
     );
+
+    const duration = Date.now() - startTime;
+    performance('User login', duration, { userId: user.id });
+    
+    audit('User logged in', user.id, { 
+      email: user.email, 
+      rememberMe: !!rememberMe,
+      tokenExpiry 
+    });
 
     res.json({
       success: true,
@@ -134,7 +195,12 @@ const login = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Login error:', error);
+    error('Login error', { 
+      error: error.message, 
+      stack: error.stack,
+      email: req.body.email,
+      ip: req.ip 
+    });
     res.status(500).json({
       success: false,
       error: 'Internal server error during login'
