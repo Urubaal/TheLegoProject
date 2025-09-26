@@ -6,6 +6,7 @@ require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
+const logsRoutes = require('./routes/logs');
 const { errorHandler } = require('./middleware/errorHandler');
 const { requestLogger, errorLogger, info, audit, security } = require('./utils/logger');
 const { monitoringMiddleware, getMetricsEndpoint, cleanupLogsEndpoint, schedulerControlEndpoint, logCleanupScheduler } = require('./utils/monitoring');
@@ -45,6 +46,7 @@ app.use(monitoringMiddleware);
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/logs', logsRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
