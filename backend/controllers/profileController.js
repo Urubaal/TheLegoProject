@@ -1,12 +1,15 @@
 const { validationResult } = require('express-validator');
 const ProfileService = require('../services/profileService');
 const { AppError, asyncHandler } = require('../middleware/errorHandler');
+const { info, warn, error } = require('../utils/logger');
 
 class ProfileController {
   // Get user profile
   static getProfile(req, res) {
     return asyncHandler(async (req, res) => {
       const userId = req.user.userId;
+      info('Profile request', { userId });
+      
       const result = await ProfileService.getUserProfile(userId);
 
       res.json({
@@ -26,6 +29,7 @@ class ProfileController {
 
       const userId = req.user.userId;
       const { name, username, country } = req.body;
+      info('Profile update request', { userId, username });
 
       const result = await ProfileService.updateUserProfile(userId, { name, username, country });
 
@@ -41,6 +45,7 @@ class ProfileController {
     return asyncHandler(async (req, res) => {
       const userId = req.user.userId;
       const { type } = req.query;
+      info('Collection request', { userId, type });
 
       const collection = await ProfileService.getUserCollection(userId, type);
 

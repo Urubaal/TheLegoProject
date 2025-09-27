@@ -2,7 +2,8 @@ const User = require('../models/User');
 const UserCollection = require('../models/UserCollection');
 const BricksEconomyService = require('../utils/bricksEconomyService');
 const { AppError } = require('../middleware/errorHandler');
-const { error: logError } = require('../utils/logger');
+const { error: logError, info: logInfo } = require('../utils/logger');
+const redisService = require('../utils/redisService');
 
 class ProfileService {
   constructor() {
@@ -13,6 +14,23 @@ class ProfileService {
   static async getUserProfile(userId) {
     if (!userId) {
       throw new AppError('Invalid token - no user ID', 401);
+    }
+
+    // Try to get from cache first
+    const cacheKey = `profile:${userId}`;
+    try {
+      if (await redisService.isHealthy()) {
+        const cachedProfile = await redisService.get(cacheKey);
+        if (cachedProfile) {
+          logInfo('Profile retrieved from cache', { userId });
+          return cachedProfile;
+        }
+      }
+    } catch (cacheError) {
+      logError('Cache retrieval failed', { 
+        error: cacheError.message,
+        userId 
+      });
     }
     
     const user = await User.findById(userId);
@@ -32,7 +50,7 @@ class ProfileService {
       stats = { owned_sets: 0, wanted_sets: 0, owned_minifigs: 0, wanted_minifigs: 0 };
     }
 
-    return {
+    const profileData = {
       user: {
         id: user.id,
         email: user.email,
@@ -44,6 +62,21 @@ class ProfileService {
       },
       collection_stats: stats
     };
+
+    // Cache the profile for 5 minutes
+    try {
+      if (await redisService.isHealthy()) {
+        await redisService.set(cacheKey, profileData, 300); // 5 minutes TTL
+        logInfo('Profile cached', { userId });
+      }
+    } catch (cacheError) {
+      logError('Cache storage failed', { 
+        error: cacheError.message,
+        userId 
+      });
+    }
+
+    return profileData;
   }
 
   // Update user profile
@@ -58,6 +91,20 @@ class ProfileService {
 
     const updatedUser = await User.updateProfile(userId, { name, username, country });
 
+    // Invalidate cache after profile update
+    const cacheKey = `profile:${userId}`;
+    try {
+      if (await redisService.isHealthy()) {
+        await redisService.del(cacheKey);
+        logInfo('Profile cache invalidated after update', { userId });
+      }
+    } catch (cacheError) {
+      logError('Cache invalidation failed', { 
+        error: cacheError.message,
+        userId 
+      });
+    }
+
     return {
       user: {
         id: updatedUser.id,
@@ -71,6 +118,24 @@ class ProfileService {
 
   // Get user's collection
   static async getUserCollection(userId, type) {
+    // Try to get from cache first
+    const cacheKey = `collection:${userId}:${type || 'all'}`;
+    try {
+      if (await redisService.isHealthy()) {
+        const cachedCollection = await redisService.get(cacheKey);
+        if (cachedCollection) {
+          logInfo('Collection retrieved from cache', { userId, type });
+          return cachedCollection;
+        }
+      }
+    } catch (cacheError) {
+      logError('Collection cache retrieval failed', { 
+        error: cacheError.message,
+        userId,
+        type 
+      });
+    }
+
     const collection = {};
 
     if (!type || type === 'all' || type === 'sets') {
@@ -81,6 +146,20 @@ class ProfileService {
     if (!type || type === 'all' || type === 'minifigs') {
       collection.owned_minifigs = await UserCollection.getOwnedMinifigs(userId);
       collection.wanted_minifigs = await UserCollection.getWantedMinifigs(userId);
+    }
+
+    // Cache the collection for 10 minutes
+    try {
+      if (await redisService.isHealthy()) {
+        await redisService.set(cacheKey, collection, 600); // 10 minutes TTL
+        logInfo('Collection cached', { userId, type });
+      }
+    } catch (cacheError) {
+      logError('Collection cache storage failed', { 
+        error: cacheError.message,
+        userId,
+        type 
+      });
     }
 
     return collection;
@@ -113,6 +192,10 @@ class ProfileService {
     };
 
     const addedSet = await UserCollection.addOwnedSet(userId, processedSetData);
+    
+    // Invalidate collection cache after adding set
+    await this.invalidateCollectionCache(userId);
+    
     return addedSet;
   }
 
@@ -143,6 +226,10 @@ class ProfileService {
     };
 
     const addedSet = await UserCollection.addWantedSet(userId, processedSetData);
+    
+    // Invalidate collection cache after adding wanted set
+    await this.invalidateCollectionCache(userId);
+    
     return addedSet;
   }
 
@@ -174,6 +261,10 @@ class ProfileService {
     };
 
     const addedMinifig = await UserCollection.addOwnedMinifig(userId, processedMinifigData);
+    
+    // Invalidate collection cache after adding minifig
+    await this.invalidateCollectionCache(userId);
+    
     return addedMinifig;
   }
 
@@ -191,6 +282,10 @@ class ProfileService {
     };
 
     const addedMinifig = await UserCollection.addWantedMinifig(userId, processedMinifigData);
+    
+    // Invalidate collection cache after adding wanted minifig
+    await this.invalidateCollectionCache(userId);
+    
     return addedMinifig;
   }
 
@@ -231,6 +326,9 @@ class ProfileService {
       throw new AppError('Item not found', 404);
     }
 
+    // Invalidate collection cache after update
+    await this.invalidateCollectionCache(userId);
+
     return updatedItem;
   }
 
@@ -253,7 +351,35 @@ class ProfileService {
       throw new AppError('Item not found', 404);
     }
 
+    // Invalidate collection cache after deletion
+    await this.invalidateCollectionCache(userId);
+
     return true;
+  }
+
+  // Helper method to invalidate collection cache
+  static async invalidateCollectionCache(userId) {
+    try {
+      if (await redisService.isHealthy()) {
+        // Invalidate all collection cache keys for this user
+        const cacheKeys = [
+          `collection:${userId}:all`,
+          `collection:${userId}:sets`,
+          `collection:${userId}:minifigs`
+        ];
+        
+        for (const key of cacheKeys) {
+          await redisService.del(key);
+        }
+        
+        logInfo('Collection cache invalidated', { userId });
+      }
+    } catch (cacheError) {
+      logError('Collection cache invalidation failed', { 
+        error: cacheError.message,
+        userId 
+      });
+    }
   }
 }
 
