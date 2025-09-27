@@ -8,7 +8,7 @@ const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
 const logsRoutes = require('./routes/logs');
 const { errorHandler } = require('./middleware/errorHandler');
-const { requestLogger, errorLogger, info, audit, security, error } = require('./utils/logger');
+const { requestLogger, errorLogger, info, security, error } = require('./utils/logger');
 const { monitoringMiddleware, getMetricsEndpoint, cleanupLogsEndpoint, schedulerControlEndpoint, logCleanupScheduler } = require('./utils/monitoring');
 const redisService = require('./utils/redisService');
 
@@ -84,47 +84,88 @@ app.use('*', (req, res) => {
 app.use(errorLogger);
 app.use(errorHandler);
 
-// Initialize Redis connection
-const initializeRedis = async () => {
-  try {
-    const connected = await redisService.connect();
-    if (connected) {
-      info('Redis connection established successfully');
-    } else {
-      error('Failed to establish Redis connection - password reset functionality may be limited');
+// Initialize Redis connection with retry logic
+const initializeRedis = async (retries = 3, delay = 1000) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const connected = await redisService.connect();
+      if (connected) {
+        info('Redis connection established successfully');
+        return true;
+      }
+    } catch (err) {
+      error(`Redis connection attempt ${i + 1} failed`, { error: err.message });
+      if (i < retries - 1) {
+        await new Promise(resolve => global.setTimeout(resolve, delay * (i + 1)));
+      }
     }
-  } catch (err) {
-    error('Redis initialization error', { error: err.message, stack: err.stack });
   }
+  error('Failed to establish Redis connection after all retries - password reset functionality may be limited');
+  return false;
 };
 
 // Start server only if not in test environment
 if (process.env.NODE_ENV !== 'test') {
-  // Initialize Redis before starting server
-  initializeRedis().then(() => {
-    app.listen(PORT, () => {
-      const serverInfo = {
-        port: PORT,
-        frontendUrl: process.env.FRONTEND_URL || 'http://localhost:8080',
-        environment: process.env.NODE_ENV || 'development',
-        database: process.env.POSTGRES_DB || 'lego_purchase_system',
-        redis: redisService.isConnected ? 'connected' : 'disconnected'
+  // Initialize Redis and start server with graceful startup
+  const startServer = async () => {
+    try {
+      // Initialize Redis in parallel with other startup tasks
+      const redisPromise = initializeRedis();
+      
+      // Start server immediately, Redis will connect in background
+      const server = app.listen(PORT, () => {
+        const serverInfo = {
+          port: PORT,
+          frontendUrl: process.env.FRONTEND_URL || 'http://localhost:8080',
+          environment: process.env.NODE_ENV || 'development',
+          database: process.env.POSTGRES_DB || 'lego_purchase_system',
+          redis: 'connecting...'
+        };
+        
+        console.log(`🚀 Server running on port ${PORT}`);
+        console.log(`📱 Frontend URL: ${serverInfo.frontendUrl}`);
+        console.log(`🌍 Environment: ${serverInfo.environment}`);
+        console.log(`🗄️  Database: ${serverInfo.database}`);
+        console.log(`🔴 Redis: ${serverInfo.redis}`);
+        
+        info('Server started successfully', serverInfo);
+        
+        // Start log cleanup scheduler
+        const cleanupInterval = process.env.LOG_CLEANUP_INTERVAL_HOURS || 6;
+        logCleanupScheduler.start(parseInt(cleanupInterval));
+        info('Automatic log cleanup scheduler started', { intervalHours: cleanupInterval });
+      });
+
+      // Wait for Redis connection and update status
+      const redisConnected = await redisPromise;
+      if (redisConnected) {
+        console.log('🔴 Redis: connected');
+      } else {
+        console.log('🔴 Redis: disconnected (fallback mode)');
+      }
+
+      // Graceful shutdown handling
+      const gracefulShutdown = (signal) => {
+        console.log(`\n${signal} received. Starting graceful shutdown...`);
+        server.close(() => {
+          console.log('HTTP server closed.');
+          redisService.disconnect().then(() => {
+            console.log('Redis connection closed.');
+            process.exit(0);
+          });
+        });
       };
-      
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📱 Frontend URL: ${serverInfo.frontendUrl}`);
-      console.log(`🌍 Environment: ${serverInfo.environment}`);
-      console.log(`🗄️  Database: ${serverInfo.database}`);
-      console.log(`🔴 Redis: ${serverInfo.redis}`);
-      
-      info('Server started successfully', serverInfo);
-      
-      // Uruchom automatyczne czyszczenie logów (co 6 godzin)
-      const cleanupInterval = process.env.LOG_CLEANUP_INTERVAL_HOURS || 6;
-      logCleanupScheduler.start(parseInt(cleanupInterval));
-      info('Automatic log cleanup scheduler started', { intervalHours: cleanupInterval });
-    });
-  });
+
+      process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+      process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+    } catch (error) {
+      error('Failed to start server', { error: error.message, stack: error.stack });
+      process.exit(1);
+    }
+  };
+
+  startServer();
 }
 
 module.exports = app;

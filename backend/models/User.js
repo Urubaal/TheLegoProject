@@ -7,15 +7,20 @@ const pool = new Pool({
   database: process.env.POSTGRES_DB || 'lego_purchase_system',
   port: process.env.POSTGRES_PORT || 5432,
   // Connection pooling configuration for performance
-  max: 20, // Maximum number of connections in the pool
+  max: process.env.NODE_ENV === 'production' ? 20 : 10, // Adjust based on environment
+  min: 2, // Minimum connections to keep alive
   idleTimeoutMillis: 30000, // Close idle connections after 30 seconds
-  connectionTimeoutMillis: 2000, // Return error after 2 seconds if connection could not be established
-  acquireTimeoutMillis: 60000, // Return error after 60 seconds if connection could not be acquired
+  connectionTimeoutMillis: 5000, // Return error after 5 seconds if connection could not be established
+  acquireTimeoutMillis: 10000, // Return error after 10 seconds if connection could not be acquired
   // Force UTC timestamps and handle timezone in application
   options: '-c timezone=UTC',
   // Additional performance settings
   keepAlive: true,
-  keepAliveInitialDelayMillis: 10000
+  keepAliveInitialDelayMillis: 10000,
+  // Statement timeout for long-running queries
+  statement_timeout: 30000,
+  // Query timeout
+  query_timeout: 10000
 });
 
 // Helper function to convert UTC to Poland time for display
