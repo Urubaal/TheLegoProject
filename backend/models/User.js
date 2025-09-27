@@ -1,13 +1,21 @@
 const { Pool } = require('pg');
 
-// Database connection pool with timezone setting
+// Database connection pool with optimized settings
 const pool = new Pool({
   user: process.env.POSTGRES_USER || 'lego_user',
   host: process.env.POSTGRES_HOST || 'localhost',
   database: process.env.POSTGRES_DB || 'lego_purchase_system',
   port: process.env.POSTGRES_PORT || 5432,
+  // Connection pooling configuration for performance
+  max: 20, // Maximum number of connections in the pool
+  idleTimeoutMillis: 30000, // Close idle connections after 30 seconds
+  connectionTimeoutMillis: 2000, // Return error after 2 seconds if connection could not be established
+  acquireTimeoutMillis: 60000, // Return error after 60 seconds if connection could not be acquired
   // Force UTC timestamps and handle timezone in application
-  options: '-c timezone=UTC'
+  options: '-c timezone=UTC',
+  // Additional performance settings
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 10000
 });
 
 // Helper function to convert UTC to Poland time for display
