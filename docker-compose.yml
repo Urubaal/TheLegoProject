@@ -2,6 +2,24 @@
 version: '3.8'
 
 services:
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: lego-redis
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - lego-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
   # PostgreSQL Database
   database:
     image: postgres:15-alpine
@@ -11,9 +29,17 @@ services:
       POSTGRES_USER: lego_user
       POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+      # Performance optimizations
+      POSTGRES_SHARED_BUFFERS: 256MB
+      POSTGRES_EFFECTIVE_CACHE_SIZE: 1GB
+      POSTGRES_MAINTENANCE_WORK_MEM: 64MB
+      POSTGRES_CHECKPOINT_COMPLETION_TARGET: 0.9
+      POSTGRES_WAL_BUFFERS: 16MB
+      POSTGRES_DEFAULT_STATISTICS_TARGET: 100
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./lego_database_schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./backend/migrations/run_performance_optimizations.sql:/docker-entrypoint-initdb.d/02-optimizations.sql:ro
     ports:
       - "5432:5432"
     networks:
@@ -21,20 +47,24 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U lego_user -d lego_purchase_system"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
 
   # Backend API
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      target: production
     container_name: lego-backend
     environment:
       NODE_ENV: production
       PORT: 3000
       DATABASE_URL: postgresql://lego_user@database:5432/lego_purchase_system
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
       JWT_EXPIRES_IN: 24h
       FRONTEND_URL: http://localhost:5500
@@ -42,6 +72,9 @@ services:
       EMAIL_PORT: 587
       EMAIL_USER: your-email@gmail.com
       EMAIL_PASS: your-app-password
+      # Performance optimizations
+      NODE_OPTIONS: "--max-old-space-size=512"
+      UV_THREADPOOL_SIZE: 4
     ports:
       - "3000:3000"
     networks:
@@ -49,10 +82,18 @@ services:
     depends_on:
       database:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: unless-stopped
     volumes:
       - ./backend:/app
       - /app/node_modules
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # Frontend
   frontend:
@@ -103,6 +144,8 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  redis_data:
     driver: local
 
 networks:
