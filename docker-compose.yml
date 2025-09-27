@@ -14,6 +14,14 @@ services:
     networks:
       - lego-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -27,7 +35,8 @@ services:
     environment:
       POSTGRES_DB: lego_purchase_system
       POSTGRES_USER: lego_user
-      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lego_secure_password_2024}
+      POSTGRES_HOST_AUTH_METHOD: md5
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
       # Performance optimizations
       POSTGRES_SHARED_BUFFERS: 256MB
@@ -45,6 +54,14 @@ services:
     networks:
       - lego-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U lego_user -d lego_purchase_system"]
       interval: 5s
@@ -62,16 +79,16 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: postgresql://lego_user@database:5432/lego_purchase_system
+      DATABASE_URL: postgresql://lego_user:${POSTGRES_PASSWORD:-lego_secure_password_2024}@database:5432/lego_purchase_system
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      JWT_SECRET: ${JWT_SECRET:-LegoSecureJWTSecretKey2024!@#$%^&*()_+{}[]|\\:";'<>?,./~`}
       JWT_EXPIRES_IN: 24h
       FRONTEND_URL: http://localhost:5500
       EMAIL_HOST: smtp.gmail.com
       EMAIL_PORT: 587
-      EMAIL_USER: your-email@gmail.com
-      EMAIL_PASS: your-app-password
+      EMAIL_USER: ${EMAIL_USER:-your-email@gmail.com}
+      EMAIL_PASS: ${EMAIL_PASS:-your-app-password}
       # Performance optimizations
       NODE_OPTIONS: "--max-old-space-size=512"
       UV_THREADPOOL_SIZE: 4
@@ -88,6 +105,14 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 768M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
       interval: 30s
@@ -108,6 +133,14 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
 
   # TablePlus Database Management (Optional)
   tableplus:
@@ -116,7 +149,8 @@ services:
     environment:
       POSTGRES_DB: lego_purchase_system
       POSTGRES_USER: lego_user
-      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lego_secure_password_2024}
+      POSTGRES_HOST_AUTH_METHOD: md5
     ports:
       - "5433:5432"
     networks:

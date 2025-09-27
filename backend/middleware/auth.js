@@ -1,15 +1,28 @@
 const jwt = require('jsonwebtoken');
+const logger = require('../utils/logger');
 
 // Verify JWT token middleware
 const authenticateToken = (req, res, next) => {
-  console.log('Auth middleware called for:', req.method, req.path);
+  logger.info('Auth middleware called', { 
+    method: req.method, 
+    path: req.path,
+    ip: req.ip 
+  });
+  
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
-  console.log('Auth header:', authHeader ? 'present' : 'missing');
+  logger.debug('Auth header check', { 
+    hasAuthHeader: !!authHeader,
+    tokenPresent: !!token 
+  });
 
   if (!token) {
-    console.log('No token provided');
+    logger.warn('No token provided', { 
+      method: req.method, 
+      path: req.path,
+      ip: req.ip 
+    });
     return res.status(401).json({
       success: false,
       error: 'Access token required'
@@ -18,13 +31,22 @@ const authenticateToken = (req, res, next) => {
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
-      console.log('Token verification failed:', err.message);
+      logger.warn('Token verification failed', { 
+        error: err.message,
+        method: req.method, 
+        path: req.path,
+        ip: req.ip 
+      });
       return res.status(403).json({
         success: false,
         error: 'Invalid or expired token'
       });
     }
-    console.log('Token verified for user:', user.userId);
+    logger.info('Token verified successfully', { 
+      userId: user.userId,
+      method: req.method, 
+      path: req.path 
+    });
     req.user = user;
     next();
   });

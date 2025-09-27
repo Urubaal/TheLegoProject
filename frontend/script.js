@@ -223,8 +223,14 @@ class AuthManager {
             this.showError(errorId, 'Hasło jest wymagane');
             return false;
         }
-        if (password.length < 6) {
-            this.showError(errorId, 'Hasło musi mieć co najmniej 6 znaków');
+        if (password.length < 8) {
+            this.showError(errorId, 'Hasło musi mieć co najmniej 8 znaków');
+            return false;
+        }
+        // Check for at least one lowercase letter, one uppercase letter, and one number
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
+        if (!passwordRegex.test(password)) {
+            this.showError(errorId, 'Hasło musi zawierać co najmniej jedną małą literę, jedną wielką literę i jedną cyfrę');
             return false;
         }
         this.hideError(errorId);
