@@ -34,8 +34,9 @@ class ProfileController {
       const result = await ProfileService.updateUserProfile(userId, { name, username, country });
 
       res.json({
+        success: true,
         message: 'Profile updated successfully',
-        user: result.user
+        data: result
       });
     })(req, res);
   }

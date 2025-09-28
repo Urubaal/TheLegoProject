@@ -80,6 +80,12 @@ services:
       NODE_ENV: production
       PORT: 3000
       DATABASE_URL: postgresql://lego_user:${POSTGRES_PASSWORD:-lego_secure_password_2024}@database:5432/lego_purchase_system
+      # Database connection variables for User.js model
+      POSTGRES_HOST: database
+      POSTGRES_USER: lego_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lego_secure_password_2024}
+      POSTGRES_DB: lego_purchase_system
+      POSTGRES_PORT: 5432
       REDIS_HOST: redis
       REDIS_PORT: 6379
       JWT_SECRET: ${JWT_SECRET:-LegoSecureJWTSecretKey2024!@#$%^&*()_+{}[]|\\:";'<>?,./~`}
