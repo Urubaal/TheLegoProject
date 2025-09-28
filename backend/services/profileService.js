@@ -89,7 +89,7 @@ class ProfileService {
       throw new AppError('Username already taken', 400);
     }
 
-    const updatedUser = await User.updateProfile(userId, { name, username, country });
+    const updatedUser = await User.updateProfile(userId, { username, display_name: name, country });
 
     // Invalidate cache after profile update
     const cacheKey = `profile:${userId}`;
@@ -110,8 +110,9 @@ class ProfileService {
         id: updatedUser.id,
         email: updatedUser.email,
         username: updatedUser.username,
-        name: updatedUser.name,
-        country: updatedUser.country
+        name: updatedUser.display_name,
+        country: updatedUser.country,
+        created_at: updatedUser.created_at
       }
     };
   }

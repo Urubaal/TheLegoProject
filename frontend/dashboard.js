@@ -180,11 +180,29 @@ class DashboardManager {
     updateProfileDisplay() {
         if (!currentUser) return;
 
-        document.getElementById('profileName').textContent = currentUser.name || 'Brak nazwy';
-        document.getElementById('profileUsername').textContent = `@${currentUser.username}`;
+        // Username na górze jako główna nazwa
+        document.getElementById('profileName').textContent = currentUser.username || 'Brak username';
+        
+        // Pełna nazwa (display_name) na dole
+        const displayName = currentUser.name || currentUser.display_name || 'Brak nazwy';
+        document.getElementById('profileUsername').textContent = displayName;
+        
         document.getElementById('profileEmail').textContent = currentUser.email;
         document.getElementById('profileCountry').textContent = `Kraj: ${currentUser.country || 'Nie ustawiono'}`;
-        document.getElementById('profileMemberSince').textContent = `Członek od: ${new Date(currentUser.created_at).toLocaleDateString('pl-PL')}`;
+        
+        // Poprawne formatowanie daty
+        let memberSinceText = 'Brak daty';
+        if (currentUser.created_at) {
+            try {
+                const date = new Date(currentUser.created_at);
+                if (!isNaN(date.getTime())) {
+                    memberSinceText = `Członek od: ${date.toLocaleDateString('pl-PL')}`;
+                }
+            } catch (error) {
+                console.error('Error formatting date:', error);
+            }
+        }
+        document.getElementById('profileMemberSince').textContent = memberSinceText;
     }
 
     async loadCollectionData() {
