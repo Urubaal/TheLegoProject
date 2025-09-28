@@ -336,7 +336,7 @@ class AuthManager {
 
             const data = await response.json();
 
-            if (data.success) {
+            if (response.ok && data.success) {
                 // Store token in localStorage
                 localStorage.setItem('authToken', data.data.token);
                 
@@ -347,7 +347,14 @@ class AuthManager {
                     window.location.href = '/dashboard.html';
                 }, 1500);
             } else {
-                this.showMessage(data.error || 'Błąd rejestracji', true);
+                // Handle different error statuses
+                if (response.status === 400) {
+                    this.showMessage(data.error || 'Nieprawidłowe dane rejestracji', true);
+                } else if (response.status === 409) {
+                    this.showMessage('Nieprawidłowe dane logowania', true);
+                } else {
+                    this.showMessage(data.error || 'Błąd rejestracji', true);
+                }
             }
         } catch (error) {
             console.error('Register error:', error);
@@ -391,7 +398,7 @@ class AuthManager {
 
             const data = await response.json();
 
-            if (data.success) {
+            if (response.ok && data.success) {
                 // Store token in localStorage
                 localStorage.setItem('authToken', data.data.token);
                 if (rememberMe) {
@@ -405,7 +412,16 @@ class AuthManager {
                     window.location.href = '/dashboard.html';
                 }, 1500);
             } else {
-                this.showMessage(data.error || 'Błąd logowania', true);
+                // Handle different error statuses
+                if (response.status === 401) {
+                    this.showMessage('Nieprawidłowy email lub hasło', true);
+                } else if (response.status === 400) {
+                    this.showMessage(data.error || 'Nieprawidłowe dane logowania', true);
+                } else if (response.status === 429) {
+                    this.showMessage('Zbyt wiele prób logowania. Spróbuj ponownie za chwilę', true);
+                } else {
+                    this.showMessage(data.error || 'Błąd logowania', true);
+                }
             }
         } catch (error) {
             console.error('Login error:', error);
