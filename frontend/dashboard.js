@@ -324,10 +324,7 @@ class DashboardManager {
                         <p class="item-condition">Stan: ${conditionText}</p>
                         ${set.purchase_date ? `<p class="item-date">Data zakupu: ${new Date(set.purchase_date).toLocaleDateString('pl-PL')}</p>` : ''}
                         ${set.purchase_price ? `
-                            <div class="item-price">
-                                <p>Cena: ${set.purchase_price}</p>
-                                <p class="currency">${set.purchase_currency || 'PLN'}</p>
-                            </div>
+                            <p class="item-price">Cena: ${set.purchase_price} ${set.purchase_currency || 'PLN'}</p>
                         ` : ''}
                         ${components.length > 0 ? `<p class="item-components">Komponenty: ${components.join(', ')}</p>` : ''}
                         ${set.notes ? `<p class="item-notes">${set.notes}</p>` : ''}
@@ -506,10 +503,7 @@ class DashboardManager {
                     <p class="item-number">#${set.set_number}</p>
                     <p class="item-priority">Priorytet: ${set.priority}</p>
                     ${set.max_price ? `
-                        <div class="item-price">
-                            <p>Max cena: ${set.max_price}</p>
-                            <p class="currency">${set.max_currency || 'PLN'}</p>
-                        </div>
+                        <p class="item-price">Max cena: ${set.max_price} ${set.max_currency || 'PLN'}</p>
                     ` : ''}
                     ${set.notes ? `<p class="item-notes">${set.notes}</p>` : ''}
                 </div>
@@ -544,10 +538,7 @@ class DashboardManager {
                     ${minifig.minifig_number ? `<p class="item-number">#${minifig.minifig_number}</p>` : ''}
                     <p class="item-condition">Stan: ${minifig.condition_status === 'new' ? 'Nowa' : 'Używana'}</p>
                     ${minifig.purchase_price ? `
-                        <div class="item-price">
-                            <p>Cena: ${minifig.purchase_price}</p>
-                            <p class="currency">${minifig.purchase_currency || 'PLN'}</p>
-                        </div>
+                        <p class="item-price">Cena: ${minifig.purchase_price} ${minifig.purchase_currency || 'PLN'}</p>
                     ` : ''}
                     ${minifig.notes ? `<p class="item-notes">${minifig.notes}</p>` : ''}
                 </div>
@@ -582,10 +573,7 @@ class DashboardManager {
                     ${minifig.minifig_number ? `<p class="item-number">#${minifig.minifig_number}</p>` : ''}
                     <p class="item-priority">Priorytet: ${minifig.priority}</p>
                     ${minifig.max_price ? `
-                        <div class="item-price">
-                            <p>Max cena: ${minifig.max_price}</p>
-                            <p class="currency">${minifig.max_currency || 'PLN'}</p>
-                        </div>
+                        <p class="item-price">Max cena: ${minifig.max_price} ${minifig.max_currency || 'PLN'}</p>
                     ` : ''}
                     ${minifig.notes ? `<p class="item-notes">${minifig.notes}</p>` : ''}
                 </div>
@@ -1213,6 +1201,9 @@ class DashboardManager {
             if (key === 'purchase_price' || key === 'max_price') {
                 const numValue = parseFloat(value);
                 itemData[key] = value && !isNaN(numValue) ? numValue : null;
+            } else if (key === 'purchase_date') {
+                // Convert empty string to null for purchase_date
+                itemData[key] = value && value.trim() !== '' ? value : null;
             } else if (key === 'priority') {
                 itemData[key] = parseInt(value);
             } else if (key.startsWith('has_')) {
@@ -1253,11 +1244,12 @@ class DashboardManager {
                 this.currentEditModal = null;
             } else {
                 const error = await response.json();
-                this.showMessage(error.error || 'Błąd aktualizacji elementu', true);
+                console.error('Edit item error response:', error);
+                this.showMessage(error.error || error.message || 'Błąd aktualizacji elementu', true);
             }
         } catch (error) {
             console.error('Edit item error:', error);
-            this.showMessage('Błąd połączenia z serwerem', true);
+            this.showMessage('Błąd połączenia z serwerem: ' + error.message, true);
         }
     }
 
