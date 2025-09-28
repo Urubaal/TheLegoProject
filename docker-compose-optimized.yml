@@ -109,6 +109,8 @@ services:
       # Performance optimizations for faster startup
       NODE_OPTIONS: "--max-old-space-size=512 --optimize-for-size"
       UV_THREADPOOL_SIZE: 4
+      # Fast startup optimizations
+      NODE_ENV: production
     ports:
       - "3000:3000"
     networks:
@@ -223,3 +225,4 @@ networks:
     driver: bridge
     driver_opts:
       com.docker.network.bridge.name: lego-bridge
+
