@@ -4,6 +4,13 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
+// ⚠️ WAŻNE: Przy dodawaniu nowych pól do API ZAWSZE sprawdź:
+// 1. Czy baza danych ma odpowiednie kolumny (lego_database_schema.sql)
+// 2. Czy modele obsługują nowe pola (UserCollection.js)
+// 3. Czy constraints są aktualne
+// 4. Uruchom migracje jeśli potrzeba
+// Patrz: DEVELOPMENT_RULES.md
+
 const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
 const logsRoutes = require('./routes/logs');

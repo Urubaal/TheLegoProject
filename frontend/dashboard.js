@@ -1,6 +1,13 @@
 // API Configuration
 const API_BASE_URL = 'http://localhost:3000/api';
 
+// ⚠️ WAŻNE: Przy dodawaniu nowych pól do formularzy ZAWSZE sprawdź:
+// 1. Czy baza danych ma odpowiednie kolumny (lego_database_schema.sql)
+// 2. Czy backend obsługuje nowe pola (ProfileService, UserCollection)
+// 3. Czy constraints są aktualne (np. condition_status)
+// 4. Uruchom migracje jeśli potrzeba
+// Patrz: DEVELOPMENT_RULES.md
+
 // Global state
 let currentUser = null;
 let collectionData = {
@@ -107,6 +114,17 @@ class DashboardManager {
         // Search buttons
         searchSetBtn.addEventListener('click', () => this.searchSet('set'));
         searchWantedSetBtn.addEventListener('click', () => this.searchSet('wanted'));
+
+        // Auto-search on set number input
+        const setNumberInput = document.getElementById('setNumber');
+        if (setNumberInput) {
+            setNumberInput.addEventListener('input', (e) => {
+                const value = e.target.value.trim();
+                if (value.length >= 4) { // Search when at least 4 characters
+                    this.autoSearchSet(value);
+                }
+            });
+        }
 
         // Forms
         editProfileForm.addEventListener('submit', (e) => this.handleEditProfile(e));
@@ -277,32 +295,48 @@ class DashboardManager {
         const endIndex = startIndex + pagination.itemsPerPage;
         const paginatedSets = sets.slice(startIndex, endIndex);
 
-        grid.innerHTML = paginatedSets.map(set => `
-            <div class="collection-item">
-                <div class="item-image">
-                    <img data-src="https://via.placeholder.com/150x150/007ACC/FFFFFF?text=${encodeURIComponent(set.set_name.substring(0, 10))}" 
-                         alt="${set.set_name}" 
-                         class="lazy-image"
-                         loading="lazy">
-                    <i class="fas fa-cube placeholder-icon"></i>
+        grid.innerHTML = paginatedSets.map(set => {
+            const conditionText = {
+                'factory_sealed': 'Zapakowany fabrycznie',
+                'new': 'Nowy',
+                'used': 'Używany'
+            }[set.condition_status] || 'Nieznany';
+            
+            const components = [];
+            if (set.has_minifigures) components.push('Figurki');
+            if (set.has_instructions) components.push('Instrukcje');
+            if (set.has_box) components.push('Pudełko');
+            if (set.has_building_blocks) components.push('Klocki');
+            
+            return `
+                <div class="collection-item">
+                    <div class="item-image">
+                        <img data-src="https://via.placeholder.com/150x150/007ACC/FFFFFF?text=${encodeURIComponent(set.set_name.substring(0, 10))}" 
+                             alt="${set.set_name}" 
+                             class="lazy-image"
+                             loading="lazy">
+                        <i class="fas fa-cube placeholder-icon"></i>
+                    </div>
+                    <div class="item-info">
+                        <h3>${set.set_name}</h3>
+                        <p class="item-number">#${set.set_number}</p>
+                        <p class="item-condition">Stan: ${conditionText}</p>
+                        ${set.purchase_date ? `<p class="item-date">Data zakupu: ${new Date(set.purchase_date).toLocaleDateString('pl-PL')}</p>` : ''}
+                        ${set.purchase_price ? `<p class="item-price">Cena: ${set.purchase_price} ${set.purchase_currency || 'PLN'}</p>` : ''}
+                        ${components.length > 0 ? `<p class="item-components">Komponenty: ${components.join(', ')}</p>` : ''}
+                        ${set.notes ? `<p class="item-notes">${set.notes}</p>` : ''}
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn btn-sm btn-secondary" onclick="dashboardManager.editItem('owned-set', '${set.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="dashboardManager.deleteItem('owned-set', '${set.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="item-info">
-                    <h3>${set.set_name}</h3>
-                    <p class="item-number">#${set.set_number}</p>
-                    <p class="item-condition">Stan: ${set.condition_status === 'new' ? 'Nowy' : 'Używany'}</p>
-                    ${set.purchase_price ? `<p class="item-price">Cena: ${set.purchase_price} ${set.purchase_currency || 'PLN'}</p>` : ''}
-                    ${set.notes ? `<p class="item-notes">${set.notes}</p>` : ''}
-                </div>
-                <div class="item-actions">
-                    <button class="btn btn-sm btn-secondary" onclick="dashboardManager.editItem('owned-set', '${set.id}')">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-sm btn-danger" onclick="dashboardManager.deleteItem('owned-set', '${set.id}')">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
         
         // Initialize lazy loading for this batch
         this.initLazyLoading();
@@ -603,6 +637,40 @@ class DashboardManager {
         modal.classList.remove('active');
     }
 
+    async autoSearchSet(setNumber) {
+        if (!setNumber || setNumber.length < 4) return;
+
+        const cacheKey = `search_${setNumber}`;
+        
+        // Check cache first
+        const cachedResults = apiCache.get(cacheKey);
+        if (cachedResults) {
+            this.processSearchResults(cachedResults, 'set');
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('authToken');
+            const response = await fetch(`${API_BASE_URL}/profile/search/sets?q=${encodeURIComponent(setNumber)}&limit=5`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                
+                // Cache the results
+                apiCache.set(cacheKey, data);
+                
+                this.processSearchResults(data, 'set');
+            }
+        } catch (error) {
+            console.error('Auto search error:', error);
+            // Don't show error message for auto-search
+        }
+    }
+
     async searchSet(type) {
         const setNumber = type === 'set' ? 
             document.getElementById('setNumber').value : 
@@ -771,7 +839,13 @@ class DashboardManager {
             set_number: formData.get('set_number'),
             set_name: formData.get('set_name'),
             condition_status: formData.get('condition_status'),
+            purchase_date: formData.get('purchase_date') || null,
             purchase_price: formData.get('purchase_price') ? parseFloat(formData.get('purchase_price')) : null,
+            purchase_currency: formData.get('purchase_currency') || 'PLN',
+            has_minifigures: formData.get('has_minifigures') === '1',
+            has_instructions: formData.get('has_instructions') === '1',
+            has_box: formData.get('has_box') === '1',
+            has_building_blocks: formData.get('has_building_blocks') === '1',
             notes: formData.get('notes')
         };
 
@@ -932,13 +1006,49 @@ class DashboardManager {
                             <div class="form-group">
                                 <label for="editCondition">Stan</label>
                                 <select id="editCondition" name="condition_status" required>
+                                    <option value="factory_sealed" ${item.condition_status === 'factory_sealed' ? 'selected' : ''}>Zapakowany fabrycznie</option>
                                     <option value="new" ${item.condition_status === 'new' ? 'selected' : ''}>Nowy</option>
                                     <option value="used" ${item.condition_status === 'used' ? 'selected' : ''}>Używany</option>
                                 </select>
                             </div>
                             <div class="form-group">
+                                <label for="editPurchaseDate">Data zakupu</label>
+                                <input type="date" id="editPurchaseDate" name="purchase_date" value="${item.purchase_date || ''}">
+                            </div>
+                            <div class="form-group">
                                 <label for="editPurchasePrice">Cena zakupu</label>
-                                <input type="number" id="editPurchasePrice" name="purchase_price" step="0.01" value="${item.purchase_price || ''}">
+                                <div class="price-input-group">
+                                    <input type="number" id="editPurchasePrice" name="purchase_price" step="0.01" value="${item.purchase_price || ''}">
+                                    <select id="editPurchaseCurrency" name="purchase_currency">
+                                        <option value="PLN" ${item.purchase_currency === 'PLN' ? 'selected' : ''}>PLN</option>
+                                        <option value="EUR" ${item.purchase_currency === 'EUR' ? 'selected' : ''}>EUR</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Komponenty zestawu</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="has_minifigures" value="1" ${item.has_minifigures ? 'checked' : ''}>
+                                        <span class="checkmark"></span>
+                                        Figurki
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="has_instructions" value="1" ${item.has_instructions ? 'checked' : ''}>
+                                        <span class="checkmark"></span>
+                                        Instrukcje
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="has_box" value="1" ${item.has_box ? 'checked' : ''}>
+                                        <span class="checkmark"></span>
+                                        Pudełko
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="has_building_blocks" value="1" ${item.has_building_blocks ? 'checked' : ''}>
+                                        <span class="checkmark"></span>
+                                        Klocki budowlane
+                                    </label>
+                                </div>
                             </div>
                             ` : `
                             <div class="form-group">
@@ -1066,6 +1176,8 @@ class DashboardManager {
                 itemData[key] = value ? parseFloat(value) : null;
             } else if (key === 'priority') {
                 itemData[key] = parseInt(value);
+            } else if (key.startsWith('has_')) {
+                itemData[key] = value === '1';
             } else {
                 itemData[key] = value;
             }

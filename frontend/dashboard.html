@@ -239,13 +239,49 @@
                 <div class="form-group">
                     <label for="setCondition">Stan</label>
                     <select id="setCondition" name="condition_status">
+                        <option value="factory_sealed">Zapakowany fabrycznie</option>
                         <option value="new">Nowy</option>
                         <option value="used">Używany</option>
                     </select>
                 </div>
                 <div class="form-group">
+                    <label for="purchaseDate">Data zakupu</label>
+                    <input type="date" id="purchaseDate" name="purchase_date">
+                </div>
+                <div class="form-group">
                     <label for="purchasePrice">Cena zakupu (opcjonalnie)</label>
-                    <input type="number" id="purchasePrice" name="purchase_price" step="0.01">
+                    <div class="price-input-group">
+                        <input type="number" id="purchasePrice" name="purchase_price" step="0.01" placeholder="0.00">
+                        <select id="purchaseCurrency" name="purchase_currency">
+                            <option value="PLN">PLN</option>
+                            <option value="EUR">EUR</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Komponenty zestawu</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="has_minifigures" value="1">
+                            <span class="checkmark"></span>
+                            Figurki
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="has_instructions" value="1">
+                            <span class="checkmark"></span>
+                            Instrukcje
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="has_box" value="1">
+                            <span class="checkmark"></span>
+                            Pudełko
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="has_building_blocks" value="1">
+                            <span class="checkmark"></span>
+                            Klocki budowlane
+                        </label>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="setNotes">Notatki (opcjonalnie)</label>
