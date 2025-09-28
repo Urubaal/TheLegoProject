@@ -169,7 +169,8 @@ class ProfileController {
     return asyncHandler(async (req, res) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        throw new AppError('Validation failed', 400);
+        console.error('Validation errors:', errors.array());
+        throw new AppError(`Validation failed: ${errors.array().map(err => err.msg).join(', ')}`, 400);
       }
 
       const userId = req.user.userId;
@@ -200,6 +201,46 @@ class ProfileController {
 
       res.json({
         message: 'Item deleted successfully'
+      });
+    })(req, res);
+  }
+
+  // Upload photo for collection item
+  static uploadPhoto(req, res) {
+    return asyncHandler(async (req, res) => {
+      const userId = req.user.userId;
+      const { type, id } = req.params;
+      
+      if (!req.file) {
+        throw new AppError('No photo file provided', 400);
+      }
+
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(req.file.mimetype)) {
+        throw new AppError('Invalid file type. Only images are allowed.', 400);
+      }
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (req.file.size > maxSize) {
+        throw new AppError('File too large. Maximum size is 5MB.', 400);
+      }
+
+      info('Photo upload request', { userId, type, id, fileSize: req.file.size });
+
+      // For now, we'll store the file path as photo_url
+      // In production, you might want to upload to cloud storage (AWS S3, etc.)
+      const photoUrl = `/uploads/${req.file.filename}`;
+
+      // Update the collection item with photo_url
+      const result = await ProfileService.updateCollectionItemPhoto(userId, type, id, photoUrl);
+
+      res.json({
+        success: true,
+        message: 'Photo uploaded successfully',
+        photo_url: photoUrl,
+        data: result
       });
     })(req, res);
   }

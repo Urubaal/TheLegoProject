@@ -382,6 +382,40 @@ class ProfileService {
       });
     }
   }
+
+  // Update collection item photo
+  static async updateCollectionItemPhoto(userId, type, itemId, photoUrl) {
+    try {
+      logInfo('Updating collection item photo', { userId, type, itemId });
+
+      // Validate type
+      const validTypes = ['sets', 'minifigs', 'wanted-sets', 'wanted-minifigs'];
+      if (!validTypes.includes(type)) {
+        throw new AppError('Invalid collection type', 400);
+      }
+
+      // Update photo_url in the appropriate table
+      const result = await UserCollection.updateCollectionItemPhoto(userId, type, itemId, photoUrl);
+      
+      if (!result) {
+        throw new AppError('Collection item not found or not owned by user', 404);
+      }
+
+      // Invalidate cache
+      await this.invalidateCollectionCache(userId);
+
+      logInfo('Collection item photo updated successfully', { userId, type, itemId });
+      return result;
+    } catch (error) {
+      logError('Failed to update collection item photo', { 
+        error: error.message, 
+        userId, 
+        type, 
+        itemId 
+      });
+      throw error;
+    }
+  }
 }
 
 module.exports = ProfileService;

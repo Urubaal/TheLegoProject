@@ -82,6 +82,7 @@ class UserCollection {
   }
   
   static async updateOwnedSet(userId, setId, updateData) {
+    console.log('updateOwnedSet called with:', { userId, setId, updateData });
     const fields = [];
     const values = [];
     let paramCount = 1;
@@ -106,8 +107,12 @@ class UserCollection {
       RETURNING *
     `;
     
+    console.log('Executing query:', query);
+    console.log('With values:', values);
+    
     try {
       const result = await pool.query(query, values);
+      console.log('Update result:', result.rows[0]);
       return result.rows[0];
     } catch (error) {
       throw error;
@@ -360,6 +365,42 @@ class UserCollection {
     
     try {
       const result = await pool.query(query, [userId]);
+      return result.rows[0];
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Update collection item photo
+  static async updateCollectionItemPhoto(userId, type, itemId, photoUrl) {
+    let tableName;
+    
+    switch (type) {
+      case 'sets':
+        tableName = 'user_owned_sets';
+        break;
+      case 'minifigs':
+        tableName = 'user_owned_minifigs';
+        break;
+      case 'wanted-sets':
+        tableName = 'user_wanted_sets';
+        break;
+      case 'wanted-minifigs':
+        tableName = 'user_wanted_minifigs';
+        break;
+      default:
+        throw new Error('Invalid collection type');
+    }
+
+    const query = `
+      UPDATE ${tableName} 
+      SET photo_url = $1, updated_at = NOW()
+      WHERE id = $2 AND user_id = $3
+      RETURNING *
+    `;
+    
+    try {
+      const result = await pool.query(query, [photoUrl, itemId, userId]);
       return result.rows[0];
     } catch (error) {
       throw error;

@@ -717,6 +717,13 @@ body {
     color: #28a745 !important;
 }
 
+.item-price .currency {
+    font-size: 0.8em;
+    font-weight: 400;
+    color: #666;
+    margin-top: 2px;
+}
+
 .item-condition {
     text-transform: capitalize;
 }

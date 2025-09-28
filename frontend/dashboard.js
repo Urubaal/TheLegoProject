@@ -245,6 +245,7 @@ class DashboardManager {
 
             if (response.ok) {
                 const data = await response.json();
+                console.log('Collection data received:', data);
                 collectionData = data;
                 
                 // Cache the data
@@ -322,7 +323,12 @@ class DashboardManager {
                         <p class="item-number">#${set.set_number}</p>
                         <p class="item-condition">Stan: ${conditionText}</p>
                         ${set.purchase_date ? `<p class="item-date">Data zakupu: ${new Date(set.purchase_date).toLocaleDateString('pl-PL')}</p>` : ''}
-                        ${set.purchase_price ? `<p class="item-price">Cena: ${set.purchase_price} ${set.purchase_currency || 'PLN'}</p>` : ''}
+                        ${set.purchase_price ? `
+                            <div class="item-price">
+                                <p>Cena: ${set.purchase_price}</p>
+                                <p class="currency">${set.purchase_currency || 'PLN'}</p>
+                            </div>
+                        ` : ''}
                         ${components.length > 0 ? `<p class="item-components">Komponenty: ${components.join(', ')}</p>` : ''}
                         ${set.notes ? `<p class="item-notes">${set.notes}</p>` : ''}
                     </div>
@@ -499,7 +505,12 @@ class DashboardManager {
                     <h3>${set.set_name}</h3>
                     <p class="item-number">#${set.set_number}</p>
                     <p class="item-priority">Priorytet: ${set.priority}</p>
-                    ${set.max_price ? `<p class="item-price">Max cena: ${set.max_price} ${set.max_currency || 'PLN'}</p>` : ''}
+                    ${set.max_price ? `
+                        <div class="item-price">
+                            <p>Max cena: ${set.max_price}</p>
+                            <p class="currency">${set.max_currency || 'PLN'}</p>
+                        </div>
+                    ` : ''}
                     ${set.notes ? `<p class="item-notes">${set.notes}</p>` : ''}
                 </div>
                 <div class="item-actions">
@@ -532,7 +543,12 @@ class DashboardManager {
                     <h3>${minifig.minifig_name}</h3>
                     ${minifig.minifig_number ? `<p class="item-number">#${minifig.minifig_number}</p>` : ''}
                     <p class="item-condition">Stan: ${minifig.condition_status === 'new' ? 'Nowa' : 'Używana'}</p>
-                    ${minifig.purchase_price ? `<p class="item-price">Cena: ${minifig.purchase_price} ${minifig.purchase_currency || 'PLN'}</p>` : ''}
+                    ${minifig.purchase_price ? `
+                        <div class="item-price">
+                            <p>Cena: ${minifig.purchase_price}</p>
+                            <p class="currency">${minifig.purchase_currency || 'PLN'}</p>
+                        </div>
+                    ` : ''}
                     ${minifig.notes ? `<p class="item-notes">${minifig.notes}</p>` : ''}
                 </div>
                 <div class="item-actions">
@@ -565,7 +581,12 @@ class DashboardManager {
                     <h3>${minifig.minifig_name}</h3>
                     ${minifig.minifig_number ? `<p class="item-number">#${minifig.minifig_number}</p>` : ''}
                     <p class="item-priority">Priorytet: ${minifig.priority}</p>
-                    ${minifig.max_price ? `<p class="item-price">Max cena: ${minifig.max_price} ${minifig.max_currency || 'PLN'}</p>` : ''}
+                    ${minifig.max_price ? `
+                        <div class="item-price">
+                            <p>Max cena: ${minifig.max_price}</p>
+                            <p class="currency">${minifig.max_currency || 'PLN'}</p>
+                        </div>
+                    ` : ''}
                     ${minifig.notes ? `<p class="item-notes">${minifig.notes}</p>` : ''}
                 </div>
                 <div class="item-actions">
@@ -840,7 +861,11 @@ class DashboardManager {
             set_name: formData.get('set_name'),
             condition_status: formData.get('condition_status'),
             purchase_date: formData.get('purchase_date') || null,
-            purchase_price: formData.get('purchase_price') ? parseFloat(formData.get('purchase_price')) : null,
+            purchase_price: (() => {
+                const price = formData.get('purchase_price');
+                const numValue = parseFloat(price);
+                return price && !isNaN(numValue) ? numValue : null;
+            })(),
             purchase_currency: formData.get('purchase_currency') || 'PLN',
             has_minifigures: formData.get('has_minifigures') === '1',
             has_instructions: formData.get('has_instructions') === '1',
@@ -884,7 +909,11 @@ class DashboardManager {
         const setData = {
             set_number: formData.get('set_number'),
             set_name: formData.get('set_name'),
-            max_price: formData.get('max_price') ? parseFloat(formData.get('max_price')) : null,
+            max_price: (() => {
+                const price = formData.get('max_price');
+                const numValue = parseFloat(price);
+                return price && !isNaN(numValue) ? numValue : null;
+            })(),
             priority: parseInt(formData.get('priority')),
             notes: formData.get('notes')
         };
@@ -1028,21 +1057,25 @@ class DashboardManager {
                             <div class="form-group">
                                 <label>Komponenty zestawu</label>
                                 <div class="checkbox-group">
+                                    <input type="hidden" name="has_minifigures" value="0">
                                     <label class="checkbox-item">
                                         <input type="checkbox" name="has_minifigures" value="1" ${item.has_minifigures ? 'checked' : ''}>
                                         <span class="checkmark"></span>
                                         Figurki
                                     </label>
+                                    <input type="hidden" name="has_instructions" value="0">
                                     <label class="checkbox-item">
                                         <input type="checkbox" name="has_instructions" value="1" ${item.has_instructions ? 'checked' : ''}>
                                         <span class="checkmark"></span>
                                         Instrukcje
                                     </label>
+                                    <input type="hidden" name="has_box" value="0">
                                     <label class="checkbox-item">
                                         <input type="checkbox" name="has_box" value="1" ${item.has_box ? 'checked' : ''}>
                                         <span class="checkmark"></span>
                                         Pudełko
                                     </label>
+                                    <input type="hidden" name="has_building_blocks" value="0">
                                     <label class="checkbox-item">
                                         <input type="checkbox" name="has_building_blocks" value="1" ${item.has_building_blocks ? 'checked' : ''}>
                                         <span class="checkmark"></span>
@@ -1169,19 +1202,27 @@ class DashboardManager {
         const photoFile = formData.get('photo');
         
         // Convert FormData to object (excluding photo file)
+        const formDataObj = {};
         for (let [key, value] of formData.entries()) {
             if (key === 'photo') continue; // Handle photo separately
-            
+            formDataObj[key] = value;
+        }
+        
+        // Process the data
+        for (let [key, value] of Object.entries(formDataObj)) {
             if (key === 'purchase_price' || key === 'max_price') {
-                itemData[key] = value ? parseFloat(value) : null;
+                const numValue = parseFloat(value);
+                itemData[key] = value && !isNaN(numValue) ? numValue : null;
             } else if (key === 'priority') {
                 itemData[key] = parseInt(value);
             } else if (key.startsWith('has_')) {
-                itemData[key] = value === '1';
+                itemData[key] = value === '1' || value === 'true';
             } else {
                 itemData[key] = value;
             }
         }
+        
+        console.log('Sending update data:', itemData);
         
         try {
             const token = localStorage.getItem('authToken');

@@ -87,16 +87,16 @@ const addSetValidation = [
     .withMessage('Set number must be between 1 and 20 characters'),
   body('condition_status')
     .optional()
-    .isIn(['new', 'used', 'damaged'])
-    .withMessage('Condition status must be new, used, or damaged'),
+    .isIn(['factory_sealed', 'new', 'used', 'damaged'])
+    .withMessage('Condition status must be factory_sealed, new, used, or damaged'),
   body('purchase_price')
     .optional()
     .isFloat({ min: 0 })
     .withMessage('Purchase price must be a positive number'),
   body('purchase_currency')
     .optional()
-    .isLength({ min: 3, max: 3 })
-    .withMessage('Purchase currency must be a 3-character code'),
+    .isIn(['PLN', 'EUR'])
+    .withMessage('Purchase currency must be PLN or EUR'),
   body('notes')
     .optional()
     .isLength({ max: 500 })
@@ -115,8 +115,8 @@ const addWantedSetValidation = [
     .withMessage('Max price must be a positive number'),
   body('max_currency')
     .optional()
-    .isLength({ min: 3, max: 3 })
-    .withMessage('Max currency must be a 3-character code'),
+    .isIn(['PLN', 'EUR'])
+    .withMessage('Max currency must be PLN or EUR'),
   body('priority')
     .optional()
     .isInt({ min: 1, max: 5 })
@@ -139,16 +139,16 @@ const addMinifigValidation = [
     .withMessage('Minifig number must be between 1 and 20 characters'),
   body('condition_status')
     .optional()
-    .isIn(['new', 'used', 'damaged'])
-    .withMessage('Condition status must be new, used, or damaged'),
+    .isIn(['factory_sealed', 'new', 'used', 'damaged'])
+    .withMessage('Condition status must be factory_sealed, new, used, or damaged'),
   body('purchase_price')
     .optional()
     .isFloat({ min: 0 })
     .withMessage('Purchase price must be a positive number'),
   body('purchase_currency')
     .optional()
-    .isLength({ min: 3, max: 3 })
-    .withMessage('Purchase currency must be a 3-character code'),
+    .isIn(['PLN', 'EUR'])
+    .withMessage('Purchase currency must be PLN or EUR'),
   body('notes')
     .optional()
     .isLength({ max: 500 })
@@ -171,8 +171,8 @@ const addWantedMinifigValidation = [
     .withMessage('Max price must be a positive number'),
   body('max_currency')
     .optional()
-    .isLength({ min: 3, max: 3 })
-    .withMessage('Max currency must be a 3-character code'),
+    .isIn(['PLN', 'EUR'])
+    .withMessage('Max currency must be PLN or EUR'),
   body('priority')
     .optional()
     .isInt({ min: 1, max: 5 })
@@ -204,6 +204,73 @@ const collectionItemValidation = [
     .withMessage('Invalid item ID')
 ];
 
+const updateCollectionItemValidation = [
+  param('type')
+    .isIn(['owned-set', 'wanted-set', 'owned-minifig', 'wanted-minifig'])
+    .withMessage('Invalid collection type'),
+  param('id')
+    .isUUID()
+    .withMessage('Invalid item ID'),
+  // Common fields for all types
+  body('set_name')
+    .optional()
+    .isLength({ min: 1, max: 200 })
+    .withMessage('Set name must be between 1 and 200 characters'),
+  body('minifig_name')
+    .optional()
+    .isLength({ min: 1, max: 200 })
+    .withMessage('Minifig name must be between 1 and 200 characters'),
+  body('condition_status')
+    .optional()
+    .isIn(['factory_sealed', 'new', 'used', 'damaged'])
+    .withMessage('Condition status must be factory_sealed, new, used, or damaged'),
+  body('purchase_price')
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage('Purchase price must be a positive number'),
+  body('purchase_currency')
+    .optional()
+    .isIn(['PLN', 'EUR'])
+    .withMessage('Purchase currency must be PLN or EUR'),
+  body('max_price')
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage('Max price must be a positive number'),
+  body('max_currency')
+    .optional()
+    .isIn(['PLN', 'EUR'])
+    .withMessage('Max currency must be PLN or EUR'),
+  body('priority')
+    .optional()
+    .isInt({ min: 1, max: 5 })
+    .withMessage('Priority must be between 1 and 5'),
+  body('notes')
+    .optional()
+    .isLength({ max: 500 })
+    .withMessage('Notes must not exceed 500 characters'),
+  body('purchase_date')
+    .optional()
+    .isISO8601()
+    .withMessage('Purchase date must be a valid date'),
+  // Boolean fields
+  body('has_minifigures')
+    .optional()
+    .isBoolean()
+    .withMessage('Has minifigures must be a boolean'),
+  body('has_instructions')
+    .optional()
+    .isBoolean()
+    .withMessage('Has instructions must be a boolean'),
+  body('has_box')
+    .optional()
+    .isBoolean()
+    .withMessage('Has box must be a boolean'),
+  body('has_building_blocks')
+    .optional()
+    .isBoolean()
+    .withMessage('Has building blocks must be a boolean')
+];
+
 module.exports = {
   // Auth validations
   registerValidation,
@@ -218,5 +285,6 @@ module.exports = {
   addMinifigValidation,
   addWantedMinifigValidation,
   searchValidation,
-  collectionItemValidation
+  collectionItemValidation,
+  updateCollectionItemValidation
 };

@@ -94,7 +94,7 @@ class RedisService {
         createdAt: new Date().toISOString()
       });
       
-      await this.client.setex(key, ttlSeconds, value);
+      await this.client.set(key, value, { EX: ttlSeconds });
       info('Password reset token stored', { 
         token: token.substring(0, 10) + '...', 
         ttl: ttlSeconds,
@@ -149,7 +149,7 @@ class RedisService {
       data.usedAt = new Date().toISOString();
       
       // Update the token with used flag
-      await this.client.setex(key, 300, JSON.stringify(data)); // Keep for 5 minutes after use
+      await this.client.set(key, JSON.stringify(data), { EX: 300 }); // Keep for 5 minutes after use
       
       info('Password reset token marked as used', { 
         token: token.substring(0, 10) + '...',
@@ -190,7 +190,7 @@ class RedisService {
 
     try {
       if (ttlSeconds) {
-        await this.client.setex(key, ttlSeconds, JSON.stringify(value));
+        await this.client.set(key, JSON.stringify(value), { EX: ttlSeconds });
       } else {
         await this.client.set(key, JSON.stringify(value));
       }
