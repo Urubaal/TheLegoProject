@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const LegoController = require('../controllers/legoController');
 const { authenticateToken } = require('../middleware/auth');
-const { body, param, query } = require('express-validator');
+const { body } = require('express-validator');
 
 // Validation rules
 const setValidation = [
@@ -29,6 +29,7 @@ router.get('/sets/years', LegoController.getYears);
 router.get('/sets/stats', LegoController.getStats);
 router.get('/sets/:setNumber', LegoController.getSetByNumber);
 router.get('/sets/:setNumber/offers', LegoController.getSetOffers);
+router.get('/offers', LegoController.getAllOffers);
 
 // Protected routes (require authentication)
 router.use(authenticateToken);

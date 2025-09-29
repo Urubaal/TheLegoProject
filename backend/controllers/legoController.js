@@ -2,8 +2,25 @@ const LegoSet = require('../models/LegoSet');
 const UserCollection = require('../models/UserCollection');
 const OlxOffer = require('../models/OlxOffer');
 const { validationResult } = require('express-validator');
+const fs = require('fs');
+const path = require('path');
 
 class LegoController {
+  // Helper function to load mock data
+  static loadMockData() {
+    try {
+      const setsPath = path.join(__dirname, '../data/sets.json');
+      const offersPath = path.join(__dirname, '../data/offers.json');
+      
+      const sets = fs.existsSync(setsPath) ? JSON.parse(fs.readFileSync(setsPath, 'utf8')) : [];
+      const offers = fs.existsSync(offersPath) ? JSON.parse(fs.readFileSync(offersPath, 'utf8')) : [];
+      
+      return { sets, offers };
+    } catch (error) {
+      console.error('Error loading mock data:', error);
+      return { sets: [], offers: [] };
+    }
+  }
   // Get all LEGO sets with pagination and filtering
   static async getAllSets(req, res) {
     try {
@@ -111,10 +128,33 @@ class LegoController {
       });
     } catch (error) {
       console.error('Error getting LEGO set:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Błąd podczas pobierania zestawu LEGO'
-      });
+      
+      // Fallback to mock data
+      try {
+        const { sets } = LegoController.loadMockData();
+        const set = sets.find(s => s.setNumber === req.params.setNumber);
+        
+        if (set) {
+          res.json({
+            success: true,
+            data: {
+              set,
+              offers: [],
+              priceStats: { min: 0, max: 0, avg: 0 }
+            }
+          });
+        } else {
+          res.status(404).json({
+            success: false,
+            error: 'Zestaw LEGO nie został znaleziony'
+          });
+        }
+      } catch (error) {
+        res.status(500).json({
+          success: false,
+          error: 'Błąd podczas pobierania zestawu LEGO'
+        });
+      }
     }
   }
 
@@ -380,10 +420,6 @@ class LegoController {
         offset = 0, 
         sortBy = 'price', 
         sortOrder = 'ASC',
-        minPrice,
-        maxPrice,
-        condition,
-        location
       } = req.query;
 
       // Verify set exists
@@ -424,6 +460,61 @@ class LegoController {
         success: false,
         error: 'Błąd podczas pobierania ofert'
       });
+    }
+  }
+
+  // Get all offers (for deals modal)
+  static async getAllOffers(req, res) {
+    try {
+      const { 
+        limit = 20, 
+        offset = 0, 
+        sortBy = 'created_at', 
+        sortOrder = 'DESC',
+      } = req.query;
+
+      const options = {
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        sortBy,
+        sortOrder,
+        activeOnly: true
+      };
+
+      const offers = await OlxOffer.findAll(options);
+      const totalCount = await OlxOffer.count(options);
+
+      res.json({
+        success: true,
+        data: {
+          offers,
+          totalCount,
+          currentPage: Math.floor(offset / limit) + 1,
+          totalPages: Math.ceil(totalCount / limit)
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching all offers:', error);
+      
+      // Fallback to mock data
+      try {
+        const { offers } = LegoController.loadMockData();
+        
+        res.json({
+          success: true,
+          data: {
+            offers,
+            totalCount: offers.length,
+            currentPage: 1,
+            totalPages: 1
+          }
+        });
+      } catch (error) {
+        res.status(500).json({
+          success: false,
+          error: 'Błąd podczas pobierania ofert'
+        });
+      }
     }
   }
 }
