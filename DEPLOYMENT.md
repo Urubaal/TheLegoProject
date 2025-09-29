@@ -185,7 +185,7 @@ JWT_SECRET=super-secure-secret-key
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-app-password
+EMAIL_PASS=CHANGE_ME_EMAIL_PASSWORD
 FRONTEND_URL=https://yourdomain.com
 ```
 

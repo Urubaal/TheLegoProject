@@ -1,0 +1,195 @@
+# PRODUCTION Docker Compose - SECURE VERSION
+# ⚠️ NIEBEZPIECZNE ustawienia DEV zostały usunięte!
+version: '3.8'
+
+services:
+  # Redis Cache - Production Ready
+  redis:
+    image: redis:7-alpine
+    container_name: lego-redis-prod
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru --tcp-keepalive 60
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"  # Bind tylko do localhost
+    networks:
+      - lego-network
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/run
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  # PostgreSQL Database - PRODUCTION SECURE
+  database:
+    image: postgres:15-alpine
+    container_name: lego-database-prod
+    environment:
+      POSTGRES_DB: lego_purchase_system
+      POSTGRES_USER: lego_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: md5
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+      # PRODUCTION optimizations (SECURE!)
+      POSTGRES_SHARED_BUFFERS: 512MB
+      POSTGRES_EFFECTIVE_CACHE_SIZE: 2GB
+      POSTGRES_MAINTENANCE_WORK_MEM: 128MB
+      POSTGRES_CHECKPOINT_COMPLETION_TARGET: 0.9
+      POSTGRES_WAL_BUFFERS: 32MB
+      POSTGRES_DEFAULT_STATISTICS_TARGET: 100
+      # PRODUCTION SECURITY - FSYNC ON!
+      POSTGRES_FSYNC: "on"
+      POSTGRES_SYNCHRONOUS_COMMIT: "on"
+      POSTGRES_WAL_LEVEL: "replica"
+      POSTGRES_MAX_WAL_SENDERS: 3
+      POSTGRES_MAX_REPLICATION_SLOTS: 3
+      # Additional security
+      POSTGRES_LOG_STATEMENT: "all"
+      POSTGRES_LOG_MIN_DURATION_STATEMENT: 1000
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./lego_database_schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./backend/migrations/run_performance_optimizations.sql:/docker-entrypoint-initdb.d/02-optimizations.sql:ro
+    ports:
+      - "127.0.0.1:5432:5432"  # Bind tylko do localhost
+    networks:
+      - lego-network
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lego_user -d lego_purchase_system"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Backend API - Production Ready
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: lego-backend-prod
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://lego_user:${POSTGRES_PASSWORD}@database:5432/lego_purchase_system
+      POSTGRES_HOST: database
+      POSTGRES_USER: lego_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: lego_purchase_system
+      POSTGRES_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: 24h
+      FRONTEND_URL: https://yourdomain.com
+      EMAIL_HOST: smtp.gmail.com
+      EMAIL_PORT: 587
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASS: ${EMAIL_PASS}
+      # Production optimizations
+      NODE_OPTIONS: "--max-old-space-size=1024"
+      UV_THREADPOOL_SIZE: 8
+    ports:
+      - "127.0.0.1:3000:3000"  # Bind tylko do localhost
+    networks:
+      - lego-network
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1.5G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Frontend - Production Ready
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: lego-frontend-prod
+    ports:
+      - "80:80"
+      - "443:443"  # HTTPS
+    networks:
+      - lego-network
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+      - /usr/share/nginx/html/node_modules
+      - ./ssl-certs:/etc/ssl/certs:ro  # SSL certificates
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  lego-network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: lego-bridge-prod

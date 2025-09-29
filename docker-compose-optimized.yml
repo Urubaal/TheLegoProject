@@ -15,6 +15,12 @@ services:
     networks:
       - lego-network
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/run
     deploy:
       resources:
         limits:
@@ -121,6 +127,8 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -156,6 +164,8 @@ services:
       backend:
         condition: service_healthy
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     deploy:
       resources:
         limits:
