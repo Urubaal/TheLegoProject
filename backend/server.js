@@ -17,6 +17,7 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
 const logsRoutes = require('./routes/logs');
+const legoRoutes = require('./routes/lego');
 const { errorHandler } = require('./middleware/errorHandler');
 const { requestLogger, errorLogger, info, security, error } = require('./utils/logger');
 const { monitoringMiddleware, getMetricsEndpoint, cleanupLogsEndpoint, schedulerControlEndpoint, logCleanupScheduler } = require('./utils/monitoring');
@@ -138,6 +139,7 @@ app.use(monitoringMiddleware);
 app.use('/api/auth', authLimiter, authRoutes); // Stricter rate limiting for auth
 app.use('/api/profile', profileRoutes);
 app.use('/api/logs', logsRoutes);
+app.use('/api/lego', legoRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -258,4 +260,6 @@ if (process.env.NODE_ENV !== 'test') {
   startServer();
 }
 
+// Export app and pool for models to use
 module.exports = app;
+module.exports.pool = require('./models/User').pool || null;

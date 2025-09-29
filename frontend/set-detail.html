@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEGO Set Details - BrickEconomy Clone</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="brickeconomy.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar-brickeconomy">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="logo">
+                    <div class="logo-icon">🧱</div>
+                    <div class="logo-text">
+                        <span class="logo-title">BrickEconomy</span>
+                        <span class="logo-subtitle">the economics of LEGO</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nav-links">
+                <a href="#" class="nav-link">Browse</a>
+                <a href="#" class="nav-link">Deals</a>
+                <a href="#" class="nav-link">Analysis</a>
+                <a href="#" class="nav-link collection-link">
+                    My Collection
+                    <span class="collection-count" id="collectionCount">0</span>
+                </a>
+                <a href="#" class="nav-link">Me</a>
+            </div>
+            
+            <div class="nav-actions">
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Search (eg: 10196 or Grand Carousel)">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                <div class="region-selector">
+                    <select class="region-select">
+                        <option value="PL">🇵🇱 Poland</option>
+                        <option value="US">🇺🇸 United States</option>
+                        <option value="UK">🇬🇧 United Kingdom</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Breadcrumbs -->
+    <div class="breadcrumbs">
+        <a href="#" class="breadcrumb-link">Sets</a>
+        <span class="breadcrumb-separator">/</span>
+        <a href="#" class="breadcrumb-link" id="themeBreadcrumb">Star Wars</a>
+        <span class="breadcrumb-separator">/</span>
+        <a href="#" class="breadcrumb-link" id="subthemeBreadcrumb">Andor</a>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current" id="setNameBreadcrumb">Rebel U-Wing Starfighter</span>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Left Panel - Set Details -->
+        <div class="set-details-panel">
+            <!-- Set Image and Basic Info -->
+            <div class="set-header">
+                <div class="set-image-container">
+                    <img id="setImage" src="https://www.lego.com/cdn/cs/set/assets/blt1234567890/75399.png" alt="LEGO Set" class="set-image">
+                </div>
+                <div class="set-basic-info">
+                    <h1 id="setTitle" class="set-title">75399 LEGO Star Wars Andor Rebel U-Wing Starfighter</h1>
+                    
+                    <!-- Tabs -->
+                    <div class="content-tabs">
+                        <button class="tab-btn active" data-tab="images">
+                            <span class="tab-text">Images <span class="tab-count" id="imagesCount">6</span></span>
+                        </button>
+                        <button class="tab-btn" data-tab="description">
+                            <span class="tab-text">Description <span class="tab-count" id="descriptionCount">1</span></span>
+                        </button>
+                    </div>
+                    
+                    <!-- Tab Content -->
+                    <div class="tab-content active" id="images-tab">
+                        <div class="image-gallery">
+                            <div class="gallery-item active">
+                                <img src="https://www.lego.com/cdn/cs/set/assets/blt1234567890/75399.png" alt="Set Image 1">
+                            </div>
+                            <div class="gallery-item">
+                                <img src="https://www.lego.com/cdn/cs/set/assets/blt1234567890/75399-2.png" alt="Set Image 2">
+                            </div>
+                            <div class="gallery-item">
+                                <img src="https://www.lego.com/cdn/cs/set/assets/blt1234567890/75399-3.png" alt="Set Image 3">
+                            </div>
+                        </div>
+                        <div class="gallery-thumbnails">
+                            <div class="thumbnail active">
+                                <img src="https://www.lego.com/cdn/cs/set/assets/blt1234567890/75399.png" alt="Thumbnail 1">
+                            </div>
+                            <div class="thumbnail">
+                                <img src="https://www.lego.com/cdn/cs/set/assets/blt1234567890/75399-2.png" alt="Thumbnail 2">
+                            </div>
+                            <div class="thumbnail">
+                                <img src="https://www.lego.com/cdn/cs/set/assets/blt1234567890/75399-3.png" alt="Thumbnail 3">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="description-tab">
+                        <div class="set-description">
+                            <p id="setDescription">Build the Rebel U-Wing Starfighter from Andor series with 4 minifigures including Cassian Andor, K-2SO, and Rebel soldiers.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Price Trend Graph -->
+            <div class="price-trend-section">
+                <h3 class="section-title">Price Trend</h3>
+                <div class="price-chart">
+                    <div class="chart-container">
+                        <div class="chart-y-axis">
+                            <div class="y-label">€100</div>
+                            <div class="y-label">€90</div>
+                            <div class="y-label">€80</div>
+                            <div class="y-label">€70</div>
+                            <div class="y-label">€60</div>
+                        </div>
+                        <div class="chart-area">
+                            <div class="chart-line"></div>
+                            <div class="chart-points">
+                                <div class="chart-point" style="left: 10%; bottom: 20%;" data-price="€70"></div>
+                                <div class="chart-point" style="left: 30%; bottom: 25%;" data-price="€72"></div>
+                                <div class="chart-point" style="left: 50%; bottom: 30%;" data-price="€75"></div>
+                                <div class="chart-point" style="left: 70%; bottom: 35%;" data-price="€78"></div>
+                                <div class="chart-point" style="left: 90%; bottom: 40%;" data-price="€82"></div>
+                            </div>
+                        </div>
+                        <div class="chart-x-axis">
+                            <div class="x-label">Apr 2025</div>
+                            <div class="x-label">May 2025</div>
+                            <div class="x-label">Jun 2025</div>
+                            <div class="x-label">Jul 2025</div>
+                            <div class="x-label">Aug 2025</div>
+                            <div class="x-label">Sep 2025</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typical Selling Price Range -->
+            <div class="price-range-section">
+                <h3 class="section-title">Typical Selling Price Range</h3>
+                <div class="price-range-slider">
+                    <div class="price-range-track">
+                        <div class="price-range-fill" style="width: 60%;"></div>
+                        <div class="price-range-handle start" style="left: 20%;"></div>
+                        <div class="price-range-handle end" style="left: 80%;"></div>
+                    </div>
+                    <div class="price-range-labels">
+                        <span class="price-label">€70</span>
+                        <span class="price-label">€79</span>
+                    </div>
+                </div>
+                <p class="price-range-text">This LEGO set typically sells between €70-€79 locally.</p>
+            </div>
+
+            <!-- OLX Offers List -->
+            <div class="offers-section">
+                <h3 class="section-title">Current Offers</h3>
+                <div class="offers-list" id="offersList">
+                    <!-- Offers will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - My Collection & Set Details -->
+        <div class="sidebar-panel">
+            <!-- My Collection Card -->
+            <div class="collection-card">
+                <div class="card-header">
+                    <h3>My Collection</h3>
+                    <button class="btn btn-primary btn-sm" id="addToCollectionBtn">+ In Star Wars</button>
+                </div>
+                
+                <div class="collection-options">
+                    <!-- Owned Checkbox -->
+                    <div class="collection-option">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="ownedCheckbox" data-type="owned">
+                            <span class="checkmark"></span>
+                            <span class="option-text">I own <input type="number" id="ownedQuantity" value="1" min="1" max="99"> of this set</span>
+                        </label>
+                        <button class="remove-btn" id="removeOwnedBtn" style="display: none;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Wanted Checkbox -->
+                    <div class="collection-option">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="wantedCheckbox" data-type="wanted">
+                            <span class="checkmark"></span>
+                            <span class="option-text">I want this set</span>
+                        </label>
+                        <button class="remove-btn" id="removeWantedBtn" style="display: none;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Collection Details -->
+                <div class="collection-details" id="collectionDetails" style="display: none;">
+                    <div class="detail-group">
+                        <label for="paidPrice">Paid Price:</label>
+                        <input type="number" id="paidPrice" placeholder="0.00" step="0.01" min="0">
+                        <span class="currency">€</span>
+                    </div>
+                    <div class="detail-group">
+                        <label for="condition">Condition:</label>
+                        <select id="condition">
+                            <option value="new">New</option>
+                            <option value="used">Used</option>
+                            <option value="excellent">Excellent</option>
+                            <option value="good">Good</option>
+                            <option value="fair">Fair</option>
+                        </select>
+                    </div>
+                    <div class="detail-group">
+                        <label for="notes">Notes:</label>
+                        <textarea id="notes" placeholder="Optional notes..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Set Details Card -->
+            <div class="set-details-card">
+                <h3>Set Details</h3>
+                <div class="details-list">
+                    <div class="detail-item">
+                        <span class="detail-label">Set number:</span>
+                        <span class="detail-value" id="setNumber">75399-1</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Name:</span>
+                        <span class="detail-value" id="setName">Rebel U-Wing Starfighter</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Theme:</span>
+                        <a href="#" class="detail-link" id="setTheme">Star Wars</a>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Subtheme:</span>
+                        <a href="#" class="detail-link" id="setSubtheme">Andor</a>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Year:</span>
+                        <span class="detail-value" id="setYear">2025</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Released:</span>
+                        <span class="detail-value" id="setReleased">May 2025</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Availability:</span>
+                        <span class="detail-value" id="setAvailability">Retail</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Pieces:</span>
+                        <span class="detail-value" id="setPieces">594</span>
+                        <span class="detail-info">PPP €0.12 <i class="fas fa-info-circle"></i></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Minifigs:</span>
+                        <span class="detail-value" id="setMinifigs">4</span>
+                        <span class="detail-info">Value €40.92 <i class="fas fa-info-circle"></i></span>
+                    </div>
+                </div>
+                
+                <!-- Minifigures -->
+                <div class="minifigures-section">
+                    <h4>Minifigures</h4>
+                    <div class="minifigures-grid">
+                        <div class="minifigure">
+                            <div class="minifig-avatar">🤖</div>
+                            <span class="minifig-name">K-2SO</span>
+                        </div>
+                        <div class="minifigure">
+                            <div class="minifig-avatar">👤</div>
+                            <span class="minifig-name">Cassian Andor</span>
+                        </div>
+                        <div class="minifigure">
+                            <div class="minifig-avatar">👤</div>
+                            <span class="minifig-name">Rebel Soldier</span>
+                        </div>
+                        <div class="minifigure">
+                            <div class="minifig-avatar">👤</div>
+                            <span class="minifig-name">Rebel Soldier</span>
+                        </div>
+                    </div>
+                    <p class="minifig-note">(3 exclusive)</p>
+                </div>
+            </div>
+
+            <!-- Quick Buy Card -->
+            <div class="quick-buy-card">
+                <h3>Quick Buy</h3>
+                <div class="buy-options">
+                    <div class="buy-option">
+                        <div class="buy-option-header">
+                            <div class="store-logo">🧱</div>
+                            <span class="store-name">LEGO Store</span>
+                        </div>
+                        <div class="buy-price">€69.99</div>
+                        <button class="btn btn-primary btn-sm">Buy</button>
+                    </div>
+                    
+                    <div class="buy-option">
+                        <div class="buy-option-header">
+                            <div class="store-logo">🛒</div>
+                            <span class="store-name">eBay</span>
+                        </div>
+                        <div class="buy-price-range">
+                            <span class="price-range">€47.08 - €117.91</span>
+                            <span class="price-note">Lowest - Highest price</span>
+                        </div>
+                        <button class="btn btn-primary btn-sm">Buy</button>
+                    </div>
+                    
+                    <div class="buy-option">
+                        <div class="buy-option-header">
+                            <div class="store-logo">📦</div>
+                            <span class="store-name">Amazon</span>
+                        </div>
+                        <div class="buy-price">
+                            <span class="avg-price">€52.79</span>
+                            <span class="price-note">Average price</span>
+                        </div>
+                        <button class="btn btn-primary btn-sm">Buy</button>
+                    </div>
+                    
+                    <div class="buy-option">
+                        <div class="buy-option-header">
+                            <div class="store-logo">🔗</div>
+                            <span class="store-name">Bricklink</span>
+                        </div>
+                        <div class="buy-price-range">
+                            <span class="price-range">€63.64 - €69.04</span>
+                            <span class="price-note">Lowest - Highest price</span>
+                        </div>
+                        <button class="btn btn-primary btn-sm">Buy</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>Loading set details...</p>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="message-container hidden">
+        <div class="message" id="message">
+            <i class="fas fa-check-circle"></i>
+            <span id="messageText"></span>
+        </div>
+    </div>
+
+    <script src="set-detail.js"></script>
+</body>
+</html>

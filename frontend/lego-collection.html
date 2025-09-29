@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My LEGO Collection - BrickEconomy Clone</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="brickeconomy.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar-brickeconomy">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="logo">
+                    <div class="logo-icon">🧱</div>
+                    <div class="logo-text">
+                        <span class="logo-title">BrickEconomy</span>
+                        <span class="logo-subtitle">the economics of LEGO</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nav-links">
+                <a href="lego-collection.html" class="nav-link">Browse</a>
+                <a href="#" class="nav-link">Deals</a>
+                <a href="#" class="nav-link">Analysis</a>
+                <a href="lego-collection.html" class="nav-link collection-link active">
+                    My Collection
+                    <span class="collection-count" id="collectionCount">0</span>
+                </a>
+                <a href="#" class="nav-link">Me</a>
+            </div>
+            
+            <div class="nav-actions">
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Search (eg: 10196 or Grand Carousel)" id="searchInput">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                <div class="region-selector">
+                    <select class="region-select">
+                        <option value="PL">🇵🇱 Poland</option>
+                        <option value="US">🇺🇸 United States</option>
+                        <option value="UK">🇬🇧 United Kingdom</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Breadcrumbs -->
+    <div class="breadcrumbs">
+        <a href="lego-collection.html" class="breadcrumb-link">My Collection</a>
+        <span class="breadcrumb-separator">/</span>
+        <a href="lego-collection.html" class="breadcrumb-link">Sets</a>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current" id="currentTab">Owned</span>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Collection Tabs -->
+        <div class="collection-tabs">
+            <button class="tab-btn active" data-tab="owned">
+                <span class="tab-text">Owned Sets <span class="tab-count" id="ownedCount">0</span></span>
+            </button>
+            <button class="tab-btn" data-tab="wanted">
+                <span class="tab-text">Wanted Sets <span class="tab-count" id="wantedCount">0</span></span>
+            </button>
+        </div>
+
+        <!-- Filters and Sorting -->
+        <div class="filters-section">
+            <div class="filter-group">
+                <label for="themeFilter">Theme:</label>
+                <select id="themeFilter" class="filter-select">
+                    <option value="">All Themes</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="sortFilter">Sort:</label>
+                <select id="sortFilter" class="filter-select">
+                    <option value="year-desc">Year (Desc)</option>
+                    <option value="year-asc">Year (Asc)</option>
+                    <option value="name-asc">Name (A-Z)</option>
+                    <option value="name-desc">Name (Z-A)</option>
+                    <option value="price-desc">Price (High-Low)</option>
+                    <option value="price-asc">Price (Low-High)</option>
+                </select>
+            </div>
+            
+            <div class="view-toggle">
+                <button class="view-btn active" data-view="grid">
+                    <i class="fas fa-th"></i>
+                </button>
+                <button class="view-btn" data-view="list">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Collection Stats -->
+        <div class="collection-stats">
+            <div class="stat-card">
+                <div class="stat-icon">📦</div>
+                <div class="stat-content">
+                    <h3 id="totalSets">0</h3>
+                    <p>Total Sets</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-content">
+                    <h3 id="totalValue">€0</h3>
+                    <p>Total Value</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-content">
+                    <h3 id="avgPrice">€0</h3>
+                    <p>Avg Price</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-content">
+                    <h3 id="growth">0%</h3>
+                    <p>Growth</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Collection Grid -->
+        <div class="collection-grid" id="collectionGrid">
+            <!-- Collection items will be loaded here -->
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination">
+            <!-- Pagination buttons will be generated here -->
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>Loading collection...</p>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="message-container hidden">
+        <div class="message" id="message">
+            <i class="fas fa-check-circle"></i>
+            <span id="messageText"></span>
+        </div>
+    </div>
+
+    <script src="lego-collection.js"></script>
+</body>
+</html>
