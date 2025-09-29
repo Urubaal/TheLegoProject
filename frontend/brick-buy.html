@@ -848,6 +848,102 @@
             color: #666666;
         }
 
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: white;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-left: 4px solid #1976d2;
+            min-width: 300px;
+            max-width: 400px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left-color: #4caf50;
+        }
+
+        .toast.error {
+            border-left-color: #f44336;
+        }
+
+        .toast.warning {
+            border-left-color: #ff9800;
+        }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .toast-icon.success {
+            color: #4caf50;
+        }
+
+        .toast-icon.error {
+            color: #f44336;
+        }
+
+        .toast-icon.warning {
+            color: #ff9800;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin: 0 0 4px 0;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .toast-message {
+            margin: 0;
+            color: #666;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .toast-close:hover {
+            background: #f5f5f5;
+            color: #666;
+        }
+
         .user-avatar {
             width: 24px;
             height: 24px;
@@ -859,6 +955,61 @@
             color: white;
             font-size: 12px;
             font-weight: 600;
+        }
+
+        /* User Menu Dropdown */
+        .user-menu {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            min-width: 150px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .user-menu:hover .user-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .user-dropdown a {
+            display: block;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
+        }
+
+        .user-dropdown a:hover {
+            background-color: #f5f5f5;
+        }
+
+        .user-dropdown a:first-child {
+            border-radius: 8px 8px 0 0;
+        }
+
+        .user-dropdown a:last-child {
+            border-radius: 0 0 8px 8px;
+            color: #f44336;
+        }
+
+        .user-dropdown a:last-child:hover {
+            background-color: #ffebee;
         }
 
         /* Collection Link States */
@@ -965,10 +1116,11 @@
                         <i class="fas fa-heart"></i>
                         I Want This
                     </button>
-                    <button class="btn btn-secondary" id="buyBtn">
+                    <!-- Quick Buy button hidden as requested -->
+                    <!-- <button class="btn btn-secondary" id="buyBtn">
                         <i class="fas fa-shopping-cart"></i>
                         Quick Buy
-                    </button>
+                    </button> -->
                 </div>
             </div>
         </div>
@@ -1037,6 +1189,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
 
     <!-- Login/Register Modal -->
     <div id="authModal" class="modal" style="display: none;">
@@ -1113,8 +1268,8 @@
         // User state management
         let currentUser = null;
         let userCollection = {
-            owned: [],
-            wanted: []
+            owned: [], // Array of objects with setNumber, pricePaid, purchaseDate, condition, quantity, notes
+            wanted: [] // Array of objects with setNumber, maxPrice, priority, notes
         };
 
         // Enhanced functionality
@@ -1159,18 +1314,19 @@
                 toggleWanted();
             });
             
-            buyBtn.addEventListener('click', function() {
-                showPurchaseOptions();
-            });
+            // Quick Buy button is hidden, so no event listener needed
+            // buyBtn.addEventListener('click', function() {
+            //     showPurchaseOptions();
+            // });
 
             // Navigation links
             document.getElementById('profileLink').addEventListener('click', function(e) {
                 e.preventDefault();
-                if (currentUser) {
-                    showUserProfile();
-                } else {
+                // Only show auth modal if user is not logged in (no dropdown menu)
+                if (!currentUser) {
                     showAuthModal();
                 }
+                // If user is logged in, dropdown menu handles the clicks
             });
 
             document.getElementById('collectionLink').addEventListener('click', function(e) {
@@ -1250,6 +1406,55 @@
             document.getElementById('authModal').style.display = 'flex';
         }
 
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icons = {
+                success: '✓',
+                error: '✕',
+                warning: '⚠',
+                info: 'ℹ'
+            };
+            
+            const titles = {
+                success: 'Sukces',
+                error: 'Błąd',
+                warning: 'Uwaga',
+                info: 'Informacja'
+            };
+            
+            toast.innerHTML = `
+                <div class="toast-icon ${type}">${icons[type]}</div>
+                <div class="toast-content">
+                    <div class="toast-title">${titles[type]}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        if (toast.parentElement) {
+                            toast.remove();
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        }
+
         async function handleAuth() {
             const isLogin = document.getElementById('loginTab').classList.contains('active');
             const email = document.getElementById('email').value;
@@ -1276,7 +1481,7 @@
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ email, password, fullName })
+                        body: JSON.stringify({ email, password, display_name: fullName })
                     });
                 }
 
@@ -1288,9 +1493,9 @@
                     localStorage.setItem('brickBuyToken', data.token);
                     updateUIForLoggedInUser();
                     document.getElementById('authModal').style.display = 'none';
-                    alert(`Successfully ${isLogin ? 'logged in' : 'registered'}!`);
+                    showToast(`Pomyślnie ${isLogin ? 'zalogowano' : 'zarejestrowano'}!`, 'success');
                 } else {
-                    alert(`Error: ${data.error || 'Authentication failed'}`);
+                    showToast(`Błąd: ${data.error || 'Nie udało się zalogować'}`, 'error');
                 }
             } catch (error) {
                 console.error('Auth error:', error);
@@ -1304,7 +1509,7 @@
                     localStorage.setItem('brickBuyUser', JSON.stringify(currentUser));
                     updateUIForLoggedInUser();
                     document.getElementById('authModal').style.display = 'none';
-                    alert('Successfully logged in (offline mode)!');
+                    showToast('Pomyślnie zalogowano (tryb offline)!', 'success');
                 } else {
                     if (!fullName) {
                         alert('Please enter your full name');
@@ -1318,7 +1523,7 @@
                     localStorage.setItem('brickBuyUser', JSON.stringify(currentUser));
                     updateUIForLoggedInUser();
                     document.getElementById('authModal').style.display = 'none';
-                    alert('Successfully registered and logged in (offline mode)!');
+                    showToast('Pomyślnie zarejestrowano i zalogowano (tryb offline)!', 'success');
                 }
             }
         }
@@ -1327,11 +1532,39 @@
             const profileLink = document.getElementById('profileLink');
             const collectionLink = document.getElementById('collectionLink');
             
-            profileLink.innerHTML = `<i class="fas fa-user"></i> ${currentUser.name}`;
+            profileLink.innerHTML = `
+                <div class="user-menu">
+                    <i class="fas fa-user"></i> ${currentUser.name}
+                    <div class="user-dropdown">
+                        <a href="#" onclick="showUserProfile(); return false;">Profile</a>
+                        <a href="#" onclick="logoutUser(); return false;">Logout</a>
+                    </div>
+                </div>
+            `;
             collectionLink.classList.remove('disabled');
             
             // Load user collection after login
             loadUserCollection();
+            updateButtonStates();
+        }
+
+        function logoutUser() {
+            // Clear user data
+            currentUser = null;
+            localStorage.removeItem('brickBuyUser');
+            localStorage.removeItem('brickBuyToken');
+            
+            // Update UI for guest user
+            updateUIForGuestUser();
+            
+            // Close profile modal if open
+            const profileModal = document.querySelector('.modal');
+            if (profileModal) {
+                profileModal.remove();
+            }
+            
+            // Show success message
+            showToast('Pomyślnie wylogowano!', 'success');
         }
 
         function updateUIForGuestUser() {
@@ -1341,6 +1574,9 @@
             profileLink.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
             collectionLink.classList.add('disabled');
             
+            // Reset collection and button states for guest user
+            userCollection = { owned: [], wanted: [] };
+            updateButtonStates();
             document.getElementById('collectionCount').textContent = '0';
         }
 
@@ -1349,7 +1585,7 @@
             const token = localStorage.getItem('brickBuyToken');
             
             try {
-                const ownedIndex = userCollection.owned.indexOf(setNumber);
+                const ownedIndex = userCollection.owned.findIndex(item => item.setNumber === setNumber);
                 
                 if (ownedIndex > -1) {
                     // Remove from collection
@@ -1363,31 +1599,11 @@
                     
                     if (response.ok) {
                         userCollection.owned.splice(ownedIndex, 1);
-                        document.getElementById('ownBtn').innerHTML = '<i class="fas fa-check"></i> I Own This';
-                        document.getElementById('ownBtn').classList.remove('active');
+                        updateButtonStates();
                     }
                 } else {
-                    // Add to collection
-                    const response = await fetch('http://localhost:3000/api/lego/collection/add', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            setNumber: setNumber,
-                            collectionType: 'owned',
-                            pricePaid: 0,
-                            condition: 'new',
-                            notes: ''
-                        })
-                    });
-                    
-                    if (response.ok) {
-                        userCollection.owned.push(setNumber);
-                        document.getElementById('ownBtn').innerHTML = '<i class="fas fa-check"></i> Owned ✓';
-                        document.getElementById('ownBtn').classList.add('active');
-                    }
+                    // Show add to collection modal with details
+                    showAddToCollectionModal(setNumber, 'owned');
                 }
                 
                 saveUserCollection();
@@ -1395,39 +1611,77 @@
             } catch (error) {
                 console.error('Collection error:', error);
                 // Fallback to local storage
-                const ownedIndex = userCollection.owned.indexOf(setNumber);
+                const ownedIndex = userCollection.owned.findIndex(item => item.setNumber === setNumber);
                 
                 if (ownedIndex > -1) {
                     userCollection.owned.splice(ownedIndex, 1);
-                    document.getElementById('ownBtn').innerHTML = '<i class="fas fa-check"></i> I Own This';
-                    document.getElementById('ownBtn').classList.remove('active');
                 } else {
-                    userCollection.owned.push(setNumber);
-                    document.getElementById('ownBtn').innerHTML = '<i class="fas fa-check"></i> Owned ✓';
-                    document.getElementById('ownBtn').classList.add('active');
+                    // Add with default values
+                    userCollection.owned.push({
+                        setNumber: setNumber,
+                        pricePaid: 0,
+                        purchaseDate: new Date().toISOString().split('T')[0],
+                        condition: 'new',
+                        quantity: 1,
+                        notes: ''
+                    });
                 }
+                updateButtonStates();
                 
                 saveUserCollection();
                 updateCollectionCount();
             }
         }
 
-        function toggleWanted() {
+        async function toggleWanted() {
             const setNumber = '75399-1';
-            const wantedIndex = userCollection.wanted.indexOf(setNumber);
+            const token = localStorage.getItem('brickBuyToken');
             
-            if (wantedIndex > -1) {
-                userCollection.wanted.splice(wantedIndex, 1);
-                document.getElementById('wantBtn').innerHTML = '<i class="fas fa-heart"></i> I Want This';
-                document.getElementById('wantBtn').classList.remove('active');
-            } else {
-                userCollection.wanted.push(setNumber);
-                document.getElementById('wantBtn').innerHTML = '<i class="fas fa-heart"></i> Wanted ✓';
-                document.getElementById('wantBtn').classList.add('active');
+            try {
+                const wantedIndex = userCollection.wanted.findIndex(item => item.setNumber === setNumber);
+                
+                if (wantedIndex > -1) {
+                    // Remove from collection
+                    const response = await fetch(`http://localhost:3000/api/lego/collection/${setNumber}/wanted`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        userCollection.wanted.splice(wantedIndex, 1);
+                        updateButtonStates();
+                    }
+                } else {
+                    // Show add to wanted modal with details
+                    showAddToCollectionModal(setNumber, 'wanted');
+                }
+                
+                await saveUserCollection();
+                updateCollectionCount();
+            } catch (error) {
+                console.error('Collection error:', error);
+                // Fallback to local storage
+                const wantedIndex = userCollection.wanted.findIndex(item => item.setNumber === setNumber);
+                
+                if (wantedIndex > -1) {
+                    userCollection.wanted.splice(wantedIndex, 1);
+                } else {
+                    // Add with default values
+                    userCollection.wanted.push({
+                        setNumber: setNumber,
+                        maxPrice: 0,
+                        priority: 1,
+                        notes: ''
+                    });
+                }
+                
+                updateButtonStates();
+                saveUserCollection();
+                updateCollectionCount();
             }
-            
-            saveUserCollection();
-            updateCollectionCount();
         }
 
         function updateCollectionCount() {
@@ -1442,37 +1696,607 @@
             }, 200);
         }
 
-        function loadUserCollection() {
+        async function loadUserCollection() {
+            // First load from localStorage for offline support
             const saved = localStorage.getItem('brickBuyCollection');
             if (saved) {
-                userCollection = JSON.parse(saved);
+                try {
+                    const parsed = JSON.parse(saved);
+                    // Migrate old format to new format
+                    if (Array.isArray(parsed.owned) && parsed.owned.length > 0 && typeof parsed.owned[0] === 'string') {
+                        // Old format - convert to new format
+                        userCollection = {
+                            owned: parsed.owned.map(setNumber => ({
+                                setNumber: setNumber,
+                                pricePaid: 0,
+                                purchaseDate: new Date().toISOString().split('T')[0],
+                                condition: 'new',
+                                quantity: 1,
+                                notes: ''
+                            })),
+                            wanted: parsed.wanted.map(setNumber => ({
+                                setNumber: setNumber,
+                                maxPrice: 0,
+                                priority: 1,
+                                notes: ''
+                            }))
+                        };
+                        saveUserCollection(); // Save in new format
+                    } else {
+                        userCollection = parsed;
+                    }
+                } catch (error) {
+                    console.error('Error loading collection from localStorage:', error);
+                    userCollection = { owned: [], wanted: [] };
+                }
             } else {
-                // If no saved collection, check if user is logged in and add default set
-                if (currentUser) {
-                    userCollection = {
-                        owned: ['75399-1'], // User has the Rebel U-Wing Starfighter
-                        wanted: []
-                    };
-                    saveUserCollection();
+                // Initialize empty collection if none exists
+                userCollection = {
+                    owned: [],
+                    wanted: []
+                };
+            }
+            
+            // If user is logged in, also load from database
+            if (isLoggedIn) {
+                try {
+                    const response = await fetch('http://localhost:3000/api/lego/collection', {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.data) {
+                            // Merge database data with localStorage data
+                            const dbCollection = data.data;
+                            
+                            // Convert database format to frontend format
+                            userCollection.owned = dbCollection.owned || [];
+                            userCollection.wanted = dbCollection.wanted || [];
+                            
+                            // Save merged data to localStorage
+                            localStorage.setItem('brickBuyCollection', JSON.stringify(userCollection));
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading collection from database:', error);
+                    // Continue with localStorage data if database fails
                 }
             }
             
             // Update button states for current set
-            const setNumber = '75399-1';
-            if (userCollection.owned.includes(setNumber)) {
-                document.getElementById('ownBtn').innerHTML = '<i class="fas fa-check"></i> Owned ✓';
-                document.getElementById('ownBtn').classList.add('active');
-            }
-            if (userCollection.wanted.includes(setNumber)) {
-                document.getElementById('wantBtn').innerHTML = '<i class="fas fa-heart"></i> Wanted ✓';
-                document.getElementById('wantBtn').classList.add('active');
-            }
-            
+            updateButtonStates();
             updateCollectionCount();
         }
 
-        function saveUserCollection() {
+        function updateButtonStates() {
+            const setNumber = '75399-1';
+            const ownBtn = document.getElementById('ownBtn');
+            const wantBtn = document.getElementById('wantBtn');
+            
+            // Reset button states
+            ownBtn.classList.remove('active');
+            wantBtn.classList.remove('active');
+            
+            // Update owned button
+            const ownedItem = userCollection.owned.find(item => item.setNumber === setNumber);
+            if (ownedItem) {
+                ownBtn.innerHTML = '<i class="fas fa-check"></i> Owned ✓';
+                ownBtn.classList.add('active');
+            } else {
+                ownBtn.innerHTML = '<i class="fas fa-check"></i> I Own This';
+            }
+            
+            // Update wanted button
+            const wantedItem = userCollection.wanted.find(item => item.setNumber === setNumber);
+            if (wantedItem) {
+                wantBtn.innerHTML = '<i class="fas fa-heart"></i> Wanted ✓';
+                wantBtn.classList.add('active');
+            } else {
+                wantBtn.innerHTML = '<i class="fas fa-heart"></i> I Want This';
+            }
+            
+            // Update collection details display
+            updateCollectionDetailsDisplay();
+        }
+
+        function updateCollectionDetailsDisplay() {
+            const setNumber = '75399-1';
+            const ownedItem = userCollection.owned.find(item => item.setNumber === setNumber);
+            const wantedItem = userCollection.wanted.find(item => item.setNumber === setNumber);
+            
+            // Remove existing details if any
+            const existingDetails = document.getElementById('collectionDetails');
+            if (existingDetails) {
+                existingDetails.remove();
+            }
+            
+            // Create details container
+            const detailsContainer = document.createElement('div');
+            detailsContainer.id = 'collectionDetails';
+            detailsContainer.className = 'collection-details-display';
+            
+            let detailsHTML = '';
+            
+            if (ownedItem) {
+                detailsHTML += `
+                    <div class="collection-detail-section owned-details">
+                        <h4><i class="fas fa-check-circle"></i> Posiadany</h4>
+                        <div class="detail-grid">
+                            ${ownedItem.pricePaid > 0 ? `<div class="detail-item"><i class="fas fa-tag"></i> ${ownedItem.pricePaid} ${ownedItem.currency || 'PLN'}</div>` : ''}
+                            ${ownedItem.purchaseDate ? `<div class="detail-item"><i class="fas fa-calendar"></i> ${formatDate(ownedItem.purchaseDate)}</div>` : ''}
+                            ${ownedItem.condition ? `<div class="detail-item"><i class="fas fa-check-circle"></i> ${getConditionLabel(ownedItem.condition)}</div>` : ''}
+                            ${ownedItem.quantity > 1 ? `<div class="detail-item"><i class="fas fa-layer-group"></i> x${ownedItem.quantity}</div>` : ''}
+                        </div>
+                        ${ownedItem.notes ? `<div class="detail-notes">${ownedItem.notes}</div>` : ''}
+                    </div>
+                `;
+            }
+            
+            if (wantedItem) {
+                detailsHTML += `
+                    <div class="collection-detail-section wanted-details">
+                        <h4><i class="fas fa-heart"></i> Pożądany</h4>
+                        <div class="detail-grid">
+                            ${wantedItem.maxPrice > 0 ? `<div class="detail-item"><i class="fas fa-tag"></i> Max ${wantedItem.maxPrice} ${wantedItem.currency || 'PLN'}</div>` : ''}
+                            ${wantedItem.priority ? `<div class="detail-item"><i class="fas fa-star"></i> ${getPriorityLabel(wantedItem.priority)}</div>` : ''}
+                        </div>
+                        ${wantedItem.notes ? `<div class="detail-notes">${wantedItem.notes}</div>` : ''}
+                    </div>
+                `;
+            }
+            
+            if (detailsHTML) {
+                detailsContainer.innerHTML = detailsHTML;
+                
+                // Add styles
+                const style = document.createElement('style');
+                style.textContent = `
+                    .collection-details-display {
+                        margin-top: 20px;
+                        padding: 20px;
+                        background: #f8f9fa;
+                        border-radius: 12px;
+                        border: 1px solid #e0e0e0;
+                    }
+                    
+                    .collection-detail-section {
+                        margin-bottom: 15px;
+                    }
+                    
+                    .collection-detail-section:last-child {
+                        margin-bottom: 0;
+                    }
+                    
+                    .collection-detail-section h4 {
+                        margin: 0 0 10px 0;
+                        color: #333;
+                        font-size: 16px;
+                        font-weight: 600;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    }
+                    
+                    .owned-details h4 {
+                        color: #4caf50;
+                    }
+                    
+                    .wanted-details h4 {
+                        color: #2196f3;
+                    }
+                    
+                    .detail-grid {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                        margin-bottom: 10px;
+                    }
+                    
+                    .detail-item {
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                        background: white;
+                        color: #666;
+                        padding: 6px 12px;
+                        border-radius: 16px;
+                        font-size: 13px;
+                        font-weight: 500;
+                        border: 1px solid #e0e0e0;
+                    }
+                    
+                    .detail-item i {
+                        font-size: 11px;
+                    }
+                    
+                    .detail-notes {
+                        background: white;
+                        color: #666;
+                        padding: 10px;
+                        border-radius: 8px;
+                        font-size: 13px;
+                        font-style: italic;
+                        border-left: 3px solid #1976d2;
+                        margin-top: 8px;
+                    }
+                `;
+                
+                // Insert after action buttons
+                const actionButtons = document.querySelector('.action-buttons');
+                actionButtons.parentNode.insertBefore(detailsContainer, actionButtons.nextSibling);
+                document.head.appendChild(style);
+            }
+        }
+
+        async function saveUserCollection() {
+            // Save to localStorage for offline support
             localStorage.setItem('brickBuyCollection', JSON.stringify(userCollection));
+            
+            // Also save to database if user is logged in
+            if (isLoggedIn && userCollection.owned.length > 0) {
+                try {
+                    for (const item of userCollection.owned) {
+                        await fetch('http://localhost:3000/api/lego/collection/add', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            },
+                            body: JSON.stringify({
+                                setNumber: item.setNumber,
+                                collectionType: 'owned',
+                                quantity: item.quantity || 1,
+                                paidPrice: item.pricePaid || 0,
+                                condition: item.condition || 'new',
+                                notes: item.notes || '',
+                                currency: item.currency || 'PLN',
+                                purchaseDate: item.purchaseDate
+                            })
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error saving to database:', error);
+                }
+            }
+            
+            if (isLoggedIn && userCollection.wanted.length > 0) {
+                try {
+                    for (const item of userCollection.wanted) {
+                        await fetch('http://localhost:3000/api/lego/collection/add', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            },
+                            body: JSON.stringify({
+                                setNumber: item.setNumber,
+                                collectionType: 'wanted',
+                                maxPrice: item.maxPrice || 0,
+                                priority: item.priority || 1,
+                                notes: item.notes || '',
+                                currency: item.currency || 'PLN'
+                            })
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error saving to database:', error);
+                }
+            }
+        }
+
+        function showAddToCollectionModal(setNumber, collectionType) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'flex';
+            
+            const isOwned = collectionType === 'owned';
+            const setInfo = getSetInfo(setNumber);
+            
+            modal.innerHTML = `
+                <div class="modal-content collection-modal">
+                    <div class="modal-header">
+                        <h2>Dodaj do kolekcji</h2>
+                        <span class="close" onclick="this.closest('.modal').remove()">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="set-preview">
+                            <div class="set-image">🚀</div>
+                            <div class="set-info">
+                                <h3>${setInfo.name}</h3>
+                                <p>Set #${setNumber} • ${setInfo.theme} • ${setInfo.year}</p>
+                            </div>
+                        </div>
+                        
+                        <form id="collectionForm" class="collection-form">
+                            ${isOwned ? `
+                                <div class="form-group">
+                                    <label for="pricePaid">Cena zakupu</label>
+                                    <div class="price-input-group">
+                                        <input type="number" id="pricePaid" name="pricePaid" step="0.01" min="0" placeholder="0.00">
+                                        <select id="currency" name="currency" class="currency-select">
+                                            <option value="PLN">PLN</option>
+                                            <option value="EUR">EUR</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="purchaseDate">Data zakupu</label>
+                                    <input type="date" id="purchaseDate" name="purchaseDate" value="${new Date().toISOString().split('T')[0]}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="condition">Stan</label>
+                                    <select id="condition" name="condition">
+                                        <option value="new">Nowy</option>
+                                        <option value="used-excellent">Używany - Bardzo dobry</option>
+                                        <option value="used-good">Używany - Dobry</option>
+                                        <option value="used-fair">Używany - Średni</option>
+                                        <option value="incomplete">Niekompletny</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="quantity">Ilość</label>
+                                    <input type="number" id="quantity" name="quantity" min="1" value="1">
+                                </div>
+                            ` : `
+                                <div class="form-group">
+                                    <label for="maxPrice">Maksymalna cena</label>
+                                    <div class="price-input-group">
+                                        <input type="number" id="maxPrice" name="maxPrice" step="0.01" min="0" placeholder="0.00">
+                                        <select id="currency" name="currency" class="currency-select">
+                                            <option value="PLN">PLN</option>
+                                            <option value="EUR">EUR</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="priority">Priorytet</label>
+                                    <select id="priority" name="priority">
+                                        <option value="1">Bardzo wysoki</option>
+                                        <option value="2">Wysoki</option>
+                                        <option value="3">Średni</option>
+                                        <option value="4">Niski</option>
+                                        <option value="5">Bardzo niski</option>
+                                    </select>
+                                </div>
+                            `}
+                            
+                            <div class="form-group">
+                                <label for="notes">Notatki</label>
+                                <textarea id="notes" name="notes" rows="3" placeholder="Dodatkowe informacje..."></textarea>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Anuluj</button>
+                                <button type="submit" class="btn btn-primary">Dodaj do kolekcji</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            // Add styles for collection modal
+            const style = document.createElement('style');
+            style.textContent = `
+                .collection-modal {
+                    max-width: 500px;
+                    width: 95%;
+                }
+                
+                .set-preview {
+                    display: flex;
+                    gap: 15px;
+                    margin-bottom: 20px;
+                    padding: 15px;
+                    background: #f8f9fa;
+                    border-radius: 8px;
+                }
+                
+                .set-preview .set-image {
+                    width: 60px;
+                    height: 60px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    border-radius: 8px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-size: 24px;
+                    flex-shrink: 0;
+                }
+                
+                .set-preview .set-info h3 {
+                    margin: 0 0 5px 0;
+                    color: #333;
+                    font-size: 16px;
+                    font-weight: 600;
+                }
+                
+                .set-preview .set-info p {
+                    margin: 0;
+                    color: #666;
+                    font-size: 14px;
+                }
+                
+                .collection-form {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 15px;
+                }
+                
+                .form-group {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 5px;
+                }
+                
+                .form-group label {
+                    font-weight: 600;
+                    color: #333;
+                    font-size: 14px;
+                }
+                
+                .form-group input,
+                .form-group select,
+                .form-group textarea {
+                    padding: 10px 12px;
+                    border: 2px solid #e0e0e0;
+                    border-radius: 6px;
+                    font-size: 14px;
+                    transition: border-color 0.3s ease;
+                }
+                
+                .form-group input:focus,
+                .form-group select:focus,
+                .form-group textarea:focus {
+                    outline: none;
+                    border-color: #1976d2;
+                }
+                
+                .price-input-group {
+                    display: flex;
+                    gap: 8px;
+                }
+                
+                .price-input-group input {
+                    flex: 1;
+                }
+                
+                .currency-select {
+                    min-width: 80px;
+                    flex-shrink: 0;
+                }
+                
+                .form-actions {
+                    display: flex;
+                    gap: 10px;
+                    justify-content: flex-end;
+                    margin-top: 20px;
+                }
+            `;
+            
+            document.head.appendChild(style);
+            document.body.appendChild(modal);
+            
+            // Handle form submission
+            modal.querySelector('#collectionForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const item = {
+                    setNumber: setNumber,
+                    notes: formData.get('notes') || ''
+                };
+                
+                if (isOwned) {
+                    item.pricePaid = parseFloat(formData.get('pricePaid')) || 0;
+                    item.currency = formData.get('currency') || 'PLN';
+                    item.purchaseDate = formData.get('purchaseDate');
+                    item.condition = formData.get('condition');
+                    item.quantity = parseInt(formData.get('quantity')) || 1;
+                    
+                    userCollection.owned.push(item);
+                } else {
+                    item.maxPrice = parseFloat(formData.get('maxPrice')) || 0;
+                    item.currency = formData.get('currency') || 'PLN';
+                    item.priority = parseInt(formData.get('priority')) || 1;
+                    
+                    userCollection.wanted.push(item);
+                }
+                
+                // Save to database if logged in
+                if (isLoggedIn) {
+                    try {
+                        const response = await fetch('http://localhost:3000/api/lego/collection/add', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            },
+                            body: JSON.stringify({
+                                setNumber: item.setNumber,
+                                collectionType: isOwned ? 'owned' : 'wanted',
+                                quantity: item.quantity || 1,
+                                paidPrice: item.pricePaid || 0,
+                                maxPrice: item.maxPrice || 0,
+                                condition: item.condition || 'new',
+                                priority: item.priority || 1,
+                                notes: item.notes || '',
+                                currency: item.currency || 'PLN',
+                                purchaseDate: item.purchaseDate
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                            console.error('Error saving to database:', await response.text());
+                        }
+                    } catch (error) {
+                        console.error('Error saving to database:', error);
+                    }
+                }
+                
+                updateButtonStates();
+                await saveUserCollection();
+                updateCollectionCount();
+                
+                modal.remove();
+                style.remove();
+                
+                showToast(`Zestaw został dodany do kolekcji jako ${isOwned ? 'posiadany' : 'pożądany'}!`, 'success');
+            });
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                    style.remove();
+                }
+            });
+        }
+
+        function getSetInfo(setNumber) {
+            const setInfo = {
+                '75399-1': {
+                    name: 'Rebel U-Wing Starfighter',
+                    theme: 'Star Wars',
+                    year: '2024'
+                }
+            };
+            return setInfo[setNumber] || { name: 'Unknown Set', theme: 'Unknown', year: 'Unknown' };
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pl-PL');
+        }
+
+        function getConditionLabel(condition) {
+            const labels = {
+                'new': 'Nowy',
+                'used-excellent': 'Używany - Bardzo dobry',
+                'used-good': 'Używany - Dobry',
+                'used-fair': 'Używany - Średni',
+                'incomplete': 'Niekompletny'
+            };
+            return labels[condition] || condition;
+        }
+
+        function getPriorityLabel(priority) {
+            const labels = {
+                1: 'Bardzo wysoki',
+                2: 'Wysoki',
+                3: 'Średni',
+                4: 'Niski',
+                5: 'Bardzo niski'
+            };
+            return labels[priority] || 'Nieznany';
         }
 
         async function loadSetData() {
@@ -1559,6 +2383,7 @@
                                         <small>Display this region's currency and dates.</small>
                                     </div>
                                     <button class="profile-btn">Update Profile</button>
+                                    <button class="profile-btn logout-btn" onclick="logoutUser()">Logout</button>
                                 </div>
                             </div>
                             <div class="profile-right">
@@ -1690,6 +2515,15 @@
                 
                 .profile-btn:hover {
                     transform: translateY(-2px);
+                }
+
+                .logout-btn {
+                    background: #f44336 !important;
+                    margin-top: 10px;
+                }
+
+                .logout-btn:hover {
+                    background: #d32f2f !important;
                 }
                 
                 .collection-stats {
