@@ -15,6 +15,12 @@ services:
     networks:
       - lego-network
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/run
     deploy:
       resources:
         limits:
@@ -37,7 +43,7 @@ services:
     environment:
       POSTGRES_DB: lego_purchase_system
       POSTGRES_USER: lego_user
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lego_secure_password_2024}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_HOST_AUTH_METHOD: md5
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
       # Performance optimizations for faster startup
@@ -47,7 +53,7 @@ services:
       POSTGRES_CHECKPOINT_COMPLETION_TARGET: 0.9
       POSTGRES_WAL_BUFFERS: 16MB
       POSTGRES_DEFAULT_STATISTICS_TARGET: 100
-      # Fast startup optimizations
+      # Fast startup optimizations (DEV ONLY - not for production!)
       POSTGRES_FSYNC: "off"
       POSTGRES_SYNCHRONOUS_COMMIT: "off"
       POSTGRES_WAL_LEVEL: "minimal"
@@ -90,22 +96,22 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: postgresql://lego_user:${POSTGRES_PASSWORD:-lego_secure_password_2024}@database:5432/lego_purchase_system
+      DATABASE_URL: postgresql://lego_user:${POSTGRES_PASSWORD}@database:5432/lego_purchase_system
       # Database connection variables for User.js model
       POSTGRES_HOST: database
       POSTGRES_USER: lego_user
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lego_secure_password_2024}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: lego_purchase_system
       POSTGRES_PORT: 5432
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      JWT_SECRET: ${JWT_SECRET:-LegoSecureJWTSecretKey2024!@#$%^&*()_+{}[]|\\:";'<>?,./~`}
+      JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: 24h
       FRONTEND_URL: http://localhost:5500
       EMAIL_HOST: smtp.gmail.com
       EMAIL_PORT: 587
-      EMAIL_USER: ${EMAIL_USER:-your-email@gmail.com}
-      EMAIL_PASS: ${EMAIL_PASS:-your-app-password}
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASS: ${EMAIL_PASS}
       # Performance optimizations for faster startup
       NODE_OPTIONS: "--max-old-space-size=512"
       UV_THREADPOOL_SIZE: 4
@@ -119,6 +125,8 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -154,6 +162,8 @@ services:
       backend:
         condition: service_healthy
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     volumes:
       - ./frontend:/usr/share/nginx/html
       - /usr/share/nginx/html/node_modules
@@ -179,7 +189,7 @@ services:
     environment:
       POSTGRES_DB: lego_purchase_system
       POSTGRES_USER: lego_user
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lego_secure_password_2024}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_HOST_AUTH_METHOD: md5
     ports:
       - "5433:5432"
@@ -195,7 +205,7 @@ services:
         echo 'Host: localhost'
         echo 'Port: 5433'
         echo 'User: lego_user'
-        echo 'Password: (no password required)'
+        echo 'Password: Use POSTGRES_PASSWORD from .env file'
         echo 'Database: lego_purchase_system'
         echo ''
         echo 'Waiting for database to be ready...'
