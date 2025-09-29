@@ -20,6 +20,22 @@ const logsRoutes = require('./routes/logs');
 const legoRoutes = require('./routes/lego');
 const { errorHandler } = require('./middleware/errorHandler');
 const { requestLogger, errorLogger, info, security, error } = require('./utils/logger');
+
+// Environment variables validation
+const validateEnvironmentVariables = () => {
+  const required = ['JWT_SECRET', 'DATABASE_URL'];
+  const missing = required.filter(key => !process.env[key]);
+  
+  if (missing.length > 0) {
+    error('Missing required environment variables', { missing });
+    process.exit(1);
+  }
+  
+  info('Environment variables validation passed');
+};
+
+// Call before server start
+validateEnvironmentVariables();
 const { monitoringMiddleware, getMetricsEndpoint, cleanupLogsEndpoint, schedulerControlEndpoint, logCleanupScheduler } = require('./utils/monitoring');
 const redisService = require('./utils/redisService');
 

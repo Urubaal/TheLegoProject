@@ -27,8 +27,16 @@ class RedisService {
       });
 
       this.client.on('error', (err) => {
-        error('Redis client error', { error: err.message, stack: err.stack });
+        error('Redis client error', {
+          error: err.message,
+          stack: err.stack,
+          code: err.code
+        });
         this.isConnected = false;
+      });
+
+      this.client.on('reconnecting', () => {
+        warn('Redis client reconnecting');
       });
 
       this.client.on('connect', () => {

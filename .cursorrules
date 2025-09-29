@@ -1,0 +1,86 @@
+# Cursor AI Rules for LEGO Purchase System
+
+## Project Context
+This is a FULLY FUNCTIONAL LEGO purchase suggestion system with:
+- **Backend**: Node.js/Express API with PostgreSQL + Redis
+- **Frontend**: Vanilla HTML/CSS/JS (responsive)
+- **Database**: PostgreSQL with 1000+ LEGO sets, user collections, OLX offers
+- **Cache**: Redis for sessions, tokens, and performance
+- **Auth**: JWT + email verification + password reset
+- **Security**: Helmet, CORS, rate limiting, input validation
+- **Monitoring**: Structured logging, health checks, metrics
+- **Deployment**: Docker Compose (dev & prod)
+
+## Key Files to Check
+- `PROJECT_STATUS.md` - Complete implementation status
+- `QUICK_START.md` - Immediate setup and features overview
+- `CHANGELOG.md` - Recent changes and updates
+- `backend/server.js` - Main server with all middleware
+- `backend/models/` - Database models (User, LegoSet, UserCollection, OlxOffer)
+- `backend/utils/` - Services (redisService, emailService, logger, monitoring)
+- `docker-compose.yml` - Development environment
+- `env.example` - Required environment variables
+
+## Database Schema
+- `users` - User accounts with JWT auth
+- `lego_sets` - 1000+ LEGO sets catalog
+- `user_collections` - User owned/wanted collections
+- `olx_offers` - Marketplace offers
+- `system_logs` - Application logs
+
+## Important Notes
+- PostgreSQL is PRIMARY database (not MongoDB)
+- Redis is OPTIONAL (fallback mode if not available)
+- Email service uses SMTP (Nodemailer)
+- All models have connection pool error handling
+- Environment variables validation on startup
+- Structured logging with Winston
+- Rate limiting and security middleware active
+- Error handling enhanced with PostgreSQL-specific codes
+
+## When Making Changes
+1. Check `PROJECT_STATUS.md` first
+2. Verify database schema in `lego_database_schema.sql`
+3. Check existing models before adding new fields
+4. Follow `DEVELOPMENT_RULES.md` for database changes
+5. Test with Docker Compose setup
+6. Run `node update-docs.js` to update documentation
+
+## Common Commands
+```bash
+# Start development
+docker-compose up -d
+
+# Check logs
+docker-compose logs -f backend
+
+# Database access
+docker exec -it lego_db psql -U lego_user -d lego_purchase_system
+
+# Redis access  
+docker exec -it lego_redis redis-cli
+
+# Update documentation
+node update-docs.js
+```
+
+## Never Assume
+- ❌ Don't assume MongoDB (it's PostgreSQL)
+- ❌ Don't assume Redis is required (fallback mode exists)
+- ❌ Don't assume no auth (JWT middleware is active)
+- ❌ Don't assume no logging (structured logging is everywhere)
+- ❌ Don't assume no security (Helmet, CORS, rate limiting active)
+- ❌ Don't assume no error handling (PostgreSQL errors are handled)
+
+## Always Check
+- ✅ Check `PROJECT_STATUS.md` for current features
+- ✅ Check `QUICK_START.md` for setup
+- ✅ Check `CHANGELOG.md` for recent changes
+- ✅ Check existing models before database changes
+- ✅ Check Docker setup before deployment changes
+- ✅ Check environment variables in `env.example`
+- ✅ Run documentation update after changes
+
+---
+**Last Updated**: 2025-09-29
+**Version**: Auto-generated

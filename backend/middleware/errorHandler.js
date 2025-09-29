@@ -54,6 +54,27 @@ const errorHandler = (err, req, res, next) => {
     error = new AppError('Invalid ID format', 400);
   }
 
+  // PostgreSQL specific errors
+  if (err.code) {
+    switch (err.code) {
+      case '23505': // unique_violation
+        error = new AppError('Duplicate entry', 400);
+        break;
+      case '23503': // foreign_key_violation
+        error = new AppError('Referenced record not found', 400);
+        break;
+      case '23502': // not_null_violation
+        error = new AppError('Required field missing', 400);
+        break;
+      case 'ECONNREFUSED':
+        error = new AppError('Database connection failed', 503);
+        break;
+      case 'ENOTFOUND':
+        error = new AppError('Database host not found', 503);
+        break;
+    }
+  }
+
   // Default to 500 server error
   const statusCode = error.statusCode || 500;
   const message = error.isOperational ? error.message : 'Internal Server Error';
