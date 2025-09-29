@@ -94,7 +94,7 @@ class OlxOffer {
         oo.*,
         ls.name as set_name,
         ls.theme,
-        ls.year,
+        ls.year_released as year,
         ls.retail_price
       FROM olx_offers oo
       LEFT JOIN lego_sets ls ON oo.set_number = ls.set_number
@@ -134,7 +134,7 @@ class OlxOffer {
         oo.*,
         ls.name as set_name,
         ls.theme,
-        ls.year,
+        ls.year_released as year,
         ls.retail_price,
         ls.image_url as set_image_url
       FROM olx_offers oo
@@ -170,7 +170,7 @@ class OlxOffer {
         oo.*,
         ls.name as set_name,
         ls.theme,
-        ls.year,
+        ls.year_released as year,
         ls.retail_price
       FROM olx_offers oo
       LEFT JOIN lego_sets ls ON oo.set_number = ls.set_number
@@ -243,7 +243,7 @@ class OlxOffer {
         oo.*,
         ls.name as set_name,
         ls.theme,
-        ls.year,
+        ls.year_released as year,
         ls.retail_price
       FROM olx_offers oo
       LEFT JOIN lego_sets ls ON oo.set_number = ls.set_number
@@ -423,6 +423,56 @@ class OlxOffer {
     try {
       const result = await pool.query(query);
       return result.rowCount;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Count offers with filters
+  static async count(options = {}) {
+    const { 
+      activeOnly = true, 
+      minPrice = null, 
+      maxPrice = null, 
+      condition = null, 
+      location = null
+    } = options;
+    
+    let query = 'SELECT COUNT(*) FROM olx_offers WHERE 1=1';
+    const values = [];
+    let paramCount = 0;
+    
+    if (activeOnly) {
+      query += ' AND is_active = true';
+    }
+    
+    if (minPrice !== null) {
+      paramCount++;
+      query += ` AND price >= $${paramCount}`;
+      values.push(minPrice);
+    }
+    
+    if (maxPrice !== null) {
+      paramCount++;
+      query += ` AND price <= $${paramCount}`;
+      values.push(maxPrice);
+    }
+    
+    if (condition) {
+      paramCount++;
+      query += ` AND condition ILIKE $${paramCount}`;
+      values.push(`%${condition}%`);
+    }
+    
+    if (location) {
+      paramCount++;
+      query += ` AND location ILIKE $${paramCount}`;
+      values.push(`%${location}%`);
+    }
+    
+    try {
+      const result = await pool.query(query, values);
+      return parseInt(result.rows[0].count);
     } catch (error) {
       throw error;
     }

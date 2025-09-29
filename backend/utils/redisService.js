@@ -92,7 +92,7 @@ class RedisService {
   // Password reset token methods
   async storeResetToken(token, data, ttlSeconds = 3600) {
     if (!this.isConnected) {
-      throw new Error('Redis not connected');
+      throw new Error('Redis not connected - fallback mode disabled');
     }
 
     try {
@@ -117,7 +117,7 @@ class RedisService {
 
   async getResetToken(token) {
     if (!this.isConnected) {
-      throw new Error('Redis not connected');
+      throw new Error('Redis not connected - fallback mode disabled');
     }
 
     try {
@@ -142,7 +142,7 @@ class RedisService {
 
   async markResetTokenAsUsed(token) {
     if (!this.isConnected) {
-      throw new Error('Redis not connected');
+      throw new Error('Redis not connected - fallback mode disabled');
     }
 
     try {
@@ -172,7 +172,7 @@ class RedisService {
 
   async deleteResetToken(token) {
     if (!this.isConnected) {
-      throw new Error('Redis not connected');
+      throw new Error('Redis not connected - fallback mode disabled');
     }
 
     try {
@@ -193,7 +193,7 @@ class RedisService {
   // Generic key-value operations
   async set(key, value, ttlSeconds = null) {
     if (!this.isConnected) {
-      throw new Error('Redis not connected');
+      throw new Error('Redis not connected - fallback mode disabled');
     }
 
     try {
@@ -212,7 +212,7 @@ class RedisService {
   // Batch operations for better performance
   async mset(keyValuePairs, ttlSeconds = null) {
     if (!this.isConnected) {
-      throw new Error('Redis not connected');
+      throw new Error('Redis not connected - fallback mode disabled');
     }
 
     try {
@@ -237,7 +237,7 @@ class RedisService {
   // Get multiple keys at once
   async mget(keys) {
     if (!this.isConnected) {
-      throw new Error('Redis not connected');
+      throw new Error('Redis not connected - fallback mode disabled');
     }
 
     try {
@@ -252,7 +252,7 @@ class RedisService {
   // Delete multiple keys by pattern
   async delPattern(pattern) {
     if (!this.isConnected) {
-      throw new Error('Redis not connected');
+      throw new Error('Redis not connected - fallback mode disabled');
     }
 
     try {
@@ -311,7 +311,7 @@ class RedisService {
 
   async get(key) {
     if (!this.isConnected) {
-      throw new Error('Redis not connected');
+      throw new Error('Redis not connected - fallback mode disabled');
     }
 
     try {
@@ -325,7 +325,7 @@ class RedisService {
 
   async del(key) {
     if (!this.isConnected) {
-      throw new Error('Redis not connected');
+      throw new Error('Redis not connected - fallback mode disabled');
     }
 
     try {
