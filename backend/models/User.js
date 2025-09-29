@@ -1,4 +1,5 @@
 const { Pool } = require('pg');
+const { error, info, debug } = require('../utils/logger');
 
 // Database connection pool with optimized settings
 const pool = new Pool({
@@ -21,6 +22,26 @@ const pool = new Pool({
   statement_timeout: 30000,
   // Query timeout
   query_timeout: 10000
+});
+
+// Pool error handling
+pool.on('error', (err) => {
+  error('Database pool error', {
+    error: err.message,
+    stack: err.stack
+  });
+});
+
+pool.on('connect', () => {
+  info('Database pool connected');
+});
+
+pool.on('acquire', () => {
+  debug('Database connection acquired');
+});
+
+pool.on('remove', () => {
+  debug('Database connection removed');
 });
 
 // Helper function to convert UTC to Poland time for display

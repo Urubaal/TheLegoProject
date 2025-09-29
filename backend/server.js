@@ -5,6 +5,8 @@ const rateLimit = require('express-rate-limit');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 require('dotenv').config();
 
 // ⚠️ WAŻNE: Przy dodawaniu nowych pól do API ZAWSZE sprawdź:
@@ -20,8 +22,224 @@ const logsRoutes = require('./routes/logs');
 const legoRoutes = require('./routes/lego');
 const { errorHandler } = require('./middleware/errorHandler');
 const { requestLogger, errorLogger, info, security, error } = require('./utils/logger');
+
+// Environment variables validation
+const validateEnvironmentVariables = () => {
+  const required = ['JWT_SECRET', 'DATABASE_URL'];
+  const missing = required.filter(key => !process.env[key]);
+  
+  if (missing.length > 0) {
+    error('Missing required environment variables', { missing });
+    process.exit(1);
+  }
+  
+  info('Environment variables validation passed');
+};
+
+// Call before server start
+validateEnvironmentVariables();
 const { monitoringMiddleware, getMetricsEndpoint, cleanupLogsEndpoint, schedulerControlEndpoint, logCleanupScheduler } = require('./utils/monitoring');
 const redisService = require('./utils/redisService');
+
+// Swagger configuration
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'LEGO Purchase System API',
+      version: '1.0.0',
+      description: 'API for LEGO set management, user collections, and OLX offers integration',
+      contact: {
+        name: 'LEGO Purchase System',
+        email: 'support@legopurchase.com'
+      },
+      license: {
+        name: 'MIT',
+        url: 'https://opensource.org/licenses/MIT'
+      }
+    },
+    servers: [
+      {
+        url: 'http://localhost:3000',
+        description: 'Development server'
+      }
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        }
+      },
+      schemas: {
+        Error: {
+          type: 'object',
+          properties: {
+            success: {
+              type: 'boolean',
+              example: false
+            },
+            error: {
+              type: 'string',
+              example: 'Error message'
+            }
+          }
+        },
+        LegoSet: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              format: 'uuid'
+            },
+            set_number: {
+              type: 'string',
+              example: '75399-1'
+            },
+            name: {
+              type: 'string',
+              example: 'Rebel U-Wing Starfighter'
+            },
+            theme: {
+              type: 'string',
+              example: 'Star Wars'
+            },
+            year: {
+              type: 'integer',
+              example: 2024
+            },
+            pieces: {
+              type: 'integer',
+              example: 1065
+            },
+            retail_price: {
+              type: 'number',
+              format: 'float',
+              example: 79.99
+            },
+            image_url: {
+              type: 'string',
+              format: 'uri'
+            },
+            description: {
+              type: 'string'
+            }
+          }
+        },
+        OlxOffer: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer'
+            },
+            set_number: {
+              type: 'string',
+              example: '75399-1'
+            },
+            title: {
+              type: 'string',
+              example: 'LEGO Star Wars Rebel U-Wing Starfighter 75399 - NOWY'
+            },
+            price: {
+              type: 'number',
+              format: 'float',
+              example: 65.00
+            },
+            condition: {
+              type: 'string',
+              example: 'Nowy'
+            },
+            location: {
+              type: 'string',
+              example: 'Warszawa'
+            },
+            seller_name: {
+              type: 'string',
+              example: 'LEGO_Fan_123'
+            },
+            seller_rating: {
+              type: 'number',
+              format: 'float',
+              example: 4.8
+            },
+            offer_url: {
+              type: 'string',
+              format: 'uri'
+            },
+            image_url: {
+              type: 'string',
+              format: 'uri'
+            },
+            description: {
+              type: 'string'
+            },
+            is_active: {
+              type: 'boolean',
+              example: true
+            },
+            created_at: {
+              type: 'string',
+              format: 'date-time'
+            },
+            updated_at: {
+              type: 'string',
+              format: 'date-time'
+            }
+          }
+        },
+        UserCollection: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer'
+            },
+            user_id: {
+              type: 'integer'
+            },
+            set_number: {
+              type: 'string',
+              example: '75399-1'
+            },
+            collection_type: {
+              type: 'string',
+              enum: ['owned', 'wanted'],
+              example: 'owned'
+            },
+            quantity: {
+              type: 'integer',
+              example: 1
+            },
+            paid_price: {
+              type: 'number',
+              format: 'float',
+              example: 65.00
+            },
+            condition: {
+              type: 'string',
+              enum: ['new', 'used', 'excellent', 'good', 'fair'],
+              example: 'new'
+            },
+            notes: {
+              type: 'string'
+            },
+            created_at: {
+              type: 'string',
+              format: 'date-time'
+            },
+            updated_at: {
+              type: 'string',
+              format: 'date-time'
+            }
+          }
+        }
+      }
+    }
+  },
+  apis: ['./routes/*.js', './controllers/*.js']
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -167,6 +385,65 @@ app.get('/api/health', (req, res) => {
   res.json(healthData);
 });
 
+// Swagger documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'LEGO Purchase System API Documentation'
+}));
+
+// Swagger JSON endpoint
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
+// Setup endpoint (for development only)
+if (process.env.NODE_ENV === 'development') {
+  app.post('/api/setup', async (req, res) => {
+    try {
+      const { Pool } = require('pg');
+      const fs = require('fs');
+      const path = require('path');
+      
+      const pool = new Pool({
+        user: process.env.POSTGRES_USER || 'lego_user',
+        host: process.env.POSTGRES_HOST || 'localhost',
+        database: process.env.POSTGRES_DB || 'lego_purchase_system',
+        port: process.env.POSTGRES_PORT || 5432,
+        password: process.env.POSTGRES_PASSWORD || 'lego_password'
+      });
+      
+      // Read migration file
+      const migrationPath = path.join(__dirname, 'migrations', 'create_lego_tables.sql');
+      const migrationSQL = fs.readFileSync(migrationPath, 'utf8');
+      
+      // Run migration
+      await pool.query(migrationSQL);
+      
+      // Check if data exists
+      const setsResult = await pool.query('SELECT COUNT(*) FROM lego_sets');
+      const offersResult = await pool.query('SELECT COUNT(*) FROM olx_offers');
+      
+      await pool.end();
+      
+      res.json({
+        success: true,
+        message: 'Database setup completed',
+        data: {
+          sets: parseInt(setsResult.rows[0].count),
+          offers: parseInt(offersResult.rows[0].count)
+        }
+      });
+    } catch (error) {
+      console.error('Setup error:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message
+      });
+    }
+  });
+}
+
 // Monitoring endpoints
 app.get('/api/metrics', getMetricsEndpoint);
 app.post('/api/admin/cleanup-logs', cleanupLogsEndpoint);
@@ -206,8 +483,8 @@ const initializeRedis = async (retries = 3, delay = 1000) => {
       }
     }
   }
-  error('Failed to establish Redis connection after all retries - password reset functionality may be limited');
-  return false;
+  error('Failed to establish Redis connection after all retries - REDIS IS REQUIRED');
+  throw new Error('Redis connection failed - system cannot start without Redis');
 };
 
 // Start server only if not in test environment
@@ -215,17 +492,17 @@ if (process.env.NODE_ENV !== 'test') {
   // Initialize Redis and start server with graceful startup
   const startServer = async () => {
     try {
-      // Initialize Redis in parallel with other startup tasks
-      const redisPromise = initializeRedis();
+      // Initialize Redis FIRST - system requires Redis to start
+      await initializeRedis();
       
-      // Start server immediately, Redis will connect in background
+      // Start server only after Redis is connected
       const server = app.listen(PORT, () => {
         const serverInfo = {
           port: PORT,
           frontendUrl: process.env.FRONTEND_URL || 'http://localhost:8080',
           environment: process.env.NODE_ENV || 'development',
           database: process.env.POSTGRES_DB || 'lego_purchase_system',
-          redis: 'connecting...'
+          redis: 'connected'
         };
         
         console.log(`🚀 Server running on port ${PORT}`);
@@ -242,13 +519,8 @@ if (process.env.NODE_ENV !== 'test') {
         info('Automatic log cleanup scheduler started', { intervalHours: cleanupInterval });
       });
 
-      // Wait for Redis connection and update status
-      const redisConnected = await redisPromise;
-      if (redisConnected) {
-        console.log('🔴 Redis: connected');
-      } else {
-        console.log('🔴 Redis: disconnected (fallback mode)');
-      }
+      // Redis is already connected at this point
+      console.log('🔴 Redis: connected (required)');
 
       // Graceful shutdown handling
       const gracefulShutdown = (signal) => {
@@ -265,8 +537,9 @@ if (process.env.NODE_ENV !== 'test') {
       process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
       process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
-    } catch (error) {
-      error('Failed to start server', { error: error.message, stack: error.stack });
+    } catch (err) {
+      console.error('Failed to start server:', err.message);
+      console.error(err.stack);
       process.exit(1);
     }
   };

@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const { error, info } = require('./logger');
 
 // Create email transporter
 const createTransporter = () => {
@@ -45,11 +46,11 @@ const sendPasswordResetEmail = async (email, resetToken) => {
       `
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Password reset email sent:', info.messageId);
-    return info;
+    const result = await transporter.sendMail(mailOptions);
+    info('Password reset email sent successfully', { email, messageId: result.messageId });
+    return result;
   } catch (error) {
-    console.error('Error sending password reset email:', error);
+    error('Failed to send password reset email', { error: error.message, email });
     throw error;
   }
 };
@@ -82,11 +83,11 @@ const sendWelcomeEmail = async (email, name) => {
       `
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Welcome email sent:', info.messageId);
-    return info;
+    const result = await transporter.sendMail(mailOptions);
+    info('Welcome email sent successfully', { email, messageId: result.messageId });
+    return result;
   } catch (error) {
-    console.error('Error sending welcome email:', error);
+    error('Failed to send welcome email', { error: error.message, email });
     throw error;
   }
 };

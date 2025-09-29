@@ -9,33 +9,97 @@ const { AppError, asyncHandler } = require('../middleware/errorHandler');
 // Helper function to invalidate user collection cache
 async function invalidateUserCollectionCache(userId) {
   try {
-    if (redisService.isHealthy()) {
-      const deletedCount = await redisService.invalidateUserCollectionCache(userId);
-      console.log(`Invalidated ${deletedCount} collection cache entries for user ${userId}`);
-    }
+    const deletedCount = await redisService.invalidateUserCollectionCache(userId);
+    console.log(`Invalidated ${deletedCount} collection cache entries for user ${userId}`);
   } catch (error) {
-    console.warn('Failed to invalidate collection cache:', error.message);
+    console.error('Failed to invalidate collection cache:', error.message);
+    throw error; // Rzuć błąd zamiast ignorować
   }
 }
-const fs = require('fs');
-const path = require('path');
-
 class LegoController {
-  // Helper function to load mock data
-  static loadMockData() {
-    try {
-      const setsPath = path.join(__dirname, '../data/sets.json');
-      const offersPath = path.join(__dirname, '../data/offers.json');
-      
-      const sets = fs.existsSync(setsPath) ? JSON.parse(fs.readFileSync(setsPath, 'utf8')) : [];
-      const offers = fs.existsSync(offersPath) ? JSON.parse(fs.readFileSync(offersPath, 'utf8')) : [];
-      
-      return { sets, offers };
-    } catch (error) {
-      console.error('Error loading mock data:', error);
-      return { sets: [], offers: [] };
-    }
-  }
+  /**
+   * @swagger
+   * /api/lego/sets:
+   *   get:
+   *     summary: Get all LEGO sets with pagination and filtering
+   *     tags: [LEGO Sets]
+   *     parameters:
+   *       - in: query
+   *         name: page
+   *         schema:
+   *           type: integer
+   *           default: 1
+   *         description: Page number for pagination
+   *       - in: query
+   *         name: limit
+   *         schema:
+   *           type: integer
+   *           default: 20
+   *         description: Number of items per page
+   *       - in: query
+   *         name: theme
+   *         schema:
+   *           type: string
+   *         description: Filter by theme
+   *       - in: query
+   *         name: year
+   *         schema:
+   *           type: integer
+   *         description: Filter by year
+   *       - in: query
+   *         name: search
+   *         schema:
+   *           type: string
+   *         description: Search term
+   *       - in: query
+   *         name: sortBy
+   *         schema:
+   *           type: string
+   *           default: set_number
+   *         description: Sort field
+   *       - in: query
+   *         name: sortOrder
+   *         schema:
+   *           type: string
+   *           default: ASC
+   *           enum: [ASC, DESC]
+   *         description: Sort order
+   *     responses:
+   *       200:
+   *         description: List of LEGO sets
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 data:
+   *                   type: object
+   *                   properties:
+   *                     sets:
+   *                       type: array
+   *                       items:
+   *                         $ref: '#/components/schemas/LegoSet'
+   *                     pagination:
+   *                       type: object
+   *                       properties:
+   *                         currentPage:
+   *                           type: integer
+   *                         totalPages:
+   *                           type: integer
+   *                         totalItems:
+   *                           type: integer
+   *                         itemsPerPage:
+   *                           type: integer
+   *       500:
+   *         description: Server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   */
   // Get all LEGO sets with pagination and filtering
   static async getAllSets(req, res) {
     const startTime = Date.now();
@@ -151,33 +215,10 @@ class LegoController {
       });
     } catch (error) {
       console.error('Error getting LEGO set:', error);
-      
-      // Fallback to mock data
-      try {
-        const { sets } = LegoController.loadMockData();
-        const set = sets.find(s => s.setNumber === req.params.setNumber);
-        
-        if (set) {
-          res.json({
-            success: true,
-            data: {
-              set,
-              offers: [],
-              priceStats: { min: 0, max: 0, avg: 0 }
-            }
-          });
-        } else {
-          res.status(404).json({
-            success: false,
-            error: 'Zestaw LEGO nie został znaleziony'
-          });
-        }
-      } catch (error) {
-        res.status(500).json({
-          success: false,
-          error: 'Błąd podczas pobierania zestawu LEGO'
-        });
-      }
+      res.status(500).json({
+        success: false,
+        error: 'Błąd podczas pobierania zestawu LEGO'
+      });
     }
   }
 
@@ -424,11 +465,10 @@ class LegoController {
       let cachedData = null;
       
       try {
-        if (redisService.isHealthy()) {
-          cachedData = await redisService.getCollectionCache(userId, type || 'all');
-        }
+        cachedData = await redisService.getCollectionCache(userId, type || 'all');
       } catch (redisError) {
-        console.warn('Redis cache miss or error:', redisError.message);
+        console.error('Redis cache error:', redisError.message);
+        throw redisError; // Rzuć błąd zamiast ignorować
       }
       
       if (cachedData) {
@@ -451,11 +491,10 @@ class LegoController {
       
       // Cache the result for 5 minutes
       try {
-        if (redisService.isHealthy()) {
-          await redisService.setCollectionCache(userId, type || 'all', responseData, 300); // 5 minutes
-        }
+        await redisService.setCollectionCache(userId, type || 'all', responseData, 300); // 5 minutes
       } catch (redisError) {
-        console.warn('Failed to cache collection data:', redisError.message);
+        console.error('Failed to cache collection data:', redisError.message);
+        throw redisError; // Rzuć błąd zamiast ignorować
       }
 
       res.json({
@@ -472,6 +511,129 @@ class LegoController {
     }
   }
 
+  /**
+   * @swagger
+   * /api/lego/sets/{setNumber}/offers:
+   *   get:
+   *     summary: Get OLX offers for a specific LEGO set
+   *     tags: [OLX Offers]
+   *     parameters:
+   *       - in: path
+   *         name: setNumber
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: LEGO set number
+   *         example: "75399-1"
+   *       - in: query
+   *         name: activeOnly
+   *         schema:
+   *           type: boolean
+   *           default: true
+   *         description: Show only active offers
+   *       - in: query
+   *         name: limit
+   *         schema:
+   *           type: integer
+   *           default: 20
+   *         description: Number of items per page
+   *       - in: query
+   *         name: offset
+   *         schema:
+   *           type: integer
+   *           default: 0
+   *         description: Number of items to skip
+   *       - in: query
+   *         name: sortBy
+   *         schema:
+   *           type: string
+   *           default: price
+   *         description: Sort field
+   *       - in: query
+   *         name: sortOrder
+   *         schema:
+   *           type: string
+   *           default: ASC
+   *           enum: [ASC, DESC]
+   *         description: Sort order
+   *     responses:
+   *       200:
+   *         description: List of offers for the specified set
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 data:
+   *                   type: object
+   *                   properties:
+   *                     set:
+   *                       $ref: '#/components/schemas/LegoSet'
+   *                     offers:
+   *                       type: array
+   *                       items:
+   *                         $ref: '#/components/schemas/OlxOffer'
+   *                     priceStats:
+   *                       type: object
+   *                       properties:
+   *                         total_offers:
+   *                           type: integer
+   *                         min_price:
+   *                           type: number
+   *                         max_price:
+   *                           type: number
+   *                         avg_price:
+   *                           type: number
+   *                         median_price:
+   *                           type: number
+   *                         active_offers:
+   *                           type: integer
+   *                     offersByCondition:
+   *                       type: array
+   *                       items:
+   *                         type: object
+   *                         properties:
+   *                           condition:
+   *                             type: string
+   *                           count:
+   *                             type: integer
+   *                           min_price:
+   *                             type: number
+   *                           max_price:
+   *                             type: number
+   *                           avg_price:
+   *                             type: number
+   *                     offersByLocation:
+   *                       type: array
+   *                       items:
+   *                         type: object
+   *                         properties:
+   *                           location:
+   *                             type: string
+   *                           count:
+   *                             type: integer
+   *                           min_price:
+   *                             type: number
+   *                           max_price:
+   *                             type: number
+   *                           avg_price:
+   *                             type: number
+   *       404:
+   *         description: LEGO set not found
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *       500:
+   *         description: Server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   */
   // Get OLX offers for a specific set
   static async getSetOffers(req, res) {
     try {
@@ -525,6 +687,69 @@ class LegoController {
     }
   }
 
+  /**
+   * @swagger
+   * /api/lego/offers:
+   *   get:
+   *     summary: Get all OLX offers with pagination
+   *     tags: [OLX Offers]
+   *     parameters:
+   *       - in: query
+   *         name: limit
+   *         schema:
+   *           type: integer
+   *           default: 20
+   *         description: Number of items per page
+   *       - in: query
+   *         name: offset
+   *         schema:
+   *           type: integer
+   *           default: 0
+   *         description: Number of items to skip
+   *       - in: query
+   *         name: sortBy
+   *         schema:
+   *           type: string
+   *           default: created_at
+   *         description: Sort field
+   *       - in: query
+   *         name: sortOrder
+   *         schema:
+   *           type: string
+   *           default: DESC
+   *           enum: [ASC, DESC]
+   *         description: Sort order
+   *     responses:
+   *       200:
+   *         description: List of OLX offers
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 data:
+   *                   type: object
+   *                   properties:
+   *                     offers:
+   *                       type: array
+   *                       items:
+   *                         $ref: '#/components/schemas/OlxOffer'
+   *                     totalCount:
+   *                       type: integer
+   *                     currentPage:
+   *                       type: integer
+   *                     totalPages:
+   *                       type: integer
+   *       500:
+   *         description: Server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   */
   // Get all offers (for deals modal)
   static async getAllOffers(req, res) {
     try {
@@ -557,26 +782,10 @@ class LegoController {
       });
     } catch (error) {
       console.error('Error fetching all offers:', error);
-      
-      // Fallback to mock data
-      try {
-        const { offers } = LegoController.loadMockData();
-        
-        res.json({
-          success: true,
-          data: {
-            offers,
-            totalCount: offers.length,
-            currentPage: 1,
-            totalPages: 1
-          }
-        });
-      } catch (error) {
-        res.status(500).json({
-          success: false,
-          error: 'Błąd podczas pobierania ofert'
-        });
-      }
+      res.status(500).json({
+        success: false,
+        error: 'Błąd podczas pobierania ofert'
+      });
     }
   }
 }
