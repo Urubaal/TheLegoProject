@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEGO Set Details - BrickEconomy Clone</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333333;
+            line-height: 1.6;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 0 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            font-size: 32px;
+            background: linear-gradient(135deg, #1976d2, #42a5f5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1976d2;
+            line-height: 1;
+        }
+
+        .logo-subtitle {
+            font-size: 12px;
+            color: #666666;
+            font-weight: 400;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-link {
+            color: #666666;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: color 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #1976d2;
+        }
+
+        .collection-link {
+            background-color: #f5f5f5;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .collection-count {
+            background-color: #1976d2;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-input {
+            width: 300px;
+            padding: 8px 16px 8px 40px;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            font-size: 14px;
+            background-color: #f8f9fa;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666666;
+            font-size: 14px;
+        }
+
+        .region-select {
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            background-color: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* Main Content */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+            min-height: calc(100vh - 60px);
+        }
+
+        .main-content {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .set-header {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .set-image {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 48px;
+        }
+
+        .set-info {
+            flex: 1;
+        }
+
+        .set-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333333;
+            margin-bottom: 8px;
+        }
+
+        .set-number {
+            font-size: 18px;
+            color: #666666;
+            margin-bottom: 16px;
+        }
+
+        .set-description {
+            color: #666666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .set-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 16px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1976d2;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666666;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333333;
+            margin-bottom: 16px;
+        }
+
+        /* Price Chart */
+        .price-chart {
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+
+        .price-info {
+            text-align: center;
+        }
+
+        .current-price {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1976d2;
+            margin-bottom: 8px;
+        }
+
+        .price-change {
+            font-size: 14px;
+            color: #4caf50;
+        }
+
+        /* Price Range */
+        .price-range {
+            margin-bottom: 16px;
+        }
+
+        .range-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, #4caf50 0%, #4caf50 60%, #ff9800 60%, #ff9800 100%);
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .range-handle {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            background-color: #1976d2;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .range-price {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333333;
+            margin-bottom: 8px;
+        }
+
+        .range-description {
+            font-size: 14px;
+            color: #666666;
+        }
+
+        /* Offers */
+        .offer-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .offer-item:last-child {
+            border-bottom: none;
+        }
+
+        .offer-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .offer-content {
+            flex: 1;
+        }
+
+        .offer-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333333;
+            margin-bottom: 4px;
+        }
+
+        .offer-details {
+            font-size: 12px;
+            color: #666666;
+        }
+
+        .offer-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1976d2;
+        }
+
+        /* Collection Actions */
+        .collection-actions {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: #1976d2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1565c0;
+        }
+
+        .btn-secondary {
+            background-color: #f5f5f5;
+            color: #666666;
+            border: 1px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+
+        .btn-success {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #45a049;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .set-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .search-input {
+                width: 200px;
+            }
+
+            .nav-links {
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="logo-icon">🧱</div>
+                <div>
+                    <div class="logo-title">BrickEconomy</div>
+                    <div class="logo-subtitle">the economics of LEGO</div>
+                </div>
+            </div>
+            
+            <div class="nav-links">
+                <a href="#" class="nav-link">Browse</a>
+                <a href="#" class="nav-link">Deals</a>
+                <a href="#" class="nav-link">Analysis</a>
+                <a href="#" class="nav-link collection-link active">
+                    My Collection
+                    <span class="collection-count">2</span>
+                </a>
+                <a href="#" class="nav-link">Me</a>
+            </div>
+            
+            <div class="nav-actions">
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Search (eg: 10196 or Grand Carousel)">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                <div class="region-selector">
+                    <select class="region-select">
+                        <option value="PL">🇵🇱 Poland</option>
+                        <option value="US">🇺🇸 United States</option>
+                        <option value="UK">🇬🇧 United Kingdom</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="main-content">
+            <div class="set-header">
+                <div class="set-image">🚀</div>
+                <div class="set-info">
+                    <h1 class="set-title">Rebel U-Wing Starfighter</h1>
+                    <div class="set-number">Set #75399-1</div>
+                    <p class="set-description">
+                        The Rebel U-Wing Starfighter is a versatile craft used by the Rebel Alliance for troop transport and combat missions. This detailed LEGO set features authentic details from Rogue One: A Star Wars Story.
+                    </p>
+                    <div class="set-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">4</div>
+                            <div class="stat-label">Minifigures</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">1065</div>
+                            <div class="stat-label">Pieces</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">18+</div>
+                            <div class="stat-label">Age</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">2024</div>
+                            <div class="stat-label">Year</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="collection-actions">
+                <h3>Collection Status</h3>
+                <div class="action-buttons">
+                    <button class="btn btn-success">
+                        <i class="fas fa-check"></i>
+                        I Own This
+                    </button>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-heart"></i>
+                        I Want This
+                    </button>
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-shopping-cart"></i>
+                        Quick Buy
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <!-- Price Trend -->
+            <div class="sidebar-card">
+                <h3 class="card-title">Price Trend</h3>
+                <div class="price-chart">
+                    📈 Price Chart
+                </div>
+                <div class="price-info">
+                    <div class="current-price">€70</div>
+                    <div class="price-change">+€5 from last month</div>
+                </div>
+            </div>
+
+            <!-- Price Range -->
+            <div class="sidebar-card">
+                <h3 class="card-title">Typical Selling Price Range</h3>
+                <div class="price-range">
+                    <div class="range-slider">
+                        <div class="range-handle"></div>
+                    </div>
+                    <div class="range-price">€70</div>
+                    <div class="range-description">This LEGO set typically sells between €70-€79 locally.</div>
+                </div>
+            </div>
+
+            <!-- Current Offers -->
+            <div class="sidebar-card">
+                <h3 class="card-title">Current Offers</h3>
+                <div class="offer-item">
+                    <div class="offer-icon">O</div>
+                    <div class="offer-content">
+                        <div class="offer-title">LEGO Star Wars Rebel U-Wing Starfighter 75399 - NOWY</div>
+                        <div class="offer-details">(Warszawa) • Nowy</div>
+                    </div>
+                    <div class="offer-price">€65</div>
+                </div>
+                <div class="offer-item">
+                    <div class="offer-icon">O</div>
+                    <div class="offer-content">
+                        <div class="offer-title">LEGO Star Wars 75399 U-Wing - używany</div>
+                        <div class="offer-details">(Kraków) • Używany</div>
+                    </div>
+                    <div class="offer-price">€45</div>
+                </div>
+                <div class="offer-item">
+                    <div class="offer-icon">O</div>
+                    <div class="offer-content">
+                        <div class="offer-title">75399 Rebel U-Wing Starfighter</div>
+                        <div class="offer-details">(Gdańsk) • Bardzo dobry stan</div>
+                    </div>
+                    <div class="offer-price">€55</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Demo functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Collection buttons
+            const ownBtn = document.querySelector('.btn-success');
+            const wantBtn = document.querySelector('.btn-primary');
+            const collectionCount = document.querySelector('.collection-count');
+            
+            let collectionItems = 2; // Starting with 2 items
+            
+            ownBtn.addEventListener('click', function() {
+                if (this.classList.contains('active')) {
+                    this.classList.remove('active');
+                    this.innerHTML = '<i class="fas fa-check"></i> I Own This';
+                    collectionItems--;
+                } else {
+                    this.classList.add('active');
+                    this.innerHTML = '<i class="fas fa-check"></i> Owned ✓';
+                    collectionItems++;
+                }
+                collectionCount.textContent = collectionItems;
+            });
+            
+            wantBtn.addEventListener('click', function() {
+                if (this.classList.contains('active')) {
+                    this.classList.remove('active');
+                    this.innerHTML = '<i class="fas fa-heart"></i> I Want This';
+                    collectionItems--;
+                } else {
+                    this.classList.add('active');
+                    this.innerHTML = '<i class="fas fa-heart"></i> Wanted ✓';
+                    collectionItems++;
+                }
+                collectionCount.textContent = collectionItems;
+            });
+            
+            // Quick Buy button
+            const quickBuyBtn = document.querySelector('.btn-secondary');
+            quickBuyBtn.addEventListener('click', function() {
+                alert('Redirecting to purchase options...');
+            });
+            
+            // Search functionality
+            const searchInput = document.querySelector('.search-input');
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    alert('Searching for: ' + this.value);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

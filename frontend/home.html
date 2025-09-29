@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEGO Collection Manager - BrickEconomy Clone</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="brickeconomy.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar-brickeconomy">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="logo">
+                    <div class="logo-icon">🧱</div>
+                    <div class="logo-text">
+                        <span class="logo-title">BrickEconomy</span>
+                        <span class="logo-subtitle">the economics of LEGO</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nav-links">
+                <a href="lego-collection.html" class="nav-link">Browse</a>
+                <a href="#" class="nav-link">Deals</a>
+                <a href="#" class="nav-link">Analysis</a>
+                <a href="lego-collection.html" class="nav-link collection-link">
+                    My Collection
+                    <span class="collection-count" id="collectionCount">0</span>
+                </a>
+                <a href="#" class="nav-link">Me</a>
+            </div>
+            
+            <div class="nav-actions">
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Search (eg: 10196 or Grand Carousel)" id="searchInput">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                <div class="region-selector">
+                    <select class="region-select">
+                        <option value="PL">🇵🇱 Poland</option>
+                        <option value="US">🇺🇸 United States</option>
+                        <option value="UK">🇬🇧 United Kingdom</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="home-container">
+        <div class="hero-section">
+            <div class="hero-content">
+                <h1>Welcome to BrickEconomy Clone</h1>
+                <p>Manage your LEGO collection, track prices, and find the best deals on LEGO sets.</p>
+                
+                <div class="hero-actions">
+                    <a href="lego-collection.html" class="btn btn-primary btn-lg">
+                        <i class="fas fa-box"></i>
+                        View My Collection
+                    </a>
+                    <a href="set-detail.html?set=75399-1" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-search"></i>
+                        Browse Sets
+                    </a>
+                </div>
+            </div>
+            
+            <div class="hero-image">
+                <div class="lego-preview">
+                    <div class="lego-brick">🧱</div>
+                    <div class="lego-brick">🧱</div>
+                    <div class="lego-brick">🧱</div>
+                    <div class="lego-brick">🧱</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="features-section">
+            <h2>Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <h3>Collection Management</h3>
+                    <p>Track your owned and wanted LEGO sets with detailed information and photos.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Price Tracking</h3>
+                    <p>Monitor price trends and get alerts when your wanted sets go on sale.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <h3>Marketplace Integration</h3>
+                    <p>Find the best deals on OLX and other marketplaces for LEGO sets.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-analytics"></i>
+                    </div>
+                    <h3>Collection Analytics</h3>
+                    <p>Get insights into your collection's value and growth over time.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions-section">
+            <h2>Quick Actions</h2>
+            <div class="quick-actions-grid">
+                <a href="set-detail.html?set=75399-1" class="quick-action-card">
+                    <div class="action-icon">🚀</div>
+                    <h4>View Set 75399</h4>
+                    <p>Rebel U-Wing Starfighter from Star Wars</p>
+                </a>
+                
+                <a href="lego-collection.html" class="quick-action-card">
+                    <div class="action-icon">📦</div>
+                    <h4>My Collection</h4>
+                    <p>View and manage your LEGO collection</p>
+                </a>
+                
+                <a href="#" class="quick-action-card">
+                    <div class="action-icon">🔍</div>
+                    <h4>Search Sets</h4>
+                    <p>Find LEGO sets by name or number</p>
+                </a>
+                
+                <a href="#" class="quick-action-card">
+                    <div class="action-icon">💰</div>
+                    <h4>Price Alerts</h4>
+                    <p>Set up price alerts for wanted sets</p>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="message-container hidden">
+        <div class="message" id="message">
+            <i class="fas fa-check-circle"></i>
+            <span id="messageText"></span>
+        </div>
+    </div>
+
+    <script src="home.js"></script>
+</body>
+</html>

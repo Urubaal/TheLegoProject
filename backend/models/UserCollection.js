@@ -1,54 +1,45 @@
 const { Pool } = require('pg');
 
-// Database connection pool with optimized settings
+// Database connection pool
 const pool = new Pool({
   user: process.env.POSTGRES_USER || 'lego_user',
   host: process.env.POSTGRES_HOST || 'localhost',
   database: process.env.POSTGRES_DB || 'lego_purchase_system',
   port: process.env.POSTGRES_PORT || 5432,
-  // Connection pooling configuration for performance
-  max: 20, // Maximum number of connections in the pool
-  idleTimeoutMillis: 30000, // Close idle connections after 30 seconds
-  connectionTimeoutMillis: 2000, // Return error after 2 seconds if connection could not be established
-  acquireTimeoutMillis: 60000, // Return error after 60 seconds if connection could not be acquired
-  // Additional performance settings
+  max: process.env.NODE_ENV === 'production' ? 20 : 10,
+  min: 2,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000,
+  acquireTimeoutMillis: 10000,
+  options: '-c timezone=UTC',
   keepAlive: true,
-  keepAliveInitialDelayMillis: 10000
+  keepAliveInitialDelayMillis: 10000,
+  statement_timeout: 30000,
+  query_timeout: 10000
 });
 
 class UserCollection {
-  // =============================================
-  // OWNED SETS METHODS
-  // =============================================
-  
-  static async addOwnedSet(userId, setData) {
-    const { 
-      lego_set_id, 
-      set_number, 
-      set_name, 
-      condition_status = 'new', 
-      purchase_price, 
-      purchase_currency = 'PLN',
-      notes 
-    } = setData;
-    
+  static async addToCollection(userId, setNumber, collectionType, quantity = 1, paidPrice = null, condition = 'new', notes = '') {
+    // collectionType: 'owned' or 'wanted'
     const query = `
-      INSERT INTO user_owned_sets 
-      (user_id, lego_set_id, set_number, set_name, condition_status, purchase_price, purchase_currency, notes)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      ON CONFLICT (user_id, set_number) 
+      INSERT INTO user_collections (
+        user_id, set_number, collection_type, quantity, paid_price, 
+        condition, notes, created_at, updated_at
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, 
+              CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw', 
+              CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw')
+      ON CONFLICT (user_id, set_number, collection_type) 
       DO UPDATE SET 
-        lego_set_id = EXCLUDED.lego_set_id,
-        set_name = EXCLUDED.set_name,
-        condition_status = EXCLUDED.condition_status,
-        purchase_price = EXCLUDED.purchase_price,
-        purchase_currency = EXCLUDED.purchase_currency,
+        quantity = EXCLUDED.quantity,
+        paid_price = EXCLUDED.paid_price,
+        condition = EXCLUDED.condition,
         notes = EXCLUDED.notes,
-        updated_at = NOW()
+        updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw'
       RETURNING *
     `;
     
-    const values = [userId, lego_set_id, set_number, set_name, condition_status, purchase_price, purchase_currency, notes];
+    const values = [userId, setNumber, collectionType, quantity, paidPrice, condition, notes];
     
     try {
       const result = await pool.query(query, values);
@@ -57,165 +48,111 @@ class UserCollection {
       throw error;
     }
   }
-  
-  static async getOwnedSets(userId) {
+
+  static async removeFromCollection(userId, setNumber, collectionType) {
     const query = `
-      SELECT 
-        uos.*,
-        ls.name as lego_set_name,
-        ls.theme,
-        ls.pieces,
-        ls.minifigures,
-        ls.year_released
-      FROM user_owned_sets uos
-      LEFT JOIN lego_sets ls ON uos.lego_set_id = ls.id
-      WHERE uos.user_id = $1
-      ORDER BY uos.added_at DESC
+      DELETE FROM user_collections 
+      WHERE user_id = $1 AND set_number = $2 AND collection_type = $3
     `;
     
-    try {
-      const result = await pool.query(query, [userId]);
-      return result.rows;
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-  static async updateOwnedSet(userId, setId, updateData) {
-    console.log('updateOwnedSet called with:', { userId, setId, updateData });
-    const fields = [];
-    const values = [];
-    let paramCount = 1;
-    
-    Object.keys(updateData).forEach(key => {
-      if (updateData[key] !== undefined) {
-        fields.push(`${key} = $${paramCount}`);
-        values.push(updateData[key]);
-        paramCount++;
-      }
-    });
-    
-    if (fields.length === 0) {
-      throw new Error('No fields to update');
-    }
-    
-    values.push(setId, userId);
-    const query = `
-      UPDATE user_owned_sets 
-      SET ${fields.join(', ')}, updated_at = NOW()
-      WHERE id = $${paramCount} AND user_id = $${paramCount + 1}
-      RETURNING *
-    `;
-    
-    console.log('Executing query:', query);
-    console.log('With values:', values);
+    const values = [userId, setNumber, collectionType];
     
     try {
       const result = await pool.query(query, values);
-      console.log('Update result:', result.rows[0]);
-      return result.rows[0];
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-  static async deleteOwnedSet(userId, setId) {
-    const query = 'DELETE FROM user_owned_sets WHERE id = $1 AND user_id = $2';
-    
-    try {
-      const result = await pool.query(query, [setId, userId]);
       return result.rowCount > 0;
     } catch (error) {
       throw error;
     }
   }
-  
-  // =============================================
-  // WANTED SETS METHODS
-  // =============================================
-  
-  static async addWantedSet(userId, setData) {
-    const { 
-      lego_set_id, 
-      set_number, 
-      set_name, 
-      max_price, 
-      max_currency = 'PLN',
-      priority = 1,
-      notes 
-    } = setData;
-    
-    const query = `
-      INSERT INTO user_wanted_sets 
-      (user_id, lego_set_id, set_number, set_name, max_price, max_currency, priority, notes)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      ON CONFLICT (user_id, set_number) 
-      DO UPDATE SET 
-        lego_set_id = EXCLUDED.lego_set_id,
-        set_name = EXCLUDED.set_name,
-        max_price = EXCLUDED.max_price,
-        max_currency = EXCLUDED.max_currency,
-        priority = EXCLUDED.priority,
-        notes = EXCLUDED.notes,
-        updated_at = NOW()
-      RETURNING *
+
+  static async getUserCollection(userId, collectionType = null) {
+    let query = `
+      SELECT 
+        uc.*,
+        ls.name,
+        ls.theme,
+        ls.subtheme,
+        ls.year,
+        ls.pieces,
+        ls.minifigs,
+        ls.retail_price,
+        ls.image_url,
+        ls.availability
+      FROM user_collections uc
+      LEFT JOIN lego_sets ls ON uc.set_number = ls.set_number
+      WHERE uc.user_id = $1
     `;
     
-    const values = [userId, lego_set_id, set_number, set_name, max_price, max_currency, priority, notes];
+    const values = [userId];
+    
+    if (collectionType) {
+      query += ' AND uc.collection_type = $2';
+      values.push(collectionType);
+    }
+    
+    query += ' ORDER BY uc.created_at DESC';
     
     try {
       const result = await pool.query(query, values);
-      return result.rows[0];
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-  static async getWantedSets(userId) {
-    const query = `
-      SELECT 
-        uws.*,
-        ls.name as lego_set_name,
-        ls.theme,
-        ls.pieces,
-        ls.minifigures,
-        ls.year_released
-      FROM user_wanted_sets uws
-      LEFT JOIN lego_sets ls ON uws.lego_set_id = ls.id
-      WHERE uws.user_id = $1
-      ORDER BY uws.priority ASC, uws.added_at DESC
-    `;
-    
-    try {
-      const result = await pool.query(query, [userId]);
       return result.rows;
     } catch (error) {
       throw error;
     }
   }
-  
-  static async updateWantedSet(userId, setId, updateData) {
+
+  static async getCollectionItem(userId, setNumber, collectionType) {
+    const query = `
+      SELECT 
+        uc.*,
+        ls.name,
+        ls.theme,
+        ls.subtheme,
+        ls.year,
+        ls.pieces,
+        ls.minifigs,
+        ls.retail_price,
+        ls.image_url,
+        ls.availability
+      FROM user_collections uc
+      LEFT JOIN lego_sets ls ON uc.set_number = ls.set_number
+      WHERE uc.user_id = $1 AND uc.set_number = $2 AND uc.collection_type = $3
+    `;
+    
+    const values = [userId, setNumber, collectionType];
+    
+    try {
+      const result = await pool.query(query, values);
+      return result.rows[0] || null;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async updateCollectionItem(userId, setNumber, collectionType, updateData) {
     const fields = [];
     const values = [];
-    let paramCount = 1;
-    
+    let paramCount = 0;
+
     Object.keys(updateData).forEach(key => {
-      if (updateData[key] !== undefined) {
+      if (updateData[key] !== undefined && key !== 'user_id' && key !== 'set_number' && key !== 'collection_type') {
+        paramCount++;
         fields.push(`${key} = $${paramCount}`);
         values.push(updateData[key]);
-        paramCount++;
       }
     });
-    
+
     if (fields.length === 0) {
       throw new Error('No fields to update');
     }
-    
-    values.push(setId, userId);
+
+    paramCount++;
+    fields.push('updated_at = CURRENT_TIMESTAMP AT TIME ZONE \'Europe/Warsaw\'');
+    values.push(userId, setNumber, collectionType);
+
     const query = `
-      UPDATE user_wanted_sets 
-      SET ${fields.join(', ')}, updated_at = NOW()
-      WHERE id = $${paramCount} AND user_id = $${paramCount + 1}
+      UPDATE user_collections 
+      SET ${fields.join(', ')} 
+      WHERE user_id = $${paramCount + 1} AND set_number = $${paramCount + 2} AND collection_type = $${paramCount + 3}
       RETURNING *
     `;
     
@@ -226,182 +163,146 @@ class UserCollection {
       throw error;
     }
   }
-  
-  static async deleteWantedSet(userId, setId) {
-    const query = 'DELETE FROM user_wanted_sets WHERE id = $1 AND user_id = $2';
-    
-    try {
-      const result = await pool.query(query, [setId, userId]);
-      return result.rowCount > 0;
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-  // =============================================
-  // OWNED MINIFIGS METHODS
-  // =============================================
-  
-  static async addOwnedMinifig(userId, minifigData) {
-    const { 
-      minifig_name, 
-      minifig_number, 
-      condition_status = 'new', 
-      purchase_price, 
-      purchase_currency = 'PLN',
-      notes 
-    } = minifigData;
-    
-    const query = `
-      INSERT INTO user_owned_minifigs 
-      (user_id, minifig_name, minifig_number, condition_status, purchase_price, purchase_currency, notes)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
-      ON CONFLICT (user_id, minifig_name, minifig_number) 
-      DO UPDATE SET 
-        condition_status = EXCLUDED.condition_status,
-        purchase_price = EXCLUDED.purchase_price,
-        purchase_currency = EXCLUDED.purchase_currency,
-        notes = EXCLUDED.notes,
-        updated_at = NOW()
-      RETURNING *
-    `;
-    
-    const values = [userId, minifig_name, minifig_number, condition_status, purchase_price, purchase_currency, notes];
-    
-    try {
-      const result = await pool.query(query, values);
-      return result.rows[0];
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-  static async getOwnedMinifigs(userId) {
-    const query = `
-      SELECT * FROM user_owned_minifigs 
-      WHERE user_id = $1
-      ORDER BY added_at DESC
-    `;
-    
-    try {
-      const result = await pool.query(query, [userId]);
-      return result.rows;
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-  // =============================================
-  // WANTED MINIFIGS METHODS
-  // =============================================
-  
-  static async addWantedMinifig(userId, minifigData) {
-    const { 
-      minifig_name, 
-      minifig_number, 
-      max_price, 
-      max_currency = 'PLN',
-      priority = 1,
-      notes 
-    } = minifigData;
-    
-    const query = `
-      INSERT INTO user_wanted_minifigs 
-      (user_id, minifig_name, minifig_number, max_price, max_currency, priority, notes)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
-      ON CONFLICT (user_id, minifig_name, minifig_number) 
-      DO UPDATE SET 
-        max_price = EXCLUDED.max_price,
-        max_currency = EXCLUDED.max_currency,
-        priority = EXCLUDED.priority,
-        notes = EXCLUDED.notes,
-        updated_at = NOW()
-      RETURNING *
-    `;
-    
-    const values = [userId, minifig_name, minifig_number, max_price, max_currency, priority, notes];
-    
-    try {
-      const result = await pool.query(query, values);
-      return result.rows[0];
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-  static async getWantedMinifigs(userId) {
-    const query = `
-      SELECT * FROM user_wanted_minifigs 
-      WHERE user_id = $1
-      ORDER BY priority ASC, added_at DESC
-    `;
-    
-    try {
-      const result = await pool.query(query, [userId]);
-      return result.rows;
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-  // =============================================
-  // COLLECTION STATISTICS
-  // =============================================
-  
+
   static async getCollectionStats(userId) {
     const query = `
       SELECT 
-        (SELECT COUNT(*) FROM user_owned_sets WHERE user_id = $1) as owned_sets_count,
-        (SELECT COUNT(*) FROM user_owned_sets WHERE user_id = $1 AND condition_status = 'new') as new_sets_count,
-        (SELECT COUNT(*) FROM user_owned_sets WHERE user_id = $1 AND condition_status = 'used') as used_sets_count,
-        (SELECT COALESCE(SUM(pieces), 0) FROM user_owned_sets uos 
-         LEFT JOIN lego_sets ls ON uos.lego_set_id = ls.id WHERE uos.user_id = $1) as total_pieces,
-        (SELECT COALESCE(SUM(minifigures), 0) FROM user_owned_sets uos 
-         LEFT JOIN lego_sets ls ON uos.lego_set_id = ls.id WHERE uos.user_id = $1) as total_minifigs,
-        (SELECT COUNT(*) FROM user_wanted_sets WHERE user_id = $1) as wanted_sets_count,
-        (SELECT COUNT(*) FROM user_owned_minifigs WHERE user_id = $1) as owned_minifigs_count,
-        (SELECT COUNT(*) FROM user_wanted_minifigs WHERE user_id = $1) as wanted_minifigs_count
+        COUNT(CASE WHEN collection_type = 'owned' THEN 1 END) as owned_sets,
+        COUNT(CASE WHEN collection_type = 'wanted' THEN 1 END) as wanted_sets,
+        SUM(CASE WHEN collection_type = 'owned' THEN quantity ELSE 0 END) as total_owned_quantity,
+        SUM(CASE WHEN collection_type = 'owned' AND paid_price IS NOT NULL THEN paid_price * quantity ELSE 0 END) as total_paid_value,
+        AVG(CASE WHEN collection_type = 'owned' AND paid_price IS NOT NULL THEN paid_price ELSE NULL END) as avg_paid_price,
+        SUM(CASE WHEN collection_type = 'owned' THEN ls.retail_price * quantity ELSE 0 END) as total_retail_value
+      FROM user_collections uc
+      LEFT JOIN lego_sets ls ON uc.set_number = ls.set_number
+      WHERE uc.user_id = $1
     `;
     
+    const values = [userId];
+    
     try {
-      const result = await pool.query(query, [userId]);
+      const result = await pool.query(query, values);
       return result.rows[0];
     } catch (error) {
       throw error;
     }
   }
 
-  // Update collection item photo
-  static async updateCollectionItemPhoto(userId, type, itemId, photoUrl) {
-    let tableName;
-    
-    switch (type) {
-      case 'sets':
-        tableName = 'user_owned_sets';
-        break;
-      case 'minifigs':
-        tableName = 'user_owned_minifigs';
-        break;
-      case 'wanted-sets':
-        tableName = 'user_wanted_sets';
-        break;
-      case 'wanted-minifigs':
-        tableName = 'user_wanted_minifigs';
-        break;
-      default:
-        throw new Error('Invalid collection type');
-    }
-
+  static async getCollectionByTheme(userId, theme) {
     const query = `
-      UPDATE ${tableName} 
-      SET photo_url = $1, updated_at = NOW()
-      WHERE id = $2 AND user_id = $3
-      RETURNING *
+      SELECT 
+        uc.*,
+        ls.name,
+        ls.theme,
+        ls.subtheme,
+        ls.year,
+        ls.pieces,
+        ls.minifigs,
+        ls.retail_price,
+        ls.image_url
+      FROM user_collections uc
+      LEFT JOIN lego_sets ls ON uc.set_number = ls.set_number
+      WHERE uc.user_id = $1 AND ls.theme ILIKE $2
+      ORDER BY ls.year DESC, ls.set_number
     `;
     
+    const values = [userId, `%${theme}%`];
+    
     try {
-      const result = await pool.query(query, [photoUrl, itemId, userId]);
-      return result.rows[0];
+      const result = await pool.query(query, values);
+      return result.rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async searchUserCollection(userId, searchTerm, collectionType = null) {
+    let query = `
+      SELECT 
+        uc.*,
+        ls.name,
+        ls.theme,
+        ls.subtheme,
+        ls.year,
+        ls.pieces,
+        ls.minifigs,
+        ls.retail_price,
+        ls.image_url
+      FROM user_collections uc
+      LEFT JOIN lego_sets ls ON uc.set_number = ls.set_number
+      WHERE uc.user_id = $1 
+        AND (ls.name ILIKE $2 OR ls.set_number ILIKE $2 OR ls.theme ILIKE $2)
+    `;
+    
+    const values = [userId, `%${searchTerm}%`];
+    
+    if (collectionType) {
+      query += ' AND uc.collection_type = $3';
+      values.push(collectionType);
+    }
+    
+    query += ' ORDER BY ls.name';
+    
+    try {
+      const result = await pool.query(query, values);
+      return result.rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Check if user has a specific set in collection
+  static async hasSetInCollection(userId, setNumber, collectionType) {
+    const query = `
+      SELECT * FROM user_collections 
+      WHERE user_id = $1 AND set_number = $2 AND collection_type = $3
+    `;
+    
+    const values = [userId, setNumber, collectionType];
+    
+    try {
+      const result = await pool.query(query, values);
+      return result.rows[0] || null;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Get recent additions to collection
+  static async getRecentAdditions(userId, limit = 10) {
+    const query = `
+      SELECT 
+        uc.*,
+        ls.name,
+        ls.theme,
+        ls.year,
+        ls.retail_price,
+        ls.image_url
+      FROM user_collections uc
+      LEFT JOIN lego_sets ls ON uc.set_number = ls.set_number
+      WHERE uc.user_id = $1
+      ORDER BY uc.created_at DESC
+      LIMIT $2
+    `;
+    
+    const values = [userId, limit];
+    
+    try {
+      const result = await pool.query(query, values);
+      return result.rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Delete user's entire collection (for account deletion)
+  static async deleteUserCollection(userId) {
+    const query = 'DELETE FROM user_collections WHERE user_id = $1';
+    const values = [userId];
+    
+    try {
+      const result = await pool.query(query, values);
+      return result.rowCount;
     } catch (error) {
       throw error;
     }
