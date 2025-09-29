@@ -7,6 +7,7 @@ class SetDetailManager {
             owned: null,
             wanted: null
         };
+        this.isAuthenticated = false;
         this.apiBaseUrl = 'http://localhost:3000/api';
         this.init();
     }
@@ -19,11 +20,9 @@ class SetDetailManager {
 
     checkAuthentication() {
         const token = localStorage.getItem('authToken');
-        if (!token) {
-            // Redirect to login if not authenticated
-            window.location.href = '/index.html';
-            return;
-        }
+        // Allow viewing set details without authentication
+        // Authentication is only needed for collection management
+        this.isAuthenticated = !!token;
     }
 
     setupEventListeners() {
@@ -98,13 +97,20 @@ class SetDetailManager {
             this.currentSetNumber = setNumber;
 
             // Load set details and offers
-            await Promise.all([
+            const loadPromises = [
                 this.loadSetDetails(setNumber),
-                this.loadOffers(setNumber),
-                this.loadUserCollection(setNumber)
-            ]);
+                this.loadOffers(setNumber)
+            ];
+            
+            // Only load user collection if authenticated
+            if (this.isAuthenticated) {
+                loadPromises.push(this.loadUserCollection(setNumber));
+            }
+            
+            await Promise.all(loadPromises);
 
             this.updateCollectionCount();
+            this.updateUIForAuthentication();
             this.showLoading(false);
         } catch (error) {
             console.error('Error loading set data:', error);
@@ -286,6 +292,13 @@ class SetDetailManager {
     }
 
     async handleCollectionChange(type, isChecked) {
+        if (!this.isAuthenticated) {
+            this.showMessage('Musisz się zalogować, aby zarządzać kolekcją', true);
+            // Uncheck the checkbox
+            document.getElementById(type + 'Checkbox').checked = false;
+            return;
+        }
+
         try {
             const token = localStorage.getItem('authToken');
             
@@ -326,6 +339,11 @@ class SetDetailManager {
     }
 
     async removeFromCollection(type) {
+        if (!this.isAuthenticated) {
+            this.showMessage('Musisz się zalogować, aby zarządzać kolekcją', true);
+            return;
+        }
+
         try {
             const token = localStorage.getItem('authToken');
             const response = await fetch(`${this.apiBaseUrl}/lego/collection/${this.currentSetNumber}/${type}`, {
@@ -378,7 +396,38 @@ class SetDetailManager {
         }
     }
 
+    updateUIForAuthentication() {
+        const collectionCard = document.querySelector('.collection-card');
+        const collectionLink = document.querySelector('.collection-link');
+        
+        if (!this.isAuthenticated) {
+            // Hide collection card for non-authenticated users
+            if (collectionCard) {
+                collectionCard.style.display = 'none';
+            }
+            // Hide collection count
+            const countElement = document.getElementById('collectionCount');
+            if (countElement) {
+                countElement.style.display = 'none';
+            }
+        } else {
+            // Show collection card for authenticated users
+            if (collectionCard) {
+                collectionCard.style.display = 'block';
+            }
+            // Show collection count
+            const countElement = document.getElementById('collectionCount');
+            if (countElement) {
+                countElement.style.display = 'inline-block';
+            }
+        }
+    }
+
     async updateCollectionCount() {
+        if (!this.isAuthenticated) {
+            return;
+        }
+
         try {
             const token = localStorage.getItem('authToken');
             const response = await fetch(`${this.apiBaseUrl}/lego/collection`, {
