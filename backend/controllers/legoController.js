@@ -2,6 +2,9 @@ const LegoSet = require('../models/LegoSet');
 const UserCollection = require('../models/UserCollection');
 const OlxOffer = require('../models/OlxOffer');
 const { validationResult } = require('express-validator');
+const { info, warn, error, performance } = require('../utils/logger');
+const redisService = require('../utils/redisService');
+const { AppError, asyncHandler } = require('../middleware/errorHandler');
 const fs = require('fs');
 const path = require('path');
 
@@ -23,6 +26,8 @@ class LegoController {
   }
   // Get all LEGO sets with pagination and filtering
   static async getAllSets(req, res) {
+    const startTime = Date.now();
+    
     try {
       const { 
         page = 1, 
@@ -33,6 +38,12 @@ class LegoController {
         sortBy = 'set_number',
         sortOrder = 'ASC'
       } = req.query;
+
+      info('Fetching LEGO sets with filters', { 
+        page, limit, theme, year, search, 
+        userId: req.user?.userId,
+        ip: req.ip 
+      });
 
       const offset = (page - 1) * limit;
       const options = {
@@ -86,11 +97,11 @@ class LegoController {
         }
       });
     } catch (error) {
-      console.error('Error getting LEGO sets:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Błąd podczas pobierania zestawów LEGO'
-      });
+      error('Error getting LEGO sets', { error: error.message, stack: error.stack });
+      throw new AppError('Błąd podczas pobierania zestawów LEGO', 500);
+    } finally {
+      const duration = Date.now() - startTime;
+      performance('LEGO sets fetch', duration, { userId: req.user?.userId });
     }
   }
 
