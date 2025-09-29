@@ -717,12 +717,6 @@ body {
     color: #28a745 !important;
 }
 
-.item-price .currency {
-    font-size: 0.8em;
-    font-weight: 400;
-    color: #666;
-    margin-top: 2px;
-}
 
 .item-condition {
     text-transform: capitalize;
@@ -945,13 +939,15 @@ body {
 }
 
 .price-input-group input {
-    flex: 1;
+    flex: 2;
     margin-bottom: 0;
+    min-width: 120px;
 }
 
 .price-input-group select {
-    width: 80px;
+    width: 100px;
     margin-bottom: 0;
+    flex-shrink: 0;
 }
 
 /* Checkbox group */

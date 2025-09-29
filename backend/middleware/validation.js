@@ -250,8 +250,15 @@ const updateCollectionItemValidation = [
     .withMessage('Notes must not exceed 500 characters'),
   body('purchase_date')
     .optional()
-    .isISO8601()
-    .withMessage('Purchase date must be a valid date'),
+    .custom((value) => {
+      if (value === '' || value === null || value === undefined) {
+        return true; // Allow empty values
+      }
+      // If value is provided, validate it's a valid date
+      const date = new Date(value);
+      return !isNaN(date.getTime()) && date.toISOString().startsWith(value);
+    })
+    .withMessage('Purchase date must be a valid date or empty'),
   // Boolean fields
   body('has_minifigures')
     .optional()
