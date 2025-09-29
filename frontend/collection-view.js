@@ -34,7 +34,7 @@ function showUserCollection() {
                                 </div>
                                 <div class="sets-list">
                                     ${userCollection.owned.length > 0 ? userCollection.owned.map(setNumber => `
-                                        <div class="set-item">
+                                        <div class="set-item" onclick="viewSetDetails('${setNumber}')">
                                             <div class="set-image">
                                                 <div class="set-placeholder">
                                                     <i class="fas fa-cube"></i>
@@ -46,7 +46,7 @@ function showUserCollection() {
                                                 <p class="set-details">${getSetDetails(setNumber)}</p>
                                             </div>
                                             <div class="set-actions">
-                                                <button class="action-btn remove-btn" onclick="removeFromCollection('${setNumber}', 'owned')">
+                                                <button class="action-btn remove-btn" onclick="event.stopPropagation(); removeFromCollection('${setNumber}', 'owned')">
                                                     <i class="fas fa-times"></i> Remove
                                                 </button>
                                             </div>
@@ -64,7 +64,7 @@ function showUserCollection() {
                                 </div>
                                 <div class="sets-list">
                                     ${userCollection.wanted.length > 0 ? userCollection.wanted.map(setNumber => `
-                                        <div class="set-item">
+                                        <div class="set-item" onclick="viewSetDetails('${setNumber}')">
                                             <div class="set-image">
                                                 <div class="set-placeholder">
                                                     <i class="fas fa-cube"></i>
@@ -76,7 +76,7 @@ function showUserCollection() {
                                                 <p class="set-details">${getSetDetails(setNumber)}</p>
                                             </div>
                                             <div class="set-actions">
-                                                <button class="action-btn remove-btn" onclick="removeFromCollection('${setNumber}', 'wanted')">
+                                                <button class="action-btn remove-btn" onclick="event.stopPropagation(); removeFromCollection('${setNumber}', 'wanted')">
                                                     <i class="fas fa-times"></i> Remove
                                                 </button>
                                             </div>
@@ -241,11 +241,13 @@ function showUserCollection() {
             border: 1px solid #e0e0e0;
             border-radius: 12px;
             transition: all 0.3s ease;
+            cursor: pointer;
         }
         
         .set-item:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-color: #1976d2;
         }
         
         .set-image {
@@ -467,4 +469,12 @@ function removeFromCollection(setNumber, type) {
     // Refresh the collection modal
     document.querySelector('.modal')?.remove();
     showUserCollection();
+}
+
+function viewSetDetails(setNumber) {
+    // Close collection modal first
+    document.querySelector('.modal')?.remove();
+    
+    // Navigate to set detail page
+    window.location.href = `set-detail.html?set=${setNumber}`;
 }
