@@ -1,5 +1,7 @@
 # OPTIMIZED Docker Compose configuration for LEGO Purchase Suggestion System
 # Enhanced for ultra-fast startup and better performance
+# ⚠️  WARNING: This configuration is for DEVELOPMENT ONLY!
+# ⚠️  For production, use docker-compose-production.yml with secure settings
 version: '3.8'
 
 services:

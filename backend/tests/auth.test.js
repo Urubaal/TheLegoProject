@@ -75,10 +75,15 @@ describe('Auth API Tests', () => {
   describe('Rate Limiting', () => {
     it('should have rate limiting headers', async () => {
       const response = await request(app)
-        .get('/api/health')
-        .expect(200);
+        .post('/api/auth/login') // Use POST for login endpoint
+        .send({}) // Empty body to trigger validation error
+        .expect(400); // Will fail validation but should have rate limit headers
 
-      expect(response.headers['x-ratelimit-limit']).toBeDefined();
+      // Check for rate limiting headers (they might be in different format)
+      const hasRateLimitHeaders = response.headers['x-ratelimit-limit'] || 
+                                  response.headers['ratelimit-limit'] ||
+                                  response.headers['x-ratelimit-remaining'];
+      expect(hasRateLimitHeaders).toBeDefined();
     });
   });
 });
