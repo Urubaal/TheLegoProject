@@ -1,4 +1,4 @@
-# Zasady rozwoju projektu LEGO Collection Manager
+# Zasady rozwoju projektu LEGO Purchase Suggestion System
 
 ## 🔍 **Zasada weryfikacji bazy danych przy zmianach pól**
 
@@ -6,8 +6,9 @@
 
 ### 1. **Sprawdź schemat bazy danych**
 - Przeanalizuj tabele w `lego_database_schema.sql`
-- Sprawdź czy kolumny istnieją w odpowiednich tabelach
+- Sprawdź migracje w `backend/migrations/`
 - Zweryfikuj constraints i typy danych
+- Sprawdź indeksy i relacje między tabelami
 
 ### 2. **Utwórz migrację jeśli potrzeba**
 - Dodaj brakujące kolumny przez migracje SQL
@@ -19,9 +20,11 @@
 - Sprawdź czy zmiany zostały zastosowane poprawnie
 
 ### 4. **Zaktualizuj backend**
-- Sprawdź czy modele obsługują nowe pola
-- Zaktualizuj kontrolery i serwisy
+- Sprawdź czy modele w `backend/models/` obsługują nowe pola
+- Zaktualizuj kontrolery w `backend/controllers/`
+- Zaktualizuj serwisy w `backend/services/`
 - Przetestuj endpointy API
+- Sprawdź middleware i walidację
 
 ### 5. **Dopiero wtedy implementuj frontend**
 - Dodaj pola do formularzy HTML
