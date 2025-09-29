@@ -3,26 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LEGO Set Details - BrickEconomy Clone</title>
+    <title>LEGO Set Details - Brick Buy</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="brickeconomy.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #1976d2, #42a5f5);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .logo-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .logo-main {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            line-height: 1;
+        }
+        .logo-accent {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1976d2, #42a5f5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+        .logo-subtitle {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation Bar -->
     <nav class="navbar-brickeconomy">
         <div class="nav-container">
             <div class="nav-brand">
-                <div class="logo">
-                    <div class="logo-icon">🧱</div>
+                <div class="logo-container">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
                     <div class="logo-text">
-                        <span class="logo-title">BrickEconomy</span>
-                        <span class="logo-subtitle">the economics of LEGO</span>
+                        <span class="logo-main">Brick</span>
+                        <span class="logo-accent">Buy</span>
                     </div>
                 </div>
+                <div class="logo-subtitle">LEGO marketplace & collection</div>
             </div>
             
             <div class="nav-links">
+                <a href="brick-buy.html" class="nav-link">Home</a>
                 <a href="#" class="nav-link">Browse</a>
                 <a href="#" class="nav-link">Deals</a>
                 <a href="#" class="nav-link">Analysis</a>

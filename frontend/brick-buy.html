@@ -47,12 +47,49 @@
             gap: 15px;
         }
 
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
         .logo-icon {
-            font-size: 40px;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #1976d2, #42a5f5);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .logo-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .logo-main {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            line-height: 1;
+        }
+
+        .logo-accent {
+            font-size: 24px;
+            font-weight: 700;
             background: linear-gradient(135deg, #1976d2, #42a5f5);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            line-height: 1;
         }
 
         .logo-title {
@@ -156,13 +193,16 @@
         }
 
         .region-select {
-            padding: 12px 16px;
+            padding: 12px 12px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             background-color: white;
-            font-size: 16px;
+            font-size: 14px;
             cursor: pointer;
             font-weight: 500;
+            min-width: 80px;
+            max-width: 100px;
+            width: auto;
         }
 
         /* Main Content */
@@ -581,6 +621,257 @@
             font-size: 14px;
             color: #999999;
         }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #333333;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #999999;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #333333;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        /* Auth Modal Styles */
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666666;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .auth-tab.active {
+            color: #1976d2;
+            border-bottom-color: #1976d2;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333333;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+
+        .auth-submit {
+            padding: 16px;
+            background: linear-gradient(135deg, #1976d2, #1565c0);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .auth-submit:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Deals Modal Styles */
+        .deals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .deal-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .deal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .deal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .deal-source {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .deal-price {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1976d2;
+        }
+
+        .deal-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333333;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .deal-details {
+            font-size: 14px;
+            color: #666666;
+            margin-bottom: 15px;
+        }
+
+        .deal-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .deal-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .deal-btn-primary {
+            background: #1976d2;
+            color: white;
+        }
+
+        .deal-btn-secondary {
+            background: #f5f5f5;
+            color: #666666;
+            border: 1px solid #e0e0e0;
+        }
+
+        .deal-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* User Status Styles */
+        .user-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: #f8f9fa;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #666666;
+        }
+
+        .user-avatar {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #1976d2, #42a5f5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Collection Link States */
+        .collection-link.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .collection-link.disabled:hover {
+            background-color: #1976d2 !important;
+            border-color: #1976d2 !important;
+        }
     </style>
 </head>
 <body>
@@ -588,22 +879,29 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-brand">
-                <div class="logo-icon">🧱</div>
-                <div>
-                    <div class="logo-title">Brick Buy</div>
-                    <div class="logo-subtitle">LEGO marketplace & collection</div>
+                <div class="logo-container">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-main">Brick</span>
+                        <span class="logo-accent">Buy</span>
+                    </div>
                 </div>
+                <div class="logo-subtitle">LEGO marketplace & collection</div>
             </div>
             
             <div class="nav-links">
                 <a href="#" class="nav-link">Browse</a>
-                <a href="#" class="nav-link">Deals</a>
+                <a href="#" class="nav-link" id="dealsLink">Deals</a>
                 <a href="#" class="nav-link">Analysis</a>
-                <a href="#" class="nav-link collection-link active">
+                <a href="#" class="nav-link collection-link" id="collectionLink">
                     My Collection
-                    <span class="collection-count">3</span>
+                    <span class="collection-count" id="collectionCount">0</span>
                 </a>
-                <a href="#" class="nav-link">Me</a>
+                <a href="#" class="nav-link" id="profileLink">Profile</a>
             </div>
             
             <div class="nav-actions">
@@ -613,9 +911,11 @@
                 </div>
                 <div class="region-selector">
                     <select class="region-select">
-                        <option value="PL">🇵🇱 Poland</option>
-                        <option value="US">🇺🇸 United States</option>
-                        <option value="UK">🇬🇧 United Kingdom</option>
+                        <option value="PL">🇵🇱 PL</option>
+                        <option value="US">🇺🇸 US</option>
+                        <option value="UK">🇬🇧 UK</option>
+                        <option value="DE">🇩🇪 DE</option>
+                        <option value="FR">🇫🇷 FR</option>
                     </select>
                 </div>
             </div>
@@ -738,6 +1038,58 @@
         </div>
     </div>
 
+    <!-- Login/Register Modal -->
+    <div id="authModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Login</h2>
+                <span class="close" id="closeModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" id="loginTab">Login</button>
+                    <button class="auth-tab" id="registerTab">Register</button>
+                </div>
+                
+                <form id="authForm" class="auth-form">
+                    <div id="registerFields" style="display: none;">
+                        <div class="form-group">
+                            <label for="fullName">Full Name</label>
+                            <input type="text" id="fullName" name="fullName" placeholder="Enter your full name">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    </div>
+                    
+                    <button type="submit" class="auth-submit" id="authSubmit">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deals Modal -->
+    <div id="dealsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>LEGO Deals & Offers</h2>
+                <span class="close" id="closeDealsModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="deals-grid" id="dealsGrid">
+                    <!-- Deals will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
@@ -756,100 +1108,976 @@
         </div>
     </footer>
 
+    <script src="collection-view.js"></script>
     <script>
+        // User state management
+        let currentUser = null;
+        let userCollection = {
+            owned: [],
+            wanted: []
+        };
+
         // Enhanced functionality
         document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        async function initializeApp() {
+            // Check if user is logged in (simulate localStorage check)
+            const savedUser = localStorage.getItem('brickBuyUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                updateUIForLoggedInUser();
+            } else {
+                updateUIForGuestUser();
+            }
+
+            setupEventListeners();
+            await loadUserCollection();
+            await loadSetData();
+        }
+
+        function setupEventListeners() {
             // Collection buttons
             const ownBtn = document.getElementById('ownBtn');
             const wantBtn = document.getElementById('wantBtn');
             const buyBtn = document.getElementById('buyBtn');
-            const collectionCount = document.querySelector('.collection-count');
-            
-            let collectionItems = 3; // Starting with 3 items
-            let isOwned = false;
-            let isWanted = false;
             
             ownBtn.addEventListener('click', function() {
-                if (isOwned) {
-                    this.classList.remove('active');
-                    this.innerHTML = '<i class="fas fa-check"></i> I Own This';
-                    isOwned = false;
-                    collectionItems--;
-                } else {
-                    this.classList.add('active');
-                    this.innerHTML = '<i class="fas fa-check"></i> Owned ✓';
-                    isOwned = true;
-                    collectionItems++;
+                if (!currentUser) {
+                    showAuthModal();
+                    return;
                 }
-                updateCollectionCount();
+                toggleOwnership();
             });
             
             wantBtn.addEventListener('click', function() {
-                if (isWanted) {
-                    this.classList.remove('active');
-                    this.innerHTML = '<i class="fas fa-heart"></i> I Want This';
-                    isWanted = false;
-                    collectionItems--;
-                } else {
-                    this.classList.add('active');
-                    this.innerHTML = '<i class="fas fa-heart"></i> Wanted ✓';
-                    isWanted = true;
-                    collectionItems++;
+                if (!currentUser) {
+                    showAuthModal();
+                    return;
                 }
-                updateCollectionCount();
+                toggleWanted();
             });
             
             buyBtn.addEventListener('click', function() {
-                // Show purchase options
-                const options = [
-                    'OLX - €65 (Nowy, Warszawa)',
-                    'OLX - €45 (Używany, Kraków)', 
-                    'OLX - €55 (Bardzo dobry, Gdańsk)',
-                    'LEGO Store - €79.99 (Nowy)',
-                    'Amazon - €72.50 (Nowy)'
-                ];
-                
-                const choice = confirm('Available purchase options:\n\n' + options.join('\n') + '\n\nClick OK to open OLX offers, Cancel to see all options');
-                
-                if (choice) {
-                    alert('Opening OLX offers...');
+                showPurchaseOptions();
+            });
+
+            // Navigation links
+            document.getElementById('profileLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                if (currentUser) {
+                    showUserProfile();
                 } else {
-                    alert('All purchase options:\n\n' + options.join('\n'));
+                    showAuthModal();
                 }
             });
-            
-            function updateCollectionCount() {
-                collectionCount.textContent = collectionItems;
+
+            document.getElementById('collectionLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                if (currentUser) {
+                    showUserCollection();
+                } else {
+                    showAuthModal();
+                }
+            });
+
+            document.getElementById('dealsLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                showDealsModal();
+            });
+
+            // Modal controls
+            setupModalControls();
+        }
+
+        function setupModalControls() {
+            // Auth modal
+            const authModal = document.getElementById('authModal');
+            const closeModal = document.getElementById('closeModal');
+            const loginTab = document.getElementById('loginTab');
+            const registerTab = document.getElementById('registerTab');
+            const authForm = document.getElementById('authForm');
+            const modalTitle = document.getElementById('modalTitle');
+            const registerFields = document.getElementById('registerFields');
+            const authSubmit = document.getElementById('authSubmit');
+
+            closeModal.addEventListener('click', function() {
+                authModal.style.display = 'none';
+            });
+
+            loginTab.addEventListener('click', function() {
+                loginTab.classList.add('active');
+                registerTab.classList.remove('active');
+                modalTitle.textContent = 'Login';
+                registerFields.style.display = 'none';
+                authSubmit.textContent = 'Login';
+            });
+
+            registerTab.addEventListener('click', function() {
+                registerTab.classList.add('active');
+                loginTab.classList.remove('active');
+                modalTitle.textContent = 'Register';
+                registerFields.style.display = 'block';
+                authSubmit.textContent = 'Register';
+            });
+
+            authForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                handleAuth();
+            });
+
+            // Deals modal
+            const dealsModal = document.getElementById('dealsModal');
+            const closeDealsModal = document.getElementById('closeDealsModal');
+
+            closeDealsModal.addEventListener('click', function() {
+                dealsModal.style.display = 'none';
+            });
+
+            // Close modals when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target === authModal) {
+                    authModal.style.display = 'none';
+                }
+                if (e.target === dealsModal) {
+                    dealsModal.style.display = 'none';
+                }
+            });
+        }
+
+        function showAuthModal() {
+            document.getElementById('authModal').style.display = 'flex';
+        }
+
+        async function handleAuth() {
+            const isLogin = document.getElementById('loginTab').classList.contains('active');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const fullName = document.getElementById('fullName').value;
+
+            try {
+                let response;
+                if (isLogin) {
+                    response = await fetch('http://localhost:3000/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ email, password })
+                    });
+                } else {
+                    if (!fullName) {
+                        alert('Please enter your full name');
+                        return;
+                    }
+                    response = await fetch('http://localhost:3000/api/auth/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ email, password, fullName })
+                    });
+                }
+
+                const data = await response.json();
                 
-                // Add animation
-                collectionCount.style.transform = 'scale(1.2)';
-                setTimeout(() => {
-                    collectionCount.style.transform = 'scale(1)';
-                }, 200);
+                if (response.ok) {
+                    currentUser = data.user;
+                    localStorage.setItem('brickBuyUser', JSON.stringify(currentUser));
+                    localStorage.setItem('brickBuyToken', data.token);
+                    updateUIForLoggedInUser();
+                    document.getElementById('authModal').style.display = 'none';
+                    alert(`Successfully ${isLogin ? 'logged in' : 'registered'}!`);
+                } else {
+                    alert(`Error: ${data.error || 'Authentication failed'}`);
+                }
+            } catch (error) {
+                console.error('Auth error:', error);
+                // Fallback to mock authentication if backend is not available
+                if (isLogin) {
+                    currentUser = {
+                        id: 1,
+                        email: email,
+                        name: email.split('@')[0]
+                    };
+                    localStorage.setItem('brickBuyUser', JSON.stringify(currentUser));
+                    updateUIForLoggedInUser();
+                    document.getElementById('authModal').style.display = 'none';
+                    alert('Successfully logged in (offline mode)!');
+                } else {
+                    if (!fullName) {
+                        alert('Please enter your full name');
+                        return;
+                    }
+                    currentUser = {
+                        id: 1,
+                        email: email,
+                        name: fullName
+                    };
+                    localStorage.setItem('brickBuyUser', JSON.stringify(currentUser));
+                    updateUIForLoggedInUser();
+                    document.getElementById('authModal').style.display = 'none';
+                    alert('Successfully registered and logged in (offline mode)!');
+                }
             }
+        }
+
+        function updateUIForLoggedInUser() {
+            const profileLink = document.getElementById('profileLink');
+            const collectionLink = document.getElementById('collectionLink');
             
-            // Search functionality
-            const searchInput = document.querySelector('.search-input');
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    const query = this.value.trim();
-                    if (query) {
-                        alert(`Searching for: "${query}"\n\nAvailable sets:\n- 75399 Rebel U-Wing Starfighter\n- 75313 AT-AT\n- 75308 R2-D2\n- 75341 Luke Skywalker's Landspeeder`);
+            profileLink.innerHTML = `<i class="fas fa-user"></i> ${currentUser.name}`;
+            collectionLink.classList.remove('disabled');
+            
+            // Load user collection after login
+            loadUserCollection();
+        }
+
+        function updateUIForGuestUser() {
+            const profileLink = document.getElementById('profileLink');
+            const collectionLink = document.getElementById('collectionLink');
+            
+            profileLink.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+            collectionLink.classList.add('disabled');
+            
+            document.getElementById('collectionCount').textContent = '0';
+        }
+
+        async function toggleOwnership() {
+            const setNumber = '75399-1';
+            const token = localStorage.getItem('brickBuyToken');
+            
+            try {
+                const ownedIndex = userCollection.owned.indexOf(setNumber);
+                
+                if (ownedIndex > -1) {
+                    // Remove from collection
+                    const response = await fetch(`http://localhost:3000/api/lego/collection/${setNumber}/owned`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        userCollection.owned.splice(ownedIndex, 1);
+                        document.getElementById('ownBtn').innerHTML = '<i class="fas fa-check"></i> I Own This';
+                        document.getElementById('ownBtn').classList.remove('active');
+                    }
+                } else {
+                    // Add to collection
+                    const response = await fetch('http://localhost:3000/api/lego/collection/add', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            setNumber: setNumber,
+                            collectionType: 'owned',
+                            pricePaid: 0,
+                            condition: 'new',
+                            notes: ''
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        userCollection.owned.push(setNumber);
+                        document.getElementById('ownBtn').innerHTML = '<i class="fas fa-check"></i> Owned ✓';
+                        document.getElementById('ownBtn').classList.add('active');
                     }
                 }
-            });
+                
+                saveUserCollection();
+                updateCollectionCount();
+            } catch (error) {
+                console.error('Collection error:', error);
+                // Fallback to local storage
+                const ownedIndex = userCollection.owned.indexOf(setNumber);
+                
+                if (ownedIndex > -1) {
+                    userCollection.owned.splice(ownedIndex, 1);
+                    document.getElementById('ownBtn').innerHTML = '<i class="fas fa-check"></i> I Own This';
+                    document.getElementById('ownBtn').classList.remove('active');
+                } else {
+                    userCollection.owned.push(setNumber);
+                    document.getElementById('ownBtn').innerHTML = '<i class="fas fa-check"></i> Owned ✓';
+                    document.getElementById('ownBtn').classList.add('active');
+                }
+                
+                saveUserCollection();
+                updateCollectionCount();
+            }
+        }
+
+        function toggleWanted() {
+            const setNumber = '75399-1';
+            const wantedIndex = userCollection.wanted.indexOf(setNumber);
             
-            // Add some interactive effects
-            const cards = document.querySelectorAll('.sidebar-card');
-            cards.forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-5px)';
-                    this.style.transition = 'transform 0.3s ease';
+            if (wantedIndex > -1) {
+                userCollection.wanted.splice(wantedIndex, 1);
+                document.getElementById('wantBtn').innerHTML = '<i class="fas fa-heart"></i> I Want This';
+                document.getElementById('wantBtn').classList.remove('active');
+            } else {
+                userCollection.wanted.push(setNumber);
+                document.getElementById('wantBtn').innerHTML = '<i class="fas fa-heart"></i> Wanted ✓';
+                document.getElementById('wantBtn').classList.add('active');
+            }
+            
+            saveUserCollection();
+            updateCollectionCount();
+        }
+
+        function updateCollectionCount() {
+            const totalItems = userCollection.owned.length + userCollection.wanted.length;
+            const collectionCount = document.getElementById('collectionCount');
+            collectionCount.textContent = totalItems;
+            
+            // Add animation
+            collectionCount.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                collectionCount.style.transform = 'scale(1)';
+            }, 200);
+        }
+
+        function loadUserCollection() {
+            const saved = localStorage.getItem('brickBuyCollection');
+            if (saved) {
+                userCollection = JSON.parse(saved);
+            } else {
+                // If no saved collection, check if user is logged in and add default set
+                if (currentUser) {
+                    userCollection = {
+                        owned: ['75399-1'], // User has the Rebel U-Wing Starfighter
+                        wanted: []
+                    };
+                    saveUserCollection();
+                }
+            }
+            
+            // Update button states for current set
+            const setNumber = '75399-1';
+            if (userCollection.owned.includes(setNumber)) {
+                document.getElementById('ownBtn').innerHTML = '<i class="fas fa-check"></i> Owned ✓';
+                document.getElementById('ownBtn').classList.add('active');
+            }
+            if (userCollection.wanted.includes(setNumber)) {
+                document.getElementById('wantBtn').innerHTML = '<i class="fas fa-heart"></i> Wanted ✓';
+                document.getElementById('wantBtn').classList.add('active');
+            }
+            
+            updateCollectionCount();
+        }
+
+        function saveUserCollection() {
+            localStorage.setItem('brickBuyCollection', JSON.stringify(userCollection));
+        }
+
+        async function loadSetData() {
+            try {
+                const response = await fetch('http://localhost:3000/api/lego/sets/75399-1', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 });
                 
-                card.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0)';
+                if (response.ok) {
+                    const data = await response.json();
+                    const set = data.set;
+                    
+                    // Update set information if available
+                    if (set) {
+                        document.querySelector('.set-title').textContent = set.name || 'Rebel U-Wing Starfighter';
+                        document.querySelector('.set-number').textContent = `Set #${set.setNumber} • ${set.theme || 'Star Wars'} • ${set.year || '2024'}`;
+                        document.querySelector('.set-description').textContent = set.description || 'The Rebel U-Wing Starfighter is a versatile craft used by the Rebel Alliance for troop transport and combat missions.';
+                        
+                        // Update stats if available
+                        if (set.pieces) {
+                            document.querySelector('.stat-item:nth-child(2) .stat-value').textContent = set.pieces;
+                        }
+                        if (set.minifigures) {
+                            document.querySelector('.stat-item:nth-child(1) .stat-value').textContent = set.minifigures;
+                        }
+                        if (set.age) {
+                            document.querySelector('.stat-item:nth-child(3) .stat-value').textContent = set.age;
+                        }
+                        if (set.year) {
+                            document.querySelector('.stat-item:nth-child(4) .stat-value').textContent = set.year;
+                        }
+                    }
+                } else {
+                    console.log('Set data not available in database, using default data');
+                }
+            } catch (error) {
+                console.error('Error loading set data:', error);
+                // Continue with default data
+            }
+        }
+
+        function showUserProfile() {
+            // Create a detailed profile modal
+            const profileModal = document.createElement('div');
+            profileModal.className = 'modal';
+            profileModal.style.display = 'flex';
+            
+            profileModal.innerHTML = `
+                <div class="modal-content profile-modal">
+                    <div class="modal-header">
+                        <h2>My Profile</h2>
+                        <span class="close" onclick="this.closest('.modal').remove()">&times;</span>
+                    </div>
+                    <div class="modal-body profile-body">
+                        <div class="profile-layout">
+                            <div class="profile-left">
+                                <div class="profile-section">
+                                    <h3>Profile Information</h3>
+                                    <div class="form-group">
+                                        <label>Name</label>
+                                        <input type="text" value="${currentUser.name}" readonly>
+                                        <small>Personalize your experience a little more.</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Email</label>
+                                        <input type="email" value="${currentUser.email}" readonly>
+                                        <small>Your login email address.</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Country</label>
+                                        <select disabled>
+                                            <option selected>Poland</option>
+                                        </select>
+                                        <small>Personalize shopping and deals.</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Region</label>
+                                        <select disabled>
+                                            <option selected>European Union</option>
+                                        </select>
+                                        <small>Display this region's currency and dates.</small>
+                                    </div>
+                                    <button class="profile-btn">Update Profile</button>
+                                </div>
+                            </div>
+                            <div class="profile-right">
+                                <div class="profile-section">
+                                    <h3>About</h3>
+                                    <p><strong>Member Since:</strong> ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                                </div>
+                                
+                                <div class="profile-section">
+                                    <h3>My Collection</h3>
+                                    <div class="collection-stats">
+                                        <div class="stat-group">
+                                            <h4>Owned Sets</h4>
+                                            <div class="stat-item">
+                                                <span class="stat-label">Owned sets:</span>
+                                                <span class="stat-value">${userCollection.owned.length} (${userCollection.owned.length} unique)</span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <span class="stat-label">Pieces:</span>
+                                                <span class="stat-value">${userCollection.owned.length * 1065}</span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <span class="stat-label">Minifigs:</span>
+                                                <span class="stat-value">${userCollection.owned.length * 4}</span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <span class="stat-label">Current value:</span>
+                                                <span class="stat-value">€${(userCollection.owned.length * 79.99).toFixed(2)}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="stat-group">
+                                            <h4>Wanted Sets</h4>
+                                            <div class="stat-item">
+                                                <span class="stat-label">Wanted sets:</span>
+                                                <span class="stat-value">${userCollection.wanted.length}</span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <span class="stat-label">Current value:</span>
+                                                <span class="stat-value">€${(userCollection.wanted.length * 79.99).toFixed(2)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add styles for profile modal
+            const style = document.createElement('style');
+            style.textContent = `
+                .profile-modal {
+                    max-width: 900px;
+                    width: 95%;
+                }
+                
+                .profile-body {
+                    padding: 0;
+                }
+                
+                .profile-layout {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 40px;
+                    padding: 30px;
+                }
+                
+                .profile-section {
+                    margin-bottom: 30px;
+                }
+                
+                .profile-section h3 {
+                    color: #333;
+                    font-size: 20px;
+                    font-weight: 700;
+                    margin-bottom: 20px;
+                    padding-bottom: 10px;
+                    border-bottom: 2px solid #1976d2;
+                }
+                
+                .profile-section h4 {
+                    color: #555;
+                    font-size: 16px;
+                    font-weight: 600;
+                    margin-bottom: 15px;
+                }
+                
+                .profile-section p {
+                    color: #666;
+                    margin-bottom: 10px;
+                }
+                
+                .profile-section input,
+                .profile-section select {
+                    width: 100%;
+                    padding: 12px 16px;
+                    border: 2px solid #e0e0e0;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    margin-bottom: 8px;
+                }
+                
+                .profile-section input:disabled,
+                .profile-section select:disabled {
+                    background-color: #f5f5f5;
+                    color: #666;
+                }
+                
+                .profile-section small {
+                    color: #666;
+                    font-size: 12px;
+                    display: block;
+                    margin-bottom: 15px;
+                }
+                
+                .profile-btn {
+                    padding: 12px 24px;
+                    background: linear-gradient(135deg, #1976d2, #1565c0);
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: transform 0.3s ease;
+                }
+                
+                .profile-btn:hover {
+                    transform: translateY(-2px);
+                }
+                
+                .collection-stats {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 20px;
+                }
+                
+                .stat-group {
+                    background: #f8f9fa;
+                    padding: 20px;
+                    border-radius: 12px;
+                    border: 1px solid #e0e0e0;
+                }
+                
+                .stat-item {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 8px 0;
+                    border-bottom: 1px solid #e0e0e0;
+                }
+                
+                .stat-item:last-child {
+                    border-bottom: none;
+                }
+                
+                .stat-label {
+                    color: #666;
+                    font-size: 14px;
+                }
+                
+                .stat-value {
+                    color: #333;
+                    font-weight: 600;
+                    font-size: 14px;
+                }
+                
+                @media (max-width: 768px) {
+                    .profile-layout {
+                        grid-template-columns: 1fr;
+                        gap: 20px;
+                    }
+                }
+            `;
+            
+            document.head.appendChild(style);
+            document.body.appendChild(profileModal);
+            
+            // Close modal when clicking outside
+            profileModal.addEventListener('click', function(e) {
+                if (e.target === profileModal) {
+                    profileModal.remove();
+                    style.remove();
+                }
+            });
+        }
+
+
+        async function showDealsModal() {
+            const dealsModal = document.getElementById('dealsModal');
+            const dealsGrid = document.getElementById('dealsGrid');
+            
+            // Show loading state
+            dealsGrid.innerHTML = '<div style="text-align: center; padding: 40px;">Loading deals...</div>';
+            dealsModal.style.display = 'flex';
+            
+            try {
+                // Try to load deals from API
+                const response = await fetch('http://localhost:3000/api/lego/offers', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const deals = data.data?.offers || data.offers || [];
+                    
+                    if (deals.length > 0) {
+                        dealsGrid.innerHTML = deals.map(deal => `
+                            <div class="deal-card">
+                                <div class="deal-header">
+                                    <span class="deal-source">${deal.source || 'OLX'}</span>
+                                    <span class="deal-price">€${deal.price}</span>
+                                </div>
+                                <div class="deal-title">${deal.title}</div>
+                                <div class="deal-details">(${deal.location}) • ${deal.condition}</div>
+                                <div class="deal-actions">
+                                    <button class="deal-btn deal-btn-primary" onclick="window.open('${deal.url}', '_blank')">View</button>
+                                    <button class="deal-btn deal-btn-secondary" onclick="alert('Added to watchlist')">Watch</button>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        dealsGrid.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">No deals available at the moment.</div>';
+                    }
+                } else {
+                    throw new Error('Failed to load deals from API');
+                }
+            } catch (error) {
+                console.error('Error loading deals:', error);
+                // Fallback to sample deals
+                const deals = [
+                    {
+                        title: 'LEGO Star Wars 75313 AT-AT',
+                        price: '€180',
+                        location: 'Warszawa',
+                        condition: 'Nowy',
+                        source: 'OLX'
+                    },
+                    {
+                        title: 'LEGO Creator 31120 Medieval Castle',
+                        price: '€95',
+                        location: 'Kraków',
+                        condition: 'Używany',
+                        source: 'OLX'
+                    },
+                    {
+                        title: 'LEGO Ideas 21325 Medieval Blacksmith',
+                        price: '€120',
+                        location: 'Gdańsk',
+                        condition: 'Bardzo dobry',
+                        source: 'OLX'
+                    },
+                    {
+                        title: 'LEGO Technic 42143 Ferrari Daytona',
+                        price: '€380',
+                        location: 'Wrocław',
+                        condition: 'Nowy',
+                        source: 'OLX'
+                    },
+                    {
+                        title: 'LEGO Architecture 21034 London',
+                        price: '€45',
+                        location: 'Poznań',
+                        condition: 'Używany',
+                        source: 'OLX'
+                    },
+                    {
+                        title: 'LEGO Harry Potter 76391 Hogwarts Icons',
+                        price: '€160',
+                        location: 'Łódź',
+                        condition: 'Nowy',
+                        source: 'OLX'
+                    }
+                ];
+
+                dealsGrid.innerHTML = deals.map(deal => `
+                    <div class="deal-card">
+                        <div class="deal-header">
+                            <span class="deal-source">${deal.source}</span>
+                            <span class="deal-price">${deal.price}</span>
+                        </div>
+                        <div class="deal-title">${deal.title}</div>
+                        <div class="deal-details">(${deal.location}) • ${deal.condition}</div>
+                        <div class="deal-actions">
+                            <button class="deal-btn deal-btn-primary" onclick="alert('Opening ${deal.title} on OLX...')">View</button>
+                            <button class="deal-btn deal-btn-secondary" onclick="alert('Added to watchlist')">Watch</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function showPurchaseOptions() {
+            const options = [
+                'OLX - €65 (Nowy, Warszawa)',
+                'OLX - €45 (Używany, Kraków)', 
+                'OLX - €55 (Bardzo dobry, Gdańsk)',
+                'LEGO Store - €79.99 (Nowy)',
+                'Amazon - €72.50 (Nowy)'
+            ];
+            
+            const choice = confirm('Available purchase options:\n\n' + options.join('\n') + '\n\nClick OK to open OLX offers, Cancel to see all options');
+            
+            if (choice) {
+                alert('Opening OLX offers...');
+            } else {
+                alert('All purchase options:\n\n' + options.join('\n'));
+            }
+        }
+
+        // Search functionality
+        document.querySelector('.search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const query = this.value.trim();
+                if (query) {
+                    showSearchResults(query);
+                }
+            }
+        });
+
+        async function showSearchResults(query) {
+            try {
+                // Try to search via API first
+                const response = await fetch(`http://localhost:3000/api/lego/sets?search=${encodeURIComponent(query)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const sets = data.data?.sets || data.sets || [];
+                    displaySearchResults(query, sets);
+                } else {
+                    throw new Error('API search failed');
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+                // Fallback to mock search results
+                const mockResults = [
+                    {
+                        setNumber: '75399-1',
+                        name: 'Rebel U-Wing Starfighter',
+                        theme: 'Star Wars',
+                        year: 2024,
+                        pieces: 1065,
+                        retailPrice: 79.99
+                    },
+                    {
+                        setNumber: '75313-1',
+                        name: 'AT-AT',
+                        theme: 'Star Wars',
+                        year: 2023,
+                        pieces: 1267,
+                        retailPrice: 169.99
+                    },
+                    {
+                        setNumber: '75308-1',
+                        name: 'R2-D2',
+                        theme: 'Star Wars',
+                        year: 2021,
+                        pieces: 2314,
+                        retailPrice: 199.99
+                    },
+                    {
+                        setNumber: '75341-1',
+                        name: 'Luke Skywalker\'s Landspeeder',
+                        theme: 'Star Wars',
+                        year: 2022,
+                        pieces: 1890,
+                        retailPrice: 239.99
+                    }
+                ];
+                
+                const filteredResults = mockResults.filter(set => 
+                    set.name.toLowerCase().includes(query.toLowerCase()) ||
+                    set.setNumber.includes(query) ||
+                    set.theme.toLowerCase().includes(query.toLowerCase())
+                );
+                
+                displaySearchResults(query, filteredResults);
+            }
+        }
+
+        function displaySearchResults(query, results) {
+            const searchModal = document.createElement('div');
+            searchModal.className = 'modal';
+            searchModal.style.display = 'flex';
+            
+            searchModal.innerHTML = `
+                <div class="modal-content search-modal">
+                    <div class="modal-header">
+                        <h2>Search Results for "${query}"</h2>
+                        <span class="close" onclick="this.closest('.modal').remove()">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="search-results">
+                            ${results.length > 0 ? results.map(set => `
+                                <div class="search-result-item">
+                                    <div class="result-info">
+                                        <h3>${set.name}</h3>
+                                        <p class="result-details">Set #${set.setNumber} • ${set.theme} • ${set.year}</p>
+                                        <p class="result-stats">${set.pieces} pieces • €${set.retailPrice}</p>
+                                    </div>
+                                    <button class="result-btn" onclick="viewSet('${set.setNumber}')">View Details</button>
+                                </div>
+                            `).join('') : '<p class="no-results">No sets found matching your search.</p>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add styles for search modal
+            const style = document.createElement('style');
+            style.textContent = `
+                .search-modal {
+                    max-width: 600px;
+                    width: 95%;
+                }
+                
+                .search-results {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 15px;
+                }
+                
+                .search-result-item {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 20px;
+                    border: 1px solid #e0e0e0;
+                    border-radius: 12px;
+                    background: white;
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                }
+                
+                .search-result-item:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+                }
+                
+                .result-info h3 {
+                    margin: 0 0 8px 0;
+                    color: #333;
+                    font-size: 18px;
+                    font-weight: 600;
+                }
+                
+                .result-details {
+                    margin: 0 0 4px 0;
+                    color: #666;
+                    font-size: 14px;
+                }
+                
+                .result-stats {
+                    margin: 0;
+                    color: #888;
+                    font-size: 13px;
+                }
+                
+                .result-btn {
+                    padding: 10px 20px;
+                    background: #1976d2;
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: background 0.3s ease;
+                }
+                
+                .result-btn:hover {
+                    background: #1565c0;
+                }
+                
+                .no-results {
+                    text-align: center;
+                    color: #666;
+                    font-size: 16px;
+                    padding: 40px;
+                }
+            `;
+            
+            document.head.appendChild(style);
+            document.body.appendChild(searchModal);
+            
+            // Close modal when clicking outside
+            searchModal.addEventListener('click', function(e) {
+                if (e.target === searchModal) {
+                    searchModal.remove();
+                    style.remove();
+                }
+            });
+        }
+
+        function viewSet(setNumber) {
+            // Close search modal
+            document.querySelector('.modal')?.remove();
+            // Scroll to set details (for demo purposes)
+            alert(`Viewing details for set ${setNumber}`);
+        }
+        
+        // Add some interactive effects
+        document.querySelectorAll('.sidebar-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.transition = 'transform 0.3s ease';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
             });
         });
     </script>

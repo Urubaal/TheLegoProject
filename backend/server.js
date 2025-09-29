@@ -116,11 +116,25 @@ app.use(limiter);
 
 // CORS configuration - allows requests from configured origins
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || [
-    'http://localhost:8080', // Main frontend port
-    'http://localhost:5500', // Alternative frontend port
-    'http://localhost:3000'  // Development port
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) {
+      return callback(null, true);
+    }
+    
+    const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
+      'http://localhost:8080', // Main frontend port
+      'http://localhost:5500', // Alternative frontend port
+      'http://localhost:3000', // Development port
+      'null' // Allow file:// protocol for local HTML files
+    ];
+    
+    if (allowedOrigins.includes(origin) || allowedOrigins.includes('null')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 

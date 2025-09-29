@@ -1,0 +1,26 @@
+[
+  {
+    "setNumber": "75399-1",
+    "name": "Rebel U-Wing Starfighter",
+    "theme": "Star Wars",
+    "year": 2024,
+    "pieces": 1065,
+    "minifigures": 4,
+    "age": "18+",
+    "description": "The Rebel U-Wing Starfighter is a versatile craft used by the Rebel Alliance for troop transport and combat missions. This detailed LEGO set features authentic details from Rogue One: A Star Wars Story.",
+    "retailPrice": 79.99,
+    "imageUrl": "https://www.lego.com/cdn/cs/set/assets/blt1234567890/75399.png"
+  },
+  {
+    "setNumber": "75313-1",
+    "name": "AT-AT",
+    "theme": "Star Wars",
+    "year": 2023,
+    "pieces": 1267,
+    "minifigures": 4,
+    "age": "18+",
+    "description": "Build the ultimate AT-AT model with this impressive LEGO Star Wars set featuring authentic details and minifigures.",
+    "retailPrice": 169.99,
+    "imageUrl": "https://www.lego.com/cdn/cs/set/assets/blt1234567890/75313.png"
+  }
+]
