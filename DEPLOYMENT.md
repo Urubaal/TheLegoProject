@@ -1,6 +1,6 @@
 # 🚀 Deployment Guide
 
-Przewodnik wdrażania systemu logowania na różnych platformach.
+Przewodnik wdrażania systemu LEGO Purchase Suggestion System na różnych platformach.
 
 ## 📋 Przed wdrożeniem
 
@@ -182,11 +182,19 @@ heroku addons:create heroku-postgresql:hobby-dev
 NODE_ENV=production
 PORT=3000
 JWT_SECRET=super-secure-secret-key
+DATABASE_URL=postgresql://user:password@host:5432/database
+POSTGRES_DB=lego_purchase_system
+POSTGRES_USER=lego_user
+POSTGRES_PASSWORD=secure_password
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=CHANGE_ME_EMAIL_PASSWORD
 FRONTEND_URL=https://yourdomain.com
+ALLOWED_ORIGINS=https://yourdomain.com
+LOG_LEVEL=info
+LOG_STORAGE=database
+REDIS_URL=redis://localhost:6379
 ```
 
 ## 🚨 Troubleshooting

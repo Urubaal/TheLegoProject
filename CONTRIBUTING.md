@@ -1,14 +1,14 @@
-# Contributing to TheLegoProject
+# Contributing to LEGO Purchase Suggestion System
 
-Thank you for your interest in the project! Here's how you can contribute to the development of the authentication system.
+Thank you for your interest in the project! Here's how you can contribute to the development of the LEGO collection management system.
 
 ## 🚀 Getting Started
 
 1. **Fork** the repository
 2. **Clone** your fork:
    ```bash
-   git clone https://github.com/YOUR-USERNAME/TheLegoProject.git
-   cd TheLegoProject
+   git clone https://github.com/YOUR-USERNAME/lego-purchase-system.git
+   cd lego-purchase-system
    ```
 3. **Create branch** for your feature:
    ```bash
@@ -25,7 +25,8 @@ Thank you for your interest in the project! Here's how you can contribute to the
 
 ### Frontend
 1. Open `frontend/index.html` in browser
-2. Or run local HTTP server
+2. Or run local HTTP server: `cd frontend && node server.js`
+3. Access at http://localhost:8080
 
 ## 🧪 Testing
 
@@ -87,13 +88,15 @@ Before implementation:
 
 ## 🎯 Development Areas
 
-- [ ] Add database (MongoDB/PostgreSQL)
-- [ ] Unit and integration tests
-- [ ] Docker containerization
-- [ ] CI/CD pipeline
-- [ ] Add 2FA
-- [ ] Social login (Google, Facebook)
-- [ ] User dashboard
-- [ ] Admin panel
+- [ ] Enhanced collection management features
+- [ ] Price tracking and alerts
+- [ ] Integration with more LEGO APIs
+- [ ] Mobile app development
+- [ ] Advanced analytics and reporting
+- [ ] Social features (sharing collections)
+- [ ] Import/export functionality
+- [ ] Admin panel improvements
+- [ ] Performance optimizations
+- [ ] Additional authentication methods
 
 Thank you for contributing to the project! 🎉

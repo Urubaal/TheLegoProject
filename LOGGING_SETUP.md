@@ -2,7 +2,19 @@
 
 ## Przegląd
 
-System logowania został zaimplementowany z użyciem **Winston** i oferuje wielopoziomowe logowanie z możliwością integracji z chmurowymi usługami.
+System logowania został zaimplementowany z użyciem **Winston** i oferuje wielopoziomowe logowanie z możliwością przechowywania w plikach lub bazie danych PostgreSQL, a także integrację z chmurowymi usługami.
+
+## 🎯 Opcje Przechowywania Logów
+
+### 1. **Pliki Logów** (domyślne)
+- Przechowywanie w katalogu `backend/logs/`
+- Automatyczna rotacja plików
+- Struktura: `application-YYYY-MM-DD.log`, `error-YYYY-MM-DD.log`, `audit-YYYY-MM-DD.log`
+
+### 2. **Baza Danych PostgreSQL** (opcjonalne)
+- Przechowywanie w tabeli `system_logs`
+- Lepsze zapytania i analiza
+- Integracja z aplikacją
 
 ## Funkcje
 
@@ -34,6 +46,12 @@ backend/logs/
 # Podstawowe logowanie
 LOG_LEVEL=info                    # debug, info, warn, error
 NODE_ENV=development              # development, production
+LOG_STORAGE=files                 # files, database, hybrid
+
+# Logowanie do bazy danych (opcjonalne)
+LOG_STORAGE=database              # database, files, hybrid
+LOG_RETENTION_DAYS=30             # ile dni przechowywać logi
+LOG_CLEANUP_INTERVAL_HOURS=6      # interwał czyszczenia
 
 # Google Cloud Logging (opcjonalne)
 GOOGLE_CLOUD_PROJECT=your-project-id
@@ -42,6 +60,43 @@ GOOGLE_APPLICATION_CREDENTIALS=path/to/service-account-key.json
 # Datadog (opcjonalne)
 DATADOG_API_KEY=your-datadog-api-key
 HOSTNAME=your-server-hostname
+```
+
+## 🗄️ Konfiguracja Logowania do Bazy Danych
+
+### 1. Uruchom Migrację Bazy Danych
+
+```bash
+cd backend
+node migrations/create_system_logs_table.js
+```
+
+### 2. Struktura Tabeli `system_logs`
+
+```sql
+CREATE TABLE system_logs (
+  id SERIAL PRIMARY KEY,
+  level VARCHAR(10) NOT NULL,           -- error, warn, info, debug
+  message TEXT NOT NULL,
+  metadata JSONB DEFAULT '{}',          -- dodatkowe dane
+  service VARCHAR(50) DEFAULT 'lego-backend',
+  environment VARCHAR(20) DEFAULT 'development',
+  user_id INTEGER REFERENCES users(id), -- opcjonalne
+  ip_address INET,
+  user_agent TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  expires_at TIMESTAMP                  -- dla automatycznego czyszczenia
+);
+```
+
+### 3. Migruj Istniejące Logi (Opcjonalne)
+
+```bash
+# Przenieś istniejące pliki logów do bazy danych
+node migrate-logs-to-database.js
+
+# Wyczyść stare pliki po migracji
+node migrate-logs-to-database.js cleanup
 ```
 
 ## Użycie w kodzie
@@ -127,6 +182,54 @@ Zarządza harmonogramem automatycznego czyszczenia logów.
     "isRunning": true,
     "nextCleanup": "2024-01-15T16:30:00.000Z"
   }
+}
+```
+
+## 📊 API Endpointy dla Logów w Bazie Danych
+
+### Pobierz Logi
+```http
+GET /api/logs?page=1&limit=50&level=error&userId=123
+```
+
+**Parametry:**
+- `page` - strona (domyślnie 1)
+- `limit` - liczba rekordów (domyślnie 50, max 1000)
+- `level` - poziom logu (error, warn, info, debug)
+- `service` - nazwa serwisu (domyślnie lego-backend)
+- `environment` - środowisko (development, production)
+- `userId` - ID użytkownika
+- `startDate` - data początkowa (ISO format)
+- `endDate` - data końcowa (ISO format)
+- `search` - wyszukiwanie w wiadomości i metadata
+
+### Statystyki Logów
+```http
+GET /api/logs/stats?service=lego-backend&environment=production
+```
+
+### Wyszukiwanie Logów
+```http
+POST /api/logs/search
+Content-Type: application/json
+
+{
+  "query": "database error",
+  "level": "error",
+  "userId": 123,
+  "startDate": "2024-01-01T00:00:00.000Z",
+  "endDate": "2024-01-31T23:59:59.999Z",
+  "limit": 100
+}
+```
+
+### Czyszczenie Starych Logów
+```http
+POST /api/logs/cleanup
+Content-Type: application/json
+
+{
+  "olderThanDays": 30
 }
 ```
 

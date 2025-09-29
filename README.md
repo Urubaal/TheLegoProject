@@ -1,15 +1,15 @@
-# LEGO Purchase Suggestion System - Database
+# LEGO Purchase Suggestion System
 
-AI system for LEGO set purchase suggestions with scraper integration, user management, and price analysis.
+AI-powered system for LEGO set purchase suggestions with collection management, price analysis, and marketplace integration.
 
 ## 🎯 System Overview
 
 The system consists of:
-- **PostgreSQL Database** - storing data about sets, users, prices
-- **Redis Cache** - secure storage for password reset tokens with TTL
-- **Scrapers** - collecting data from various online stores
-- **AI** - generating intelligent purchase suggestions
-- **TablePlus** - data exploration tool
+- **Backend API** (Node.js/Express) - REST API with authentication and collection management
+- **Frontend** (HTML/CSS/JS) - Modern web interface for collection management
+- **PostgreSQL Database** - storing data about sets, users, collections
+- **Redis Cache** - session management and performance optimization
+- **Docker** - containerized deployment for easy setup
 
 ## 🗄️ Database Architecture
 
@@ -91,83 +91,45 @@ The system consists of:
 
 ## 🚀 Quick Start
 
-### 0. Environment Configuration
+### 1. Prerequisites
+- Docker and Docker Compose installed
+- Git for cloning the repository
+
+### 2. Clone and Setup
 ```bash
-# Copy configuration template
+git clone <repository-url>
+cd lego-purchase-system
+
+# Copy environment template
 copy env.example .env
-
-# Edit .env file with appropriate values
-# Detailed instructions: ENVIRONMENT_SETUP.md
+# Edit .env file with your configuration
 ```
 
-### 1. PostgreSQL Installation
+### 3. Start the System
 ```bash
-# Windows - download from postgresql.org
-# macOS
-brew install postgresql
-brew services start postgresql
+# Quick start (recommended)
+quick-start-optimized.bat
 
-# Linux
-sudo apt install postgresql postgresql-contrib
-sudo systemctl start postgresql
+# Or manual startup
+docker-compose up -d
 ```
 
-### 2. Redis Installation (Required for Password Reset)
+### 4. Access the Application
+- **Frontend**: http://localhost:5500
+- **Backend API**: http://localhost:3000
+- **Health Check**: http://localhost:3000/api/health
+
+### 5. Development Setup
 ```bash
-# Docker (Recommended)
-docker run -d --name redis-server -p 6379:6379 redis:7-alpine
-
-# macOS
-brew install redis
-brew services start redis
-
-# Linux
-sudo apt install redis-server
-sudo systemctl start redis-server
-
-# Windows - download from microsoftarchive/redis
-```
-
-### 3. Database Configuration
-```sql
--- Create database
-CREATE DATABASE lego_purchase_system;
-CREATE USER lego_user;
-GRANT ALL PRIVILEGES ON DATABASE lego_purchase_system TO lego_user;
-```
-
-### 4. Load Schema
-```bash
-psql -U lego_user -d lego_purchase_system -f lego_database_schema.sql
-```
-
-### 5. TablePlus Configuration
-- Host: localhost
-- Port: 5432
-- User: lego_user
-- Password: (leave empty)
-- Database: lego_purchase_system
-
-### 6. Project Verification
-```bash
-# Check if everything works correctly
-node verify.js
+# Install dependencies
+npm install
 
 # Run backend tests
 cd backend && npm test
 
 # Check code quality
 cd backend && npm run lint
-
-# Install pre-commit hooks (one-time setup)
-npm install
 ```
-
-### 7. Pre-commit Hooks Setup
-The project automatically runs quality checks before each commit:
-- **Automatic verification** - No manual intervention needed
-- **Quality assurance** - Prevents broken code from being committed
-- **Consistent standards** - All developers follow the same quality checks
 
 ## 📊 Data Exploration
 
@@ -280,22 +242,40 @@ pg_dump -U lego_user -d lego_purchase_system > backup.sql
 psql -U lego_user -d lego_purchase_system < backup.sql
 ```
 
-## 📁 File Structure
+## 📁 Project Structure
 
 ```
-├── lego_database_schema.sql      # Main database schema
-├── database_setup_instructions.md # Installation instructions
-├── tableplus_queries.sql         # Sample queries
+├── backend/                      # Node.js/Express backend
+│   ├── controllers/              # API controllers
+│   ├── models/                   # Database models
+│   ├── routes/                   # API routes
+│   ├── services/                 # Business logic
+│   ├── middleware/               # Express middleware
+│   └── utils/                    # Utility functions
+├── frontend/                     # Web frontend
+│   ├── index.html                # Login page
+│   ├── dashboard.html            # Main dashboard
+│   ├── lego-collection.html      # Collection management
+│   └── styles.css                # Styles
+├── docker-compose.yml            # Docker configuration
+├── docker-compose-production.yml # Production configuration
+├── lego_database_schema.sql      # Database schema
 └── README.md                     # This file
 ```
 
-## 🚀 Next Steps
+## 🔧 Available Scripts
 
-1. **Scraper Configuration** - Add more stores
-2. **AI Integration** - Configure AI endpoints
-3. **Monitoring** - Set up alerts and dashboards
-4. **Backup** - Automated backups
-5. **Scaling** - Optimization for more users
+### Quick Start Scripts
+- `quick-start-optimized.bat` - Fast startup with health checks
+- `start-dev.bat` - Development mode
+- `start-prod.bat` - Production mode
+- `stop.bat` - Stop all services
+
+### Utility Scripts
+- `health-check-utility.bat` - System diagnostics
+- `performance-monitor.bat` - Performance monitoring
+- `cleanup-logs.bat` - Clean old log files
+- `setup-environment.bat` - Environment setup
 
 ## 🤖 Copilot Configuration
 
@@ -371,20 +351,63 @@ The project uses **Husky** to automatically run quality checks before each commi
 - ✅ Project structure
 - ✅ Environment configuration
 
-## 🤝 Support
+## 🔧 Troubleshooting
 
-In case of problems:
-1. Run `node verify.js` - check project status
-2. Check PostgreSQL logs
-3. Verify network configuration
-4. Check user permissions
-5. Make sure you're using PostgreSQL 13+
+### Common Issues
 
-## 📚 Sources
+**System won't start:**
+```bash
+# Check Docker status
+docker info
 
-- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
-- [TablePlus Documentation](https://tableplus.com/docs)
-- [JSON in PostgreSQL](https://www.postgresql.org/docs/current/datatype-json.html)
-- [PostgreSQL Performance Tuning](https://wiki.postgresql.org/wiki/Performance_Optimization)
-- [Redis Documentation](https://redis.io/docs/)
-- [Redis Setup Guide](REDIS_SETUP.md) - Detailed Redis installation and configuration
+# Check service status
+docker-compose ps
+
+# View logs
+docker-compose logs -f
+```
+
+**Database connection errors:**
+```bash
+# Check database health
+docker-compose exec database pg_isready -U lego_user
+
+# Reset database
+docker-compose down -v
+docker-compose up -d
+```
+
+**Frontend not loading:**
+- Ensure backend is running: http://localhost:3000/api/health
+- Check network configuration
+- Verify CORS settings
+
+### Performance Issues
+```bash
+# Monitor system performance
+performance-monitor.bat
+
+# Clean up old logs
+cleanup-logs.bat
+
+# Check Docker resources
+docker stats
+```
+
+## 📚 Documentation
+
+For detailed setup and configuration:
+- [Environment Setup](ENVIRONMENT_SETUP.md) - Environment configuration
+- [Development Rules](DEVELOPMENT_RULES.md) - Development guidelines
+- [Deployment Guide](DEPLOYMENT.md) - Production deployment
+- [Optimization Guide](OPTIMIZATION_GUIDE.md) - Performance optimization
+- [Logging Setup](LOGGING_SETUP.md) - Logging configuration
+- [Redis Setup](REDIS_SETUP.md) - Redis configuration
+
+## 🤝 Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines and best practices.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

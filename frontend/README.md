@@ -1,20 +1,38 @@
-# Frontend - Authentication System
+# Frontend - LEGO Purchase Suggestion System
 
-Frontend authentication application with modern user interface supporting login, registration, and password management.
+Frontend application for LEGO collection management with modern user interface supporting authentication, collection management, and set tracking.
 
 ## 📁 Files
 
+### Core Pages
 - `index.html` - Main login page
+- `home.html` - Dashboard home page
+- `dashboard.html` - User dashboard with collection management
+- `lego-collection.html` - Collection view and management
+- `set-detail.html` - Individual set details
+
+### Assets
 - `styles.css` - CSS styles with responsive design
 - `script.js` - JavaScript logic and API communication
+- `dashboard.js` - Dashboard functionality
+- `collection-view.js` - Collection management
+- `set-detail.js` - Set detail functionality
+- `images/` - LEGO set images and icons
 
 ## 🎨 UI Features
 
-### Forms
+### Authentication
 - **Registration** - name, email and password with validation
 - **Login** - email and password with validation
 - **Password Reset** - sending link to email
 - **Password Recovery** - setting new password
+
+### Collection Management
+- **Dashboard** - Overview of user's collection and statistics
+- **Set Management** - Add, edit, and remove LEGO sets
+- **Wishlist** - Track wanted sets with priority levels
+- **Set Search** - Search for sets by number or name
+- **Price Tracking** - Monitor set prices and trends
 
 ### Interactions
 - Real-time validation
@@ -66,12 +84,25 @@ const API_BASE_URL = 'http://localhost:3000/api';
 ## 🔄 Backend Integration
 
 Frontend communicates with backend via REST API:
+
+### Authentication
 - `POST /api/auth/register` - user registration
 - `POST /api/auth/login` - user login
 - `POST /api/auth/forgot-password` - password reset request
 - `POST /api/auth/reset-password` - password reset with token
 - `GET /api/auth/profile` - get user profile
 - `POST /api/auth/logout` - user logout
+
+### Collection Management
+- `GET /api/profile/collection` - get user collection
+- `POST /api/profile/collection/sets` - add set to collection
+- `POST /api/profile/collection/wanted-sets` - add set to wishlist
+- `PUT /api/profile/collection/:type/:id` - edit collection item
+- `DELETE /api/profile/collection/:type/:id` - remove collection item
+
+### Set Search
+- `GET /api/profile/search/sets` - search for sets
+- `GET /api/profile/search/minifigs` - search for minifigures
 
 ## ✅ Validation Rules
 
