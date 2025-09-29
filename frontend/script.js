@@ -339,6 +339,7 @@ class AuthManager {
             if (response.ok && data.success) {
                 // Store token in localStorage
                 localStorage.setItem('authToken', data.data.token);
+                localStorage.setItem('brickBuyToken', data.data.token); // For compatibility
                 
                 this.showMessage('Konto zostało utworzone pomyślnie!', false);
                 
@@ -401,6 +402,7 @@ class AuthManager {
             if (response.ok && data.success) {
                 // Store token in localStorage
                 localStorage.setItem('authToken', data.data.token);
+                localStorage.setItem('brickBuyToken', data.data.token); // For compatibility
                 if (rememberMe) {
                     localStorage.setItem('rememberedUser', email);
                 }
@@ -573,11 +575,17 @@ function checkAuthStatus() {
             } else {
                 // Token is invalid, remove it
                 localStorage.removeItem('authToken');
+            localStorage.removeItem('brickBuyToken');
+            localStorage.removeItem('brickBuyUser');
+            localStorage.removeItem('brickBuyCollection');
             }
         })
         .catch(error => {
             console.error('Auth check failed:', error);
             localStorage.removeItem('authToken');
+            localStorage.removeItem('brickBuyToken');
+            localStorage.removeItem('brickBuyUser');
+            localStorage.removeItem('brickBuyCollection');
         });
     }
 }

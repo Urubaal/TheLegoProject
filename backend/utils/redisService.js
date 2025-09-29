@@ -201,6 +201,106 @@ class RedisService {
     }
   }
 
+  // Batch operations for better performance
+  async mset(keyValuePairs, ttlSeconds = null) {
+    if (!this.isConnected) {
+      throw new Error('Redis not connected');
+    }
+
+    try {
+      const pipeline = this.client.multi();
+      
+      for (const [key, value] of Object.entries(keyValuePairs)) {
+        if (ttlSeconds) {
+          pipeline.set(key, JSON.stringify(value), { EX: ttlSeconds });
+        } else {
+          pipeline.set(key, JSON.stringify(value));
+        }
+      }
+      
+      await pipeline.exec();
+      return true;
+    } catch (err) {
+      error('Failed to set multiple keys', { error: err.message });
+      throw err;
+    }
+  }
+
+  // Get multiple keys at once
+  async mget(keys) {
+    if (!this.isConnected) {
+      throw new Error('Redis not connected');
+    }
+
+    try {
+      const values = await this.client.mGet(keys);
+      return values.map(value => value ? JSON.parse(value) : null);
+    } catch (err) {
+      error('Failed to get multiple keys', { error: err.message });
+      throw err;
+    }
+  }
+
+  // Delete multiple keys by pattern
+  async delPattern(pattern) {
+    if (!this.isConnected) {
+      throw new Error('Redis not connected');
+    }
+
+    try {
+      const keys = await this.client.keys(pattern);
+      if (keys.length > 0) {
+        await this.client.del(keys);
+        info(`Deleted ${keys.length} keys matching pattern: ${pattern}`);
+      }
+      return keys.length;
+    } catch (err) {
+      error('Failed to delete keys by pattern', { error: err.message, pattern });
+      throw err;
+    }
+  }
+
+  // Session management
+  async setSession(sessionId, sessionData, ttlSeconds = 3600) {
+    const key = `session:${sessionId}`;
+    return await this.set(key, sessionData, ttlSeconds);
+  }
+
+  async getSession(sessionId) {
+    const key = `session:${sessionId}`;
+    return await this.get(key);
+  }
+
+  async deleteSession(sessionId) {
+    const key = `session:${sessionId}`;
+    return await this.del(key);
+  }
+
+  // Collection cache management
+  async setCollectionCache(userId, type, data, ttlSeconds = 300) {
+    const key = `collection:${userId}:${type}`;
+    return await this.set(key, data, ttlSeconds);
+  }
+
+  async getCollectionCache(userId, type) {
+    const key = `collection:${userId}:${type}`;
+    return await this.get(key);
+  }
+
+  async invalidateUserCollectionCache(userId) {
+    const patterns = [
+      `collection:${userId}:*`,
+      `user:${userId}:collection:*`
+    ];
+    
+    let totalDeleted = 0;
+    for (const pattern of patterns) {
+      totalDeleted += await this.delPattern(pattern);
+    }
+    
+    return totalDeleted;
+  }
+
   async get(key) {
     if (!this.isConnected) {
       throw new Error('Redis not connected');

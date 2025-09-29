@@ -5,6 +5,18 @@ const { validationResult } = require('express-validator');
 const { info, warn, error, performance } = require('../utils/logger');
 const redisService = require('../utils/redisService');
 const { AppError, asyncHandler } = require('../middleware/errorHandler');
+
+// Helper function to invalidate user collection cache
+async function invalidateUserCollectionCache(userId) {
+  try {
+    if (redisService.isHealthy()) {
+      const deletedCount = await redisService.invalidateUserCollectionCache(userId);
+      console.log(`Invalidated ${deletedCount} collection cache entries for user ${userId}`);
+    }
+  } catch (error) {
+    console.warn('Failed to invalidate collection cache:', error.message);
+  }
+}
 const fs = require('fs');
 const path = require('path');
 
@@ -345,14 +357,17 @@ class LegoController {
       }
 
       const collectionItem = await UserCollection.addToCollection(
-        userId, 
-        setNumber, 
+        userId,
+        setNumber,
         collectionType, 
-        quantity, 
-        paidPrice, 
-        condition, 
+        quantity,
+        paidPrice,
+        condition,
         notes
       );
+
+      // Invalidate cache for this user
+      await invalidateUserCollectionCache(userId);
 
       res.json({
         success: true,
@@ -383,6 +398,9 @@ class LegoController {
         });
       }
 
+      // Invalidate cache for this user
+      await invalidateUserCollectionCache(userId);
+
       res.json({
         success: true,
         message: 'Element został usunięty z kolekcji'
@@ -402,15 +420,48 @@ class LegoController {
       const userId = req.user.id;
       const { type } = req.query; // 'owned', 'wanted', or null for all
 
+      // Try to get from Redis cache first
+      let cachedData = null;
+      
+      try {
+        if (redisService.isHealthy()) {
+          cachedData = await redisService.getCollectionCache(userId, type || 'all');
+        }
+      } catch (redisError) {
+        console.warn('Redis cache miss or error:', redisError.message);
+      }
+      
+      if (cachedData) {
+        console.log('Returning cached collection data');
+        return res.json({
+          success: true,
+          data: cachedData,
+          cached: true
+        });
+      }
+
+      // If not in cache, get from database
       const collection = await UserCollection.getUserCollection(userId, type);
       const stats = await UserCollection.getCollectionStats(userId);
 
+      const responseData = {
+        collection,
+        stats
+      };
+      
+      // Cache the result for 5 minutes
+      try {
+        if (redisService.isHealthy()) {
+          await redisService.setCollectionCache(userId, type || 'all', responseData, 300); // 5 minutes
+        }
+      } catch (redisError) {
+        console.warn('Failed to cache collection data:', redisError.message);
+      }
+
       res.json({
         success: true,
-        data: {
-          collection,
-          stats
-        }
+        data: responseData,
+        cached: false
       });
     } catch (error) {
       console.error('Error getting user collection:', error);
