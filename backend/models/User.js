@@ -38,13 +38,19 @@ const formatPolishTime = (utcDate) => {
 
 class User {
   static async create(userData) {
-    const { email, password, username, display_name, country } = userData;
+    const { email, password, username, display_name, first_name, last_name, country } = userData;
+    
+    // Split display_name into first_name and last_name if provided
+    const nameParts = (display_name || first_name || '').split(' ');
+    const firstName = nameParts[0] || email.split('@')[0];
+    const lastName = nameParts.slice(1).join(' ') || '';
+    
     const query = `
-      INSERT INTO users (email, password_hash, username, display_name, country, created_at, updated_at, is_active)
-      VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw', CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw', $6)
-      RETURNING id, email, username, display_name, country, created_at, is_active
+      INSERT INTO users (email, password_hash, username, first_name, last_name, created_at, updated_at, is_active)
+      VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, $6)
+      RETURNING id, email, username, first_name, last_name, created_at, is_active
     `;
-    const values = [email, password, username, display_name || username, country, true];
+    const values = [email, password, username || email.split('@')[0], firstName, lastName, true];
     
     try {
       console.log('Creating user with Poland timezone');
