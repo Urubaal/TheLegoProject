@@ -1,6 +1,6 @@
 const { validationResult } = require('express-validator');
 const AuthService = require('../services/authService');
-const { performance } = require('../utils/logger');
+const { performance, error: logError } = require('../utils/logger');
 const { AppError, asyncHandler } = require('../middleware/errorHandler');
 
 // Register new user
@@ -34,7 +34,8 @@ const register = asyncHandler(async (req, res) => {
   performance('User registration', duration, { userId: result.user.id });
 
   // Don't send sessionToken in response body - it's in cookie
-  const { sessionToken, ...responseData } = result;
+  // eslint-disable-next-line no-unused-vars
+  const { sessionToken: _sessionToken, ...responseData } = result;
 
   res.status(201).json({
     success: true,
@@ -76,7 +77,8 @@ const login = asyncHandler(async (req, res) => {
   performance('User login', duration, { userId: result.user.id });
 
   // Don't send sessionToken in response body - it's in cookie
-  const { sessionToken, ...responseData } = result;
+  // eslint-disable-next-line no-unused-vars
+  const { sessionToken: _sessionToken, ...responseData } = result;
 
   res.json({
     success: true,
@@ -132,7 +134,7 @@ const logout = asyncHandler(async (req, res) => {
       await Session.invalidate(sessionToken);
     } catch (error) {
       // Log error but don't fail logout
-      console.error('Session invalidation error:', error.message);
+      logError('Session invalidation error', { error: error.message });
     }
   }
   

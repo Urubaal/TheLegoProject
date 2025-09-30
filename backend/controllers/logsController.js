@@ -1,4 +1,5 @@
 const { Pool } = require('pg');
+const { info } = require('../utils/logger');
 require('dotenv').config();
 
 const pool = new Pool({
@@ -115,7 +116,7 @@ const getLogs = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching logs:', error);
+    info('Error fetching logs', { error: error.message });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch logs'
@@ -197,7 +198,7 @@ const getLogStats = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching log stats:', error);
+    info('Error fetching log stats', { error: error.message });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch log statistics'
@@ -293,7 +294,7 @@ const searchLogs = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error searching logs:', error);
+    info('Error searching logs', { error: error.message });
     res.status(500).json({
       success: false,
       error: 'Failed to search logs'
@@ -325,7 +326,7 @@ const cleanupLogs = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error cleaning up logs:', error);
+    info('Error cleaning up logs', { error: error.message });
     res.status(500).json({
       success: false,
       error: 'Failed to cleanup logs'
@@ -372,7 +373,7 @@ const getLogById = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching log by ID:', error);
+    info('Error fetching log by ID', { error: error.message });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch log entry'

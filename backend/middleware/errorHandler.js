@@ -12,6 +12,7 @@ class AppError extends Error {
 }
 
 // Central error handling middleware
+// eslint-disable-next-line no-unused-vars
 const errorHandler = (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;

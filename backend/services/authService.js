@@ -4,7 +4,7 @@ const User = require('../models/User');
 const Session = require('../models/Session');
 const { sendPasswordResetEmail } = require('../utils/emailService');
 const redisService = require('../utils/redisService');
-const { info, warn, error, audit, security, performance } = require('../utils/logger');
+const { info, warn, error, audit, security } = require('../utils/logger');
 const { AppError } = require('../middleware/errorHandler');
 
 class AuthService {

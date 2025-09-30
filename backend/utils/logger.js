@@ -48,11 +48,14 @@ if (process.env.LOG_STORAGE === 'database' && process.env.DATABASE_URL) {
       retentionDays: parseInt(process.env.LOG_RETENTION_DAYS) || 30
     });
     transports.push(databaseTransport);
+    // eslint-disable-next-line no-console
     console.log('✅ Database logging enabled');
-  } catch (error) {
+  } catch (_error) { // eslint-disable-line no-unused-vars
+    // eslint-disable-next-line no-console
     console.log('⚠️  Database logging disabled - database not available');
   }
 } else {
+  // eslint-disable-next-line no-console
   console.log('⚠️  Database logging disabled - using file logging only');
 }
 
@@ -83,12 +86,14 @@ if (process.env.NODE_ENV !== 'production') {
 const cloudLogger = createCloudLogger();
 if (cloudLogger) {
   transports.push(cloudLogger);
+  // eslint-disable-next-line no-console
   console.log('✅ Google Cloud Logging enabled');
 }
 
 const datadogLogger = createDatadogLogger();
 if (datadogLogger) {
   transports.push(datadogLogger);
+  // eslint-disable-next-line no-console
   console.log('✅ Datadog logging enabled');
 }
 
@@ -101,6 +106,7 @@ const logger = winston.createLogger({
 });
 
 // Specjalne metody dla różnych typów logów
+// eslint-disable-next-line no-unused-vars
 const auditLogger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
@@ -172,12 +178,14 @@ const logMethods = {
   // Pobierz statystyki logów z bazy danych
   getLogStats: async () => {
     if (!databaseTransport) {
+      // eslint-disable-next-line no-console
       console.log('Database logging not available');
       return [];
     }
     try {
       return await databaseTransport.getStats();
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to get log stats:', error.message);
       return [];
     }
@@ -186,12 +194,14 @@ const logMethods = {
   // Wyczyść stare logi z bazy danych
   cleanupLogs: async () => {
     if (!databaseTransport) {
+      // eslint-disable-next-line no-console
       console.log('Database logging not available');
       return 0;
     }
     try {
       return await databaseTransport.cleanup();
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to cleanup logs:', error.message);
       return 0;
     }

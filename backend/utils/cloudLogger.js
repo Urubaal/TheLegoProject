@@ -1,10 +1,10 @@
 const { LoggingWinston } = require('@google-cloud/logging-winston');
-const winston = require('winston');
 
 // Konfiguracja Google Cloud Logging
 const createCloudLogger = () => {
   // Sprawdź czy jesteśmy w środowisku Google Cloud
   if (!process.env.GOOGLE_APPLICATION_CREDENTIALS && !process.env.GOOGLE_CLOUD_PROJECT) {
+    // eslint-disable-next-line no-console
     console.log('Google Cloud Logging not configured - using local logging only');
     return null;
   }
@@ -25,6 +25,7 @@ const createCloudLogger = () => {
 
     return loggingWinston;
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Failed to initialize Google Cloud Logging:', error.message);
     return null;
   }
@@ -48,6 +49,7 @@ const createDatadogLogger = () => {
       ddtags: `env:${process.env.NODE_ENV || 'development'}`
     });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Failed to initialize Datadog logging:', error.message);
     return null;
   }

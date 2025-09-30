@@ -2,17 +2,17 @@ const LegoSet = require('../models/LegoSet');
 const UserCollection = require('../models/UserCollection');
 const OlxOffer = require('../models/OlxOffer');
 const { validationResult } = require('express-validator');
-const { info, warn, error, performance } = require('../utils/logger');
+const { info, performance } = require('../utils/logger');
 const redisService = require('../utils/redisService');
-const { AppError, asyncHandler } = require('../middleware/errorHandler');
+const { AppError } = require('../middleware/errorHandler');
 
 // Helper function to invalidate user collection cache
 async function invalidateUserCollectionCache(userId) {
   try {
     const deletedCount = await redisService.invalidateUserCollectionCache(userId);
-    console.log(`Invalidated ${deletedCount} collection cache entries for user ${userId}`);
+    info(`Invalidated ${deletedCount} collection cache entries for user ${userId}`);
   } catch (error) {
-    console.error('Failed to invalidate collection cache:', error.message);
+    info('Failed to invalidate collection cache', { error: error.message });
     throw error; // Rzuć błąd zamiast ignorować
   }
 }
@@ -214,7 +214,7 @@ class LegoController {
         }
       });
     } catch (error) {
-      console.error('Error getting LEGO set:', error);
+      info('Error getting LEGO set', { error: error.message });
       res.status(500).json({
         success: false,
         error: 'Błąd podczas pobierania zestawu LEGO'
@@ -243,7 +243,7 @@ class LegoController {
         message: 'Zestaw LEGO został utworzony pomyślnie'
       });
     } catch (error) {
-      console.error('Error creating LEGO set:', error);
+      info('Error creating LEGO set', { error: error.message });
       if (error.code === '23505') { // Unique constraint violation
         res.status(409).json({
           success: false,
@@ -288,7 +288,7 @@ class LegoController {
         message: 'Zestaw LEGO został zaktualizowany pomyślnie'
       });
     } catch (error) {
-      console.error('Error updating LEGO set:', error);
+      info('Error updating LEGO set', { error: error.message });
       res.status(500).json({
         success: false,
         error: 'Błąd podczas aktualizacji zestawu LEGO'
@@ -314,7 +314,7 @@ class LegoController {
         message: 'Zestaw LEGO został usunięty pomyślnie'
       });
     } catch (error) {
-      console.error('Error deleting LEGO set:', error);
+      info('Error deleting LEGO set', { error: error.message });
       res.status(500).json({
         success: false,
         error: 'Błąd podczas usuwania zestawu LEGO'
@@ -331,7 +331,7 @@ class LegoController {
         data: themes
       });
     } catch (error) {
-      console.error('Error getting themes:', error);
+      info('Error getting themes', { error: error.message });
       res.status(500).json({
         success: false,
         error: 'Błąd podczas pobierania motywów'
@@ -348,7 +348,7 @@ class LegoController {
         data: years
       });
     } catch (error) {
-      console.error('Error getting years:', error);
+      info('Error getting years', { error: error.message });
       res.status(500).json({
         success: false,
         error: 'Błąd podczas pobierania lat'
@@ -365,7 +365,7 @@ class LegoController {
         data: stats
       });
     } catch (error) {
-      console.error('Error getting LEGO stats:', error);
+      info('Error getting LEGO stats', { error: error.message });
       res.status(500).json({
         success: false,
         error: 'Błąd podczas pobierania statystyk'
@@ -416,7 +416,7 @@ class LegoController {
         message: `Zestaw został dodany do kolekcji jako ${collectionType === 'owned' ? 'posiadany' : 'pożądany'}`
       });
     } catch (error) {
-      console.error('Error adding to collection:', error);
+      info('Error adding to collection', { error: error.message });
       res.status(500).json({
         success: false,
         error: 'Błąd podczas dodawania do kolekcji'
@@ -447,7 +447,7 @@ class LegoController {
         message: 'Element został usunięty z kolekcji'
       });
     } catch (error) {
-      console.error('Error removing from collection:', error);
+      info('Error removing from collection', { error: error.message });
       res.status(500).json({
         success: false,
         error: 'Błąd podczas usuwania z kolekcji'
@@ -467,12 +467,12 @@ class LegoController {
       try {
         cachedData = await redisService.getCollectionCache(userId, type || 'all');
       } catch (redisError) {
-        console.error('Redis cache error:', redisError.message);
+        info('Redis cache error', { error: redisError.message });
         throw redisError; // Rzuć błąd zamiast ignorować
       }
       
       if (cachedData) {
-        console.log('Returning cached collection data');
+        info('Returning cached collection data');
         return res.json({
           success: true,
           data: cachedData,
@@ -493,7 +493,7 @@ class LegoController {
       try {
         await redisService.setCollectionCache(userId, type || 'all', responseData, 300); // 5 minutes
       } catch (redisError) {
-        console.error('Failed to cache collection data:', redisError.message);
+        info('Failed to cache collection data', { error: redisError.message });
         throw redisError; // Rzuć błąd zamiast ignorować
       }
 
@@ -503,7 +503,7 @@ class LegoController {
         cached: false
       });
     } catch (error) {
-      console.error('Error getting user collection:', error);
+      info('Error getting user collection', { error: error.message });
       res.status(500).json({
         success: false,
         error: 'Błąd podczas pobierania kolekcji'
@@ -679,7 +679,7 @@ class LegoController {
         }
       });
     } catch (error) {
-      console.error('Error getting set offers:', error);
+      info('Error getting set offers', { error: error.message });
       res.status(500).json({
         success: false,
         error: 'Błąd podczas pobierania ofert'
@@ -781,7 +781,7 @@ class LegoController {
         }
       });
     } catch (error) {
-      console.error('Error fetching all offers:', error);
+      info('Error fetching all offers', { error: error.message });
       res.status(500).json({
         success: false,
         error: 'Błąd podczas pobierania ofert'
@@ -908,7 +908,7 @@ class LegoController {
           const retailPrice = parseFloat(row[5].replace('€', '')) || null;
           const paidPrice = parseFloat(row[6].replace('€', '')) || null;
           const condition = row[8] || 'new';
-          const date = row[9];
+          const _date = row[9]; // eslint-disable-line no-unused-vars
           const notes = row[10] || '';
 
           if (!setNumber) {
@@ -942,7 +942,7 @@ class LegoController {
           }
 
           // Add/update collection item
-          const collectionItem = await UserCollection.addToCollection(
+          await UserCollection.addToCollection(
             userId,
             setNumber,
             'owned',

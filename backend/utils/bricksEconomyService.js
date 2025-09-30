@@ -51,6 +51,7 @@ class BricksEconomyService {
         throw new Error('Set not found or API error');
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(`Error fetching set ${setNumber} from BricksEconomy:`, error.message);
       
       // Return basic info if API fails
@@ -102,6 +103,7 @@ class BricksEconomyService {
         return [];
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error searching sets:', error.message);
       return [];
     }
@@ -144,6 +146,7 @@ class BricksEconomyService {
         throw new Error('Minifig not found or API error');
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(`Error fetching minifig ${minifigNumber} from BricksEconomy:`, error.message);
       
       return {
@@ -187,6 +190,7 @@ class BricksEconomyService {
         return [];
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error searching minifigs:', error.message);
       return [];
     }
@@ -213,6 +217,7 @@ class BricksEconomyService {
 
       return amount; // Return original if conversion not available
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Currency conversion error:', error.message);
       return amount;
     }

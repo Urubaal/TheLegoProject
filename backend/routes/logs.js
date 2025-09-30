@@ -1,6 +1,5 @@
 const express = require('express');
 const { getLogs, getLogStats, searchLogs, cleanupLogs, getLogById } = require('../controllers/logsController');
-const { authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
 

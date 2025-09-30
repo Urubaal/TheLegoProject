@@ -46,6 +46,7 @@ pool.on('remove', () => {
 });
 
 // Helper function to convert UTC to Poland time for display
+// eslint-disable-next-line no-unused-vars
 const formatPolishTime = (utcDate) => {
   return new Date(utcDate).toLocaleString('pl-PL', {
     timeZone: 'Europe/Warsaw',
@@ -60,7 +61,7 @@ const formatPolishTime = (utcDate) => {
 
 class User {
   static async create(userData) {
-    const { email, password, username, display_name, first_name, last_name, country } = userData;
+    const { email, password, username, display_name, first_name } = userData;
     
     // Split display_name into first_name and last_name if provided
     const nameParts = (display_name || first_name || '').split(' ');

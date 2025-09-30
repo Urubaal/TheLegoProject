@@ -1,7 +1,7 @@
 const { validationResult } = require('express-validator');
 const ProfileService = require('../services/profileService');
 const { AppError, asyncHandler } = require('../middleware/errorHandler');
-const { info, warn, error } = require('../utils/logger');
+const { info } = require('../utils/logger');
 
 class ProfileController {
   // Get user profile
@@ -169,7 +169,7 @@ class ProfileController {
     return asyncHandler(async (req, res) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        console.error('Validation errors:', errors.array());
+        info('Validation errors', { errors: errors.array() });
         throw new AppError(`Validation failed: ${errors.array().map(err => err.msg).join(', ')}`, 400);
       }
 

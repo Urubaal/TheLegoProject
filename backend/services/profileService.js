@@ -239,10 +239,9 @@ class ProfileService {
     const { minifig_name, minifig_number, condition_status, purchase_price, purchase_currency, notes } = minifigData;
 
     // Try to get minifig info from BricksEconomy if number provided
-    let minifigInfo = {};
     if (minifig_number) {
       try {
-        minifigInfo = await this.bricksEconomy.getMinifigInfo(minifig_number);
+        await this.bricksEconomy.getMinifigInfo(minifig_number);
       } catch (error) {
         logError('Could not fetch minifig info from BricksEconomy', { 
           error: error.message,

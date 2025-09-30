@@ -36,8 +36,10 @@ class DatabaseTransport extends winston.Transport {
       const client = await this.pool.connect();
       await client.query('SELECT 1');
       client.release();
+      // eslint-disable-next-line no-console
       console.log('✅ Database transport connected successfully');
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('❌ Database transport connection failed:', error.message);
       // Nie rzucaj błędu - pozwól aplikacji działać bez logowania do bazy
     }
@@ -59,6 +61,7 @@ class DatabaseTransport extends winston.Transport {
     }
       })
       .catch((error) => {
+        // eslint-disable-next-line no-console
         console.error('Database transport error:', error.message);
         if (callback) {
       callback(error, false);
@@ -115,7 +118,9 @@ class DatabaseTransport extends winston.Transport {
       
     } catch (error) {
       // Jeśli błąd bazy danych, zapisz do konsoli jako fallback
+      // eslint-disable-next-line no-console
       console.error('Failed to save log to database:', error.message);
+      // eslint-disable-next-line no-console
       console.log('Original log:', logInfo);
       throw error;
     } finally {
@@ -185,7 +190,7 @@ class DatabaseTransport extends winston.Transport {
       await client.query('SELECT 1');
       client.release();
       return true;
-    } catch (error) {
+    } catch (_error) { // eslint-disable-line no-unused-vars
       return false;
     }
   }
@@ -213,6 +218,7 @@ class DatabaseTransport extends winston.Transport {
       return result.rows;
       
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to get log stats:', error.message);
       return [];
     } finally {
@@ -236,6 +242,7 @@ class DatabaseTransport extends winston.Transport {
       return result.rowCount;
       
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to cleanup logs:', error.message);
       return 0;
     } finally {

@@ -8,6 +8,7 @@ const path = require('path');
 const fs = require('fs');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const { error: logger } = require('./utils/logger');
 require('dotenv').config();
 
 // ⚠️ WAŻNE: Przy dodawaniu nowych pól do API ZAWSZE sprawdź:
@@ -265,6 +266,7 @@ const storage = multer.diskStorage({
   }
 });
 
+// eslint-disable-next-line no-unused-vars
 const upload = multer({
   storage: storage,
   limits: {
@@ -456,7 +458,7 @@ if (process.env.NODE_ENV === 'development') {
         }
       });
     } catch (error) {
-      console.error('Setup error:', error);
+      logger.error('Setup error', { error: error.message });
       res.status(500).json({
         success: false,
         error: error.message
@@ -526,10 +528,15 @@ if (process.env.NODE_ENV !== 'test') {
           redis: 'connected'
         };
         
+        // eslint-disable-next-line no-console
         console.log(`🚀 Server running on port ${PORT}`);
+        // eslint-disable-next-line no-console
         console.log(`📱 Frontend URL: ${serverInfo.frontendUrl}`);
+        // eslint-disable-next-line no-console
         console.log(`🌍 Environment: ${serverInfo.environment}`);
+        // eslint-disable-next-line no-console
         console.log(`🗄️  Database: ${serverInfo.database}`);
+        // eslint-disable-next-line no-console
         console.log(`🔴 Redis: ${serverInfo.redis}`);
         
         info('Server started successfully', serverInfo);
@@ -546,10 +553,12 @@ if (process.env.NODE_ENV !== 'test') {
       });
 
       // Redis is already connected at this point
+      // eslint-disable-next-line no-console
       console.log('🔴 Redis: connected (required)');
 
       // Graceful shutdown handling
       const gracefulShutdown = (signal) => {
+        // eslint-disable-next-line no-console
         console.log(`\n${signal} received. Starting graceful shutdown...`);
         
         // Stop schedulers
@@ -557,8 +566,10 @@ if (process.env.NODE_ENV !== 'test') {
         sessionCleanupService.stop();
         
         server.close(() => {
+          // eslint-disable-next-line no-console
           console.log('HTTP server closed.');
           redisService.disconnect().then(() => {
+            // eslint-disable-next-line no-console
             console.log('Redis connection closed.');
             process.exit(0);
           });
@@ -569,7 +580,9 @@ if (process.env.NODE_ENV !== 'test') {
       process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error('Failed to start server:', err.message);
+      // eslint-disable-next-line no-console
       console.error(err.stack);
       process.exit(1);
     }
