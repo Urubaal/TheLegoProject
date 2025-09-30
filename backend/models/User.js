@@ -7,6 +7,7 @@ const pool = new Pool({
   host: process.env.POSTGRES_HOST || 'localhost',
   database: process.env.POSTGRES_DB || 'lego_purchase_system',
   port: process.env.POSTGRES_PORT || 5432,
+  password: process.env.POSTGRES_PASSWORD,
   // Connection pooling configuration for performance
   max: process.env.NODE_ENV === 'production' ? 20 : 10, // Adjust based on environment
   min: 2, // Minimum connections to keep alive
@@ -18,9 +19,9 @@ const pool = new Pool({
   // Additional performance settings
   keepAlive: true,
   keepAliveInitialDelayMillis: 10000,
-  // Statement timeout for long-running queries
+  // Statement timeout for long-running queries (30 seconds)
   statement_timeout: 30000,
-  // Query timeout
+  // Query timeout (10 seconds per query)
   query_timeout: 10000
 });
 
@@ -74,12 +75,17 @@ class User {
     const values = [email, password, username || email.split('@')[0], firstName, lastName, true];
     
     try {
-      console.log('Creating user with Poland timezone');
+      debug('Creating user', { email, username });
       const result = await pool.query(query, values);
-      console.log('User created with created_at:', result.rows[0].created_at);
+      info('User created successfully', { 
+        userId: result.rows[0].id, 
+        email: result.rows[0].email,
+        createdAt: result.rows[0].created_at 
+      });
       return result.rows[0];
-    } catch (error) {
-      throw error;
+    } catch (err) {
+      error('Failed to create user', { error: err.message, email });
+      throw err;
     }
   }
 
@@ -130,17 +136,19 @@ class User {
     const values = [id];
     
     try {
-      console.log('Executing updateLastLogin query for user:', id);
+      debug('Updating last login', { userId: id });
       const result = await pool.query(query, values);
-      console.log('UpdateLastLogin result:', result.rowCount, 'rows affected');
       if (result.rows[0]) {
-        console.log('New last_login:', result.rows[0].last_login);
-        console.log('New updated_at:', result.rows[0].updated_at);
+        info('Last login updated successfully', { 
+          userId: id, 
+          lastLogin: result.rows[0].last_login,
+          rowsAffected: result.rowCount
+        });
       }
       return true;
-    } catch (error) {
-      console.error('Error updating last_login:', error);
-      throw error;
+    } catch (err) {
+      error('Failed to update last login', { error: err.message, userId: id });
+      throw err;
     }
   }
 

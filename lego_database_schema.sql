@@ -136,14 +136,26 @@ CREATE TABLE scraper_logs (
 );
 
 -- =============================================
--- 8. USER SESSIONS (for AI context)
+-- 8. USER SESSIONS (Secure Authentication Sessions)
 -- =============================================
 CREATE TABLE user_sessions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    session_token VARCHAR(255) UNIQUE NOT NULL, -- Cryptographically secure token
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    session_data JSONB DEFAULT '{}',
+    user_agent TEXT, -- Browser user agent for validation
+    ip_address VARCHAR(45), -- IPv6 support
+    device_fingerprint TEXT, -- Additional security validation
+    remember_me BOOLEAN DEFAULT FALSE,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     last_activity TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    is_active BOOLEAN DEFAULT TRUE,
+    
+    -- Legacy field for compatibility
+    session_data JSONB DEFAULT '{}',
+    
+    -- Ensure only one active session per token
+    CONSTRAINT unique_active_session UNIQUE (session_token, is_active)
 );
 
 -- =============================================
@@ -231,6 +243,12 @@ CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_username ON users(username);
 CREATE INDEX idx_users_display_name ON users(display_name);
 CREATE INDEX idx_users_active ON users(is_active);
+
+-- User sessions indexes  
+CREATE INDEX idx_sessions_user_id ON user_sessions(user_id);
+CREATE INDEX idx_sessions_token ON user_sessions(session_token);
+CREATE INDEX idx_sessions_expires_at ON user_sessions(expires_at);
+CREATE INDEX idx_sessions_active ON user_sessions(is_active) WHERE is_active = TRUE;
 
 -- LEGO sets indexes
 CREATE INDEX idx_lego_sets_number ON lego_sets(set_number);

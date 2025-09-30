@@ -23,7 +23,7 @@ The system consists of:
 - **Backend API** (Node.js/Express) - REST API with authentication and collection management
 - **Frontend** (HTML/CSS/JS) - Modern web interface for collection management
 - **PostgreSQL Database** - storing data about sets, users, collections
-- **Redis Cache** - session management and performance optimization
+- **Redis Cache** - session management and performance optimization (REQUIRED)
 - **Docker** - containerized deployment for easy setup
 
 ## 🗄️ Database Architecture
