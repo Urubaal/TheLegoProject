@@ -20,8 +20,8 @@ const toggleConfirmRegisterPassword = document.getElementById('toggleConfirmRegi
 const toggleNewPassword = document.getElementById('toggleNewPassword');
 const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
 
-// API Configuration
-const API_BASE_URL = 'http://localhost:3000/api';
+// API Configuration - Now loaded from config.js for dynamic URL
+// const API_BASE_URL will be available globally from config.js
 
 // Form validation and submission
 class AuthManager {
@@ -240,14 +240,29 @@ class AuthManager {
             this.showError(errorId, 'Hasło jest wymagane');
             return false;
         }
-        if (password.length < 8) {
-            this.showError(errorId, 'Hasło musi mieć co najmniej 8 znaków');
+        if (password.length < 10) {
+            this.showError(errorId, 'Hasło musi mieć co najmniej 10 znaków');
             return false;
         }
-        // Check for at least one lowercase letter, one uppercase letter, and one number
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
+        if (password.length > 128) {
+            this.showError(errorId, 'Hasło nie może mieć więcej niż 128 znaków');
+            return false;
+        }
+        // Check for at least one lowercase, uppercase, number, and special character
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/;
         if (!passwordRegex.test(password)) {
-            this.showError(errorId, 'Hasło musi zawierać co najmniej jedną małą literę, jedną wielką literę i jedną cyfrę');
+            this.showError(errorId, 'Hasło musi zawierać małą literę, wielką literę, cyfrę i znak specjalny (@$!%*?&)');
+            return false;
+        }
+        // Check for common passwords
+        const commonPasswords = ['password', 'qwerty', '123456', '12345678'];
+        if (commonPasswords.some(p => password.toLowerCase().includes(p))) {
+            this.showError(errorId, 'Hasło jest zbyt popularne. Wybierz bardziej unikalne hasło');
+            return false;
+        }
+        // Check for repeated characters
+        if (/(.)\1{4,}/.test(password)) {
+            this.showError(errorId, 'Hasło zawiera zbyt wiele powtórzonych znaków');
             return false;
         }
         this.hideError(errorId);
@@ -342,6 +357,7 @@ class AuthManager {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include', // IMPORTANT: Send cookies with request
                 body: JSON.stringify({
                     name,
                     email,
@@ -354,9 +370,8 @@ class AuthManager {
             const data = await response.json();
 
             if (response.ok && data.success) {
-                // Store token in localStorage
-                localStorage.setItem('authToken', data.data.token);
-                localStorage.setItem('brickBuyToken', data.data.token); // For compatibility
+                // Session token is now stored in httpOnly cookie by backend
+                // No need to store in localStorage (SECURITY IMPROVEMENT)
                 
                 this.showMessage('Konto zostało utworzone pomyślnie!', false);
                 
@@ -407,6 +422,7 @@ class AuthManager {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include', // IMPORTANT: Send cookies with request
                 body: JSON.stringify({
                     email,
                     password,
@@ -417,9 +433,8 @@ class AuthManager {
             const data = await response.json();
 
             if (response.ok && data.success) {
-                // Store token in localStorage
-                localStorage.setItem('authToken', data.data.token);
-                localStorage.setItem('brickBuyToken', data.data.token); // For compatibility
+                // Session token is now stored in httpOnly cookie by backend
+                // No need to store in localStorage (SECURITY IMPROVEMENT)
                 if (rememberMe) {
                     localStorage.setItem('rememberedUser', email);
                 }
@@ -687,24 +702,16 @@ function checkRememberedUser() {
 
 // Check if user is already logged in
 function checkAuthStatus() {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-        // No token, user is not logged in
-        showSignInButton();
-        return;
-    }
-    
-    // Verify token with backend
+    // Session is now in httpOnly cookie - backend will validate automatically
+    // Verify session with backend
     fetch(`${API_BASE_URL}/auth/profile`, {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
+        credentials: 'include' // IMPORTANT: Send cookies
     })
     .then(response => {
         if (response.ok) {
             return response.json();
         } else if (response.status === 401 || response.status === 403) {
-            // Token is invalid or expired, silently remove it
+            // Session is invalid or expired
             clearAuthData();
             showSignInButton();
             return null;
@@ -788,20 +795,16 @@ function setupUserDropdown() {
 
 // Handle logout
 async function handleLogout() {
-    const token = localStorage.getItem('authToken');
-    
     try {
-        // Call logout endpoint
+        // Call logout endpoint - backend will clear httpOnly cookie
         await fetch(`${API_BASE_URL}/auth/logout`, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            credentials: 'include' // IMPORTANT: Send cookies
         });
     } catch (error) {
         console.error('Logout error:', error);
     } finally {
-        // Clear local storage and redirect
+        // Clear any remaining local data and redirect
         clearAuthData();
         window.location.reload();
     }
@@ -809,10 +812,11 @@ async function handleLogout() {
 
 // Clear authentication data
 function clearAuthData() {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('brickBuyToken');
+    // Session is in httpOnly cookie - cleared by backend on logout
+    // Only clear non-sensitive local data
     localStorage.removeItem('brickBuyUser');
     localStorage.removeItem('brickBuyCollection');
+    // Keep rememberedUser if exists (just email, not sensitive)
 }
 
 // Check authentication status on page load

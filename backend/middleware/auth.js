@@ -1,24 +1,66 @@
 const jwt = require('jsonwebtoken');
+const Session = require('../models/Session');
 const logger = require('../utils/logger');
 
-// Verify JWT token middleware
-const authenticateToken = (req, res, next) => {
+// Verify session token or JWT token middleware
+const authenticateToken = async (req, res, next) => {
   logger.info('Auth middleware called', { 
     method: req.method, 
     path: req.path,
     ip: req.ip 
   });
   
+  // Priority 1: Check for session token in httpOnly cookie (NEW SECURE METHOD)
+  const sessionToken = req.cookies.sessionToken;
+  
+  if (sessionToken) {
+    try {
+      const sessionData = await Session.validate(sessionToken);
+      
+      if (sessionData) {
+        logger.info('Session validated successfully', { 
+          userId: sessionData.user_id,
+          method: req.method, 
+          path: req.path 
+        });
+        
+        req.user = {
+          userId: sessionData.user_id,
+          email: sessionData.email,
+          username: sessionData.username
+        };
+        req.session = sessionData;
+        return next();
+      } else {
+        logger.warn('Invalid or expired session token', { 
+          method: req.method, 
+          path: req.path,
+          ip: req.ip 
+        });
+        // Clear invalid cookie
+        res.clearCookie('sessionToken');
+      }
+    } catch (error) {
+      logger.error('Session validation error', { 
+        error: error.message,
+        method: req.method, 
+        path: req.path 
+      });
+    }
+  }
+  
+  // Priority 2: Fallback to JWT in Authorization header (LEGACY - for API clients)
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
   logger.debug('Auth header check', { 
     hasAuthHeader: !!authHeader,
-    tokenPresent: !!token 
+    tokenPresent: !!token,
+    hasSessionCookie: !!sessionToken
   });
 
   if (!token) {
-    logger.warn('No token provided', { 
+    logger.warn('No token provided (neither session nor JWT)', { 
       method: req.method, 
       path: req.path,
       ip: req.ip 
@@ -31,7 +73,7 @@ const authenticateToken = (req, res, next) => {
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
-      logger.warn('Token verification failed', { 
+      logger.warn('JWT verification failed', { 
         error: err.message,
         method: req.method, 
         path: req.path,
@@ -42,7 +84,7 @@ const authenticateToken = (req, res, next) => {
         error: 'Invalid or expired token'
       });
     }
-    logger.info('Token verified successfully', { 
+    logger.info('JWT verified successfully (legacy mode)', { 
       userId: user.userId,
       method: req.method, 
       path: req.path 

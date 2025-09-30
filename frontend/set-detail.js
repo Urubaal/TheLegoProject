@@ -183,7 +183,7 @@ class SetDetailManager {
         if (!this.currentSet) return;
 
         // Update page title
-        document.title = `${this.currentSet.set_number} ${this.currentSet.name} - BrickEconomy Clone`;
+        document.title = `${this.currentSet.set_number} ${this.currentSet.name} - Brick Buy`;
 
         // Update breadcrumbs
         document.getElementById('themeBreadcrumb').textContent = this.currentSet.theme;

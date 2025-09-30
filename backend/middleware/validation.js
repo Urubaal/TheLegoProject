@@ -1,16 +1,44 @@
 const { body, param, query } = require('express-validator');
 
 // Auth validation rules
+// Common weak passwords to blacklist
+const commonPasswords = [
+  'password', 'password123', '123456', '12345678', 'qwerty', 'abc123',
+  'monkey', '1234567', 'letmein', 'trustno1', 'dragon', 'baseball',
+  'iloveyou', 'master', 'sunshine', 'ashley', 'bailey', 'passw0rd',
+  'shadow', '123123', '654321', 'superman', 'qazwsx', 'michael',
+  'football', 'welcome', 'jesus', 'ninja', 'mustang', 'password1'
+];
+
 const registerValidation = [
   body('email')
     .isEmail()
     .withMessage('Valid email is required')
     .normalizeEmail(),
   body('password')
-    .isLength({ min: 8 })
-    .withMessage('Password must be at least 8 characters long')
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage('Password must contain at least one lowercase letter, one uppercase letter, and one number'),
+    .isLength({ min: 10, max: 128 })
+    .withMessage('Password must be between 10 and 128 characters long')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)
+    .withMessage('Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character (@$!%*?&)')
+    .custom((value) => {
+      // Check for common passwords
+      const lowerValue = value.toLowerCase();
+      if (commonPasswords.some(p => lowerValue.includes(p))) {
+        throw new Error('Password is too common. Please choose a more unique password');
+      }
+      // Check for repeated characters (e.g., aaaaaaa)
+      if (/(.)\1{4,}/.test(value)) {
+        throw new Error('Password contains too many repeated characters');
+      }
+      // Check for sequential characters (e.g., 12345, abcde)
+      const sequences = ['0123456789', 'abcdefghijklmnopqrstuvwxyz', 'qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
+      for (const seq of sequences) {
+        if (seq.includes(lowerValue.substring(0, 5)) || seq.split('').reverse().join('').includes(lowerValue.substring(0, 5))) {
+          throw new Error('Password contains sequential characters. Please use a more complex password');
+        }
+      }
+      return true;
+    }),
   body('username')
     .optional()
     .isLength({ min: 2, max: 30 })
@@ -53,10 +81,22 @@ const resetPasswordValidation = [
     .notEmpty()
     .withMessage('Reset token is required'),
   body('newPassword')
-    .isLength({ min: 8 })
-    .withMessage('Password must be at least 8 characters long')
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage('Password must contain at least one lowercase letter, one uppercase letter, and one number')
+    .isLength({ min: 10, max: 128 })
+    .withMessage('Password must be between 10 and 128 characters long')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)
+    .withMessage('Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character (@$!%*?&)')
+    .custom((value) => {
+      // Check for common passwords
+      const lowerValue = value.toLowerCase();
+      if (commonPasswords.some(p => lowerValue.includes(p))) {
+        throw new Error('Password is too common. Please choose a more unique password');
+      }
+      // Check for repeated characters
+      if (/(.)\1{4,}/.test(value)) {
+        throw new Error('Password contains too many repeated characters');
+      }
+      return true;
+    })
 ];
 
 // Profile validation rules

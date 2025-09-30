@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const multer = require('multer');
+const cookieParser = require('cookie-parser');
 const path = require('path');
 const fs = require('fs');
 const swaggerJsdoc = require('swagger-jsdoc');
@@ -20,6 +21,7 @@ const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
 const logsRoutes = require('./routes/logs');
 const legoRoutes = require('./routes/lego');
+const sessionRoutes = require('./routes/sessions');
 const { errorHandler } = require('./middleware/errorHandler');
 const { requestLogger, errorLogger, info, security, error } = require('./utils/logger');
 
@@ -40,6 +42,7 @@ const validateEnvironmentVariables = () => {
 validateEnvironmentVariables();
 const { monitoringMiddleware, getMetricsEndpoint, cleanupLogsEndpoint, schedulerControlEndpoint, logCleanupScheduler } = require('./utils/monitoring');
 const redisService = require('./utils/redisService');
+const sessionCleanupService = require('./services/sessionCleanupService');
 
 // Swagger configuration
 const swaggerOptions = {
@@ -360,6 +363,13 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Cookie parsing middleware (for httpOnly cookies)
+app.use(cookieParser());
+
+// CSRF Protection: Using SameSite=Strict cookies (modern approach, no library needed)
+// Note: csurf is deprecated. SameSite cookies provide equivalent protection.
+// All cookies are set with sameSite: 'strict' in authController.js
+
 // Serve uploaded files statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -372,6 +382,17 @@ app.use('/api/auth', authLimiter, authRoutes); // Stricter rate limiting for aut
 app.use('/api/profile', profileRoutes);
 app.use('/api/logs', logsRoutes);
 app.use('/api/lego', legoRoutes);
+app.use('/api/sessions', sessionRoutes); // Session management
+
+// CSRF Protection Info endpoint
+app.get('/api/csrf-info', (req, res) => {
+  // SameSite=Strict cookies provide CSRF protection without tokens
+  res.json({ 
+    success: true,
+    csrfProtection: 'SameSite=Strict cookies',
+    info: 'CSRF protection is enabled via SameSite=Strict cookie attribute'
+  });
+});
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -517,6 +538,11 @@ if (process.env.NODE_ENV !== 'test') {
         const cleanupInterval = process.env.LOG_CLEANUP_INTERVAL_HOURS || 6;
         logCleanupScheduler.start(parseInt(cleanupInterval));
         info('Automatic log cleanup scheduler started', { intervalHours: cleanupInterval });
+        
+        // Start session cleanup scheduler
+        const sessionCleanupInterval = process.env.SESSION_CLEANUP_INTERVAL_HOURS || 24;
+        sessionCleanupService.start(parseInt(sessionCleanupInterval));
+        info('Automatic session cleanup scheduler started', { intervalHours: sessionCleanupInterval });
       });
 
       // Redis is already connected at this point
@@ -525,6 +551,11 @@ if (process.env.NODE_ENV !== 'test') {
       // Graceful shutdown handling
       const gracefulShutdown = (signal) => {
         console.log(`\n${signal} received. Starting graceful shutdown...`);
+        
+        // Stop schedulers
+        logCleanupScheduler.stop();
+        sessionCleanupService.stop();
+        
         server.close(() => {
           console.log('HTTP server closed.');
           redisService.disconnect().then(() => {

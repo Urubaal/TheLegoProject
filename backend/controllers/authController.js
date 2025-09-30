@@ -14,18 +14,32 @@ const register = asyncHandler(async (req, res) => {
 
   const userData = {
     ...req.body,
-    ip: req.ip
+    ip: req.ip,
+    userAgent: req.get('User-Agent'),
+    ipAddress: req.ip
   };
 
   const result = await AuthService.registerUser(userData);
 
+  // Set httpOnly cookie with session token (SECURE - not accessible from JavaScript)
+  res.cookie('sessionToken', result.sessionToken, {
+    httpOnly: true, // Prevents XSS attacks
+    secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+    sameSite: 'strict', // Prevents CSRF attacks
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    path: '/'
+  });
+
   const duration = Date.now() - startTime;
   performance('User registration', duration, { userId: result.user.id });
+
+  // Don't send sessionToken in response body - it's in cookie
+  const { sessionToken, ...responseData } = result;
 
   res.status(201).json({
     success: true,
     message: 'User registered successfully',
-    data: result
+    data: responseData
   });
 });
 
@@ -40,18 +54,34 @@ const login = asyncHandler(async (req, res) => {
 
   const loginData = {
     ...req.body,
-    ip: req.ip
+    ip: req.ip,
+    userAgent: req.get('User-Agent'),
+    ipAddress: req.ip
   };
 
   const result = await AuthService.loginUser(loginData);
 
+  // Set httpOnly cookie with session token (SECURE - not accessible from JavaScript)
+  const cookieMaxAge = result.rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000; // 30 days or 24 hours
+  
+  res.cookie('sessionToken', result.sessionToken, {
+    httpOnly: true, // Prevents XSS attacks
+    secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+    sameSite: 'strict', // Prevents CSRF attacks
+    maxAge: cookieMaxAge,
+    path: '/'
+  });
+
   const duration = Date.now() - startTime;
   performance('User login', duration, { userId: result.user.id });
+
+  // Don't send sessionToken in response body - it's in cookie
+  const { sessionToken, ...responseData } = result;
 
   res.json({
     success: true,
     message: 'Login successful',
-    data: result
+    data: responseData
   });
 });
 
@@ -91,8 +121,29 @@ const getProfile = asyncHandler(async (req, res) => {
   });
 });
 
-// Logout (client-side token removal)
+// Logout (invalidate session and clear cookie)
 const logout = asyncHandler(async (req, res) => {
+  const Session = require('../models/Session');
+  const sessionToken = req.cookies.sessionToken;
+  
+  // Invalidate session in database if token exists
+  if (sessionToken) {
+    try {
+      await Session.invalidate(sessionToken);
+    } catch (error) {
+      // Log error but don't fail logout
+      console.error('Session invalidation error:', error.message);
+    }
+  }
+  
+  // Clear the httpOnly cookie
+  res.clearCookie('sessionToken', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    path: '/'
+  });
+  
   res.json({
     success: true,
     message: 'Logged out successfully'

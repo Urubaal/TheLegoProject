@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Session = require('../models/Session');
 const { sendPasswordResetEmail } = require('../utils/emailService');
 const redisService = require('../utils/redisService');
 const { info, warn, error, audit, security, performance } = require('../utils/logger');
@@ -29,7 +30,7 @@ class AuthService {
 
   // Register new user
   static async registerUser(userData) {
-    const { email, password, username, display_name, country } = userData;
+    const { email, password, username, display_name, country, userAgent, ipAddress } = userData;
 
     // Check if user already exists
     const existingUser = await User.findByEmail(email);
@@ -53,13 +54,22 @@ class AuthService {
       country: country || 'Unknown'
     });
 
-    // Generate token
-    const token = this.generateToken(newUser.id);
+    // Create session in database (replaces localStorage)
+    const session = await Session.create({
+      userId: newUser.id,
+      userAgent: userAgent || 'Unknown',
+      ipAddress: ipAddress || '0.0.0.0',
+      rememberMe: false // Registration defaults to false
+    });
+
+    // Generate JWT token (for backward compatibility and API access)
+    const jwtToken = this.generateToken(newUser.id);
 
     audit('User registered', newUser.id, { 
       email: newUser.email, 
       username: newUser.username,
-      country: newUser.country 
+      country: newUser.country,
+      sessionId: session.id
     });
 
     return {
@@ -70,13 +80,15 @@ class AuthService {
         display_name: newUser.display_name,
         createdAt: newUser.created_at
       },
-      token
+      token: jwtToken, // Legacy JWT for API
+      sessionToken: session.session_token, // New session token for httpOnly cookie
+      expiresAt: session.expires_at
     };
   }
 
   // Login user
   static async loginUser(loginData) {
-    const { email, password, rememberMe, ip } = loginData;
+    const { email, password, rememberMe, ip, userAgent, ipAddress } = loginData;
 
     // Find user in database
     const user = await User.findByEmail(email);
@@ -86,6 +98,16 @@ class AuthService {
         ip 
       });
       throw new AppError('Invalid email or password', 401);
+    }
+
+    // Check if email is verified
+    if (!user.is_active) {
+      security('Login attempt with unverified email', { 
+        email, 
+        userId: user.id,
+        ip 
+      });
+      throw new AppError('Please verify your email before logging in. Check your inbox for verification link.', 403);
     }
 
     // Check password
@@ -111,9 +133,17 @@ class AuthService {
       // Don't fail the login if last_login update fails
     }
 
-    // Generate token with extended expiry if remember me is checked
+    // Create session in database (replaces localStorage)
+    const session = await Session.create({
+      userId: user.id,
+      userAgent: userAgent || 'Unknown',
+      ipAddress: ipAddress || ip || '0.0.0.0',
+      rememberMe: !!rememberMe
+    });
+
+    // Generate JWT token with extended expiry if remember me is checked (for backward compatibility)
     const tokenExpiry = rememberMe ? '30d' : '24h';
-    const token = jwt.sign(
+    const jwtToken = jwt.sign(
       { userId: user.id },
       process.env.JWT_SECRET,
       { expiresIn: tokenExpiry }
@@ -122,7 +152,8 @@ class AuthService {
     audit('User logged in', user.id, { 
       email: user.email, 
       rememberMe: !!rememberMe,
-      tokenExpiry 
+      tokenExpiry,
+      sessionId: session.id
     });
 
     return {
@@ -133,8 +164,10 @@ class AuthService {
         display_name: user.display_name,
         createdAt: user.created_at
       },
-      token,
-      expiresIn: tokenExpiry
+      token: jwtToken, // Legacy JWT for API
+      sessionToken: session.session_token, // New session token for httpOnly cookie
+      expiresIn: tokenExpiry,
+      expiresAt: session.expires_at
     };
   }
 
