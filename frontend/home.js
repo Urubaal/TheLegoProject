@@ -6,9 +6,9 @@ class HomeManager {
     }
 
     async init() {
+        this.setupEventListeners();
         const isAuthenticated = await this.checkAuthentication();
         if (isAuthenticated) {
-            this.setupEventListeners();
             this.updateCollectionCount();
         }
     }
@@ -16,7 +16,6 @@ class HomeManager {
     async checkAuthentication() {
         const token = localStorage.getItem('authToken');
         if (!token) {
-            window.location.href = '/index.html';
             return false;
         }
 
@@ -31,7 +30,7 @@ class HomeManager {
             if (!response.ok) {
                 // Token is invalid or expired
                 localStorage.removeItem('authToken');
-                window.location.href = '/index.html';
+                localStorage.removeItem('brickBuyToken');
                 return false;
             }
             
@@ -39,7 +38,7 @@ class HomeManager {
         } catch (error) {
             console.error('Token validation failed:', error);
             localStorage.removeItem('authToken');
-            window.location.href = '/index.html';
+            localStorage.removeItem('brickBuyToken');
             return false;
         }
     }

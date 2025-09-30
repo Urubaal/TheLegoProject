@@ -225,9 +225,9 @@ class LegoCollectionManager {
         return `
             <div class="collection-item ${conditionClass}">
                 <div class="item-image">
-                    <img src="${item.image_url || 'https://via.placeholder.com/100x100?text=No+Image'}" 
+                    <img src="${item.image_url || 'https://placehold.co/100x100/e0e0e0/666?text=No+Image'}" 
                          alt="${item.name}" 
-                         onerror="this.src='https://via.placeholder.com/100x100?text=No+Image'">
+                         onerror="this.src='https://placehold.co/100x100/e0e0e0/666?text=No+Image'">
                 </div>
                 
                 <div class="item-info">
@@ -361,8 +361,8 @@ class LegoCollectionManager {
 
     updateStats() {
         document.getElementById('totalSets').textContent = this.stats.owned_sets || 0;
-        document.getElementById('totalValue').textContent = `€${(this.stats.total_paid_value || 0).toFixed(2)}`;
-        document.getElementById('avgPrice').textContent = `€${(this.stats.avg_paid_price || 0).toFixed(2)}`;
+        document.getElementById('totalValue').textContent = `€${parseFloat(this.stats.total_paid_value || 0).toFixed(2)}`;
+        document.getElementById('avgPrice').textContent = `€${parseFloat(this.stats.avg_paid_price || 0).toFixed(2)}`;
         
         // Calculate growth (mock data for now)
         const growth = Math.random() * 20 - 5; // Random growth between -5% and 15%

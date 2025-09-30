@@ -385,7 +385,7 @@ class LegoController {
         });
       }
 
-      const userId = req.user.id;
+      const userId = req.user.userId;
       const { setNumber, collectionType, quantity = 1, paidPrice, condition = 'new', notes = '' } = req.body;
 
       // Verify set exists
@@ -427,7 +427,7 @@ class LegoController {
   // Remove set from user collection
   static async removeFromCollection(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user.userId;
       const { setNumber, collectionType } = req.params;
 
       const removed = await UserCollection.removeFromCollection(userId, setNumber, collectionType);
@@ -458,7 +458,7 @@ class LegoController {
   // Get user collection
   static async getUserCollection(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user.userId;
       const { type } = req.query; // 'owned', 'wanted', or null for all
 
       // Try to get from Redis cache first
@@ -792,7 +792,7 @@ class LegoController {
   // Export user collection to CSV (BrickEconomy format)
   static async exportCollection(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user.userId;
       const { type = 'owned' } = req.query; // 'owned', 'wanted', or 'all'
 
       info('Exporting user collection', { userId, type });
@@ -847,7 +847,7 @@ class LegoController {
   // Import user collection from CSV (BrickEconomy format)
   static async importCollection(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user.userId;
       const { overwrite = false } = req.body;
 
       if (!req.file) {

@@ -306,7 +306,7 @@ app.use(helmet({
 // Rate limiting - Enhanced security
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.RATE_LIMIT_MAX_REQUESTS || 50, // More restrictive default
+  max: 500, // High limit for development and testing
   message: {
     error: 'Too many requests from this IP, please try again later.',
     retryAfter: '15 minutes'
@@ -319,10 +319,10 @@ const limiter = rateLimit({
   }
 });
 
-// Stricter rate limiting for auth endpoints
+// Rate limiting for auth endpoints - relaxed for development/testing
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Only 5 auth attempts per 15 minutes
+  max: 50, // 50 auth attempts per 15 minutes
   message: {
     error: 'Too many authentication attempts, please try again later.',
     retryAfter: '15 minutes'
