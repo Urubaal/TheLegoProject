@@ -15,18 +15,43 @@ class LegoCollectionManager {
         this.init();
     }
 
-    init() {
-        this.checkAuthentication();
-        this.setupEventListeners();
-        this.loadCollection();
-        this.loadThemes();
+    async init() {
+        const isAuthenticated = await this.checkAuthentication();
+        if (isAuthenticated) {
+            this.setupEventListeners();
+            this.loadCollection();
+            this.loadThemes();
+        }
     }
 
-    checkAuthentication() {
+    async checkAuthentication() {
         const token = localStorage.getItem('authToken');
         if (!token) {
             window.location.href = '/index.html';
-            return;
+            return false;
+        }
+
+        // Validate token by checking profile
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/auth/profile`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                // Token is invalid or expired
+                localStorage.removeItem('authToken');
+                window.location.href = '/index.html';
+                return false;
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Token validation failed:', error);
+            localStorage.removeItem('authToken');
+            window.location.href = '/index.html';
+            return false;
         }
     }
 
@@ -59,6 +84,69 @@ class LegoCollectionManager {
         // Search
         document.getElementById('searchInput').addEventListener('input', (e) => {
             this.debounceSearch(e.target.value);
+        });
+
+        // Import/Export buttons
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            this.showExportModal();
+        });
+
+        document.getElementById('importBtn').addEventListener('click', () => {
+            this.showImportModal();
+        });
+
+        // Modal close buttons
+        document.getElementById('closeImportModal').addEventListener('click', () => {
+            this.hideImportModal();
+        });
+
+        document.getElementById('closeExportModal').addEventListener('click', () => {
+            this.hideExportModal();
+        });
+
+        // Modal cancel buttons
+        document.getElementById('cancelImport').addEventListener('click', () => {
+            this.hideImportModal();
+        });
+
+        document.getElementById('cancelExport').addEventListener('click', () => {
+            this.hideExportModal();
+        });
+
+        // Import confirm button
+        document.getElementById('confirmImport').addEventListener('click', () => {
+            this.importCollection();
+        });
+
+        // Export confirm button
+        document.getElementById('confirmExport').addEventListener('click', () => {
+            this.exportCollection();
+        });
+
+        // File input change
+        document.getElementById('csvFileInput').addEventListener('change', (e) => {
+            this.handleFileSelect(e);
+        });
+
+        // Drag and drop for file upload
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.add('dragover');
+        });
+
+        fileUploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('dragover');
+        });
+
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                this.handleFileSelect({ target: { files: files } });
+            }
         });
 
         // Pagination (delegated event listener)
@@ -432,6 +520,162 @@ class LegoCollectionManager {
         setTimeout(() => {
             messageContainer.classList.add('hidden');
         }, 5000);
+    }
+
+    // Import/Export Modal Functions
+    showImportModal() {
+        document.getElementById('importModal').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    hideImportModal() {
+        document.getElementById('importModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+        this.resetImportForm();
+    }
+
+    showExportModal() {
+        document.getElementById('exportModal').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    hideExportModal() {
+        document.getElementById('exportModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    resetImportForm() {
+        document.getElementById('csvFileInput').value = '';
+        document.getElementById('fileInfo').style.display = 'none';
+        document.getElementById('confirmImport').disabled = true;
+        document.getElementById('overwriteExisting').checked = false;
+    }
+
+    handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!file.name.toLowerCase().endsWith('.csv')) {
+            this.showMessage('Proszę wybrać plik CSV', true);
+            return;
+        }
+
+        // Validate file size (10MB limit)
+        if (file.size > 10 * 1024 * 1024) {
+            this.showMessage('Plik jest za duży. Maksymalny rozmiar to 10MB', true);
+            return;
+        }
+
+        // Show file info
+        document.getElementById('fileName').textContent = file.name;
+        document.getElementById('fileSize').textContent = this.formatFileSize(file.size);
+        document.getElementById('fileInfo').style.display = 'block';
+        document.getElementById('confirmImport').disabled = false;
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    async importCollection() {
+        const fileInput = document.getElementById('csvFileInput');
+        const file = fileInput.files[0];
+        const overwrite = document.getElementById('overwriteExisting').checked;
+
+        if (!file) {
+            this.showMessage('Proszę wybrać plik CSV', true);
+            return;
+        }
+
+        this.showLoading(true);
+        document.getElementById('confirmImport').disabled = true;
+
+        try {
+            const formData = new FormData();
+            formData.append('csvFile', file);
+            formData.append('overwrite', overwrite);
+
+            const response = await fetch(`${this.apiBaseUrl}/lego/collection/import`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.showMessage(result.message);
+                this.hideImportModal();
+                this.loadCollection(); // Refresh collection
+            } else {
+                this.showMessage(result.error || 'Błąd podczas importu', true);
+            }
+        } catch (error) {
+            console.error('Import error:', error);
+            this.showMessage('Błąd podczas importu kolekcji', true);
+        } finally {
+            this.showLoading(false);
+            document.getElementById('confirmImport').disabled = false;
+        }
+    }
+
+    async exportCollection() {
+        const exportType = document.querySelector('input[name="exportType"]:checked').value;
+        
+        this.showLoading(true);
+        document.getElementById('confirmExport').disabled = true;
+
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/lego/collection/export?type=${exportType}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+
+            if (response.ok) {
+                // Get filename from Content-Disposition header
+                const contentDisposition = response.headers.get('Content-Disposition');
+                let filename = `lego-collection-${exportType}-${new Date().toISOString().split('T')[0]}.csv`;
+                
+                if (contentDisposition) {
+                    const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                    if (filenameMatch) {
+                        filename = filenameMatch[1];
+                    }
+                }
+
+                // Create blob and download
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+                this.showMessage('Kolekcja została wyeksportowana pomyślnie');
+                this.hideExportModal();
+            } else {
+                const result = await response.json();
+                this.showMessage(result.error || 'Błąd podczas eksportu', true);
+            }
+        } catch (error) {
+            console.error('Export error:', error);
+            this.showMessage('Błąd podczas eksportu kolekcji', true);
+        } finally {
+            this.showLoading(false);
+            document.getElementById('confirmExport').disabled = false;
+        }
     }
 }
 

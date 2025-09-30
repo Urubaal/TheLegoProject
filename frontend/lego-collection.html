@@ -101,6 +101,23 @@
             </div>
         </div>
 
+        <!-- Import/Export Section -->
+        <div class="import-export-section">
+            <div class="import-export-buttons">
+                <button class="btn btn-primary" id="exportBtn">
+                    <i class="fas fa-download"></i>
+                    Export Collection
+                </button>
+                <button class="btn btn-secondary" id="importBtn">
+                    <i class="fas fa-upload"></i>
+                    Import Collection
+                </button>
+            </div>
+            <div class="import-export-info">
+                <p>Import/export your collection in BrickEconomy CSV format</p>
+            </div>
+        </div>
+
         <!-- Collection Stats -->
         <div class="collection-stats">
             <div class="stat-card">
@@ -158,6 +175,83 @@
         <div class="message" id="message">
             <i class="fas fa-check-circle"></i>
             <span id="messageText"></span>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div id="importModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Import Collection from CSV</h2>
+                <button class="modal-close" id="closeImportModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="import-form">
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drag and drop your CSV file here or click to browse</p>
+                        <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('csvFileInput').click()">
+                            Choose File
+                        </button>
+                    </div>
+                    <div class="file-info" id="fileInfo" style="display: none;">
+                        <p><strong>Selected file:</strong> <span id="fileName"></span></p>
+                        <p><strong>Size:</strong> <span id="fileSize"></span></p>
+                    </div>
+                    <div class="import-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="overwriteExisting">
+                            <span class="checkmark"></span>
+                            Overwrite existing items
+                        </label>
+                    </div>
+                    <div class="import-format-info">
+                        <h4>Expected CSV Format (BrickEconomy):</h4>
+                        <p>Number,Theme,Subtheme,Year,SetName,Retail,Paid,Value,Condition,Date,Notes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelImport">Cancel</button>
+                <button class="btn btn-primary" id="confirmImport" disabled>Import Collection</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Export Collection to CSV</h2>
+                <button class="modal-close" id="closeExportModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="export-options">
+                    <h4>Select collection type to export:</h4>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="exportType" value="owned" checked>
+                            <span class="radio-mark"></span>
+                            Owned Sets Only
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="exportType" value="wanted">
+                            <span class="radio-mark"></span>
+                            Wanted Sets Only
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="exportType" value="all">
+                            <span class="radio-mark"></span>
+                            All Sets (Owned + Wanted)
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelExport">Cancel</button>
+                <button class="btn btn-primary" id="confirmExport">Export Collection</button>
+            </div>
         </div>
     </div>
 

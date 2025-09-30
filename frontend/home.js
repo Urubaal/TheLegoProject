@@ -5,17 +5,42 @@ class HomeManager {
         this.init();
     }
 
-    init() {
-        this.checkAuthentication();
-        this.setupEventListeners();
-        this.updateCollectionCount();
+    async init() {
+        const isAuthenticated = await this.checkAuthentication();
+        if (isAuthenticated) {
+            this.setupEventListeners();
+            this.updateCollectionCount();
+        }
     }
 
-    checkAuthentication() {
+    async checkAuthentication() {
         const token = localStorage.getItem('authToken');
         if (!token) {
             window.location.href = '/index.html';
-            return;
+            return false;
+        }
+
+        // Validate token by checking profile
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/auth/profile`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                // Token is invalid or expired
+                localStorage.removeItem('authToken');
+                window.location.href = '/index.html';
+                return false;
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Token validation failed:', error);
+            localStorage.removeItem('authToken');
+            window.location.href = '/index.html';
+            return false;
         }
     }
 

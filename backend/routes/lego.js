@@ -1,8 +1,25 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const LegoController = require('../controllers/legoController');
 const { authenticateToken } = require('../middleware/auth');
 const { body } = require('express-validator');
+
+// Multer configuration for CSV uploads
+const csvStorage = multer.memoryStorage();
+const csvUpload = multer({
+  storage: csvStorage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit for CSV files
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'text/csv' || file.originalname.endsWith('.csv')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Tylko pliki CSV są dozwolone'), false);
+    }
+  }
+});
 
 // Validation rules
 const setValidation = [
@@ -38,6 +55,10 @@ router.use(authenticateToken);
 router.post('/collection/add', collectionValidation, LegoController.addToCollection);
 router.delete('/collection/:setNumber/:collectionType', LegoController.removeFromCollection);
 router.get('/collection', LegoController.getUserCollection);
+
+// Collection import/export
+router.get('/collection/export', LegoController.exportCollection);
+router.post('/collection/import', csvUpload.single('csvFile'), LegoController.importCollection);
 
 // Admin routes (you might want to add admin middleware here)
 router.post('/sets', setValidation, LegoController.createSet);

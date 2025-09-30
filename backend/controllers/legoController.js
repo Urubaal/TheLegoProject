@@ -788,6 +788,204 @@ class LegoController {
       });
     }
   }
+
+  // Export user collection to CSV (BrickEconomy format)
+  static async exportCollection(req, res) {
+    try {
+      const userId = req.user.id;
+      const { type = 'owned' } = req.query; // 'owned', 'wanted', or 'all'
+
+      info('Exporting user collection', { userId, type });
+
+      // Get collection data
+      const collection = await UserCollection.getUserCollection(userId, type === 'all' ? null : type);
+      
+      if (!collection || collection.length === 0) {
+        return res.status(404).json({
+          success: false,
+          error: 'Kolekcja jest pusta'
+        });
+      }
+
+      // Convert to BrickEconomy CSV format
+      const csvHeader = 'Number,Theme,Subtheme,Year,SetName,Retail,Paid,Value,Condition,Date,Notes\n';
+      
+      const csvRows = collection.map(item => {
+        const retailPrice = item.retail_price ? `€${item.retail_price.toFixed(2)}` : '€0.00';
+        const paidPrice = item.paid_price ? `€${item.paid_price.toFixed(2)}` : '€0.00';
+        const currentValue = item.retail_price ? `€${item.retail_price.toFixed(2)}` : '€0.00';
+        const condition = item.condition || 'New';
+        const date = item.created_at ? new Date(item.created_at).toLocaleDateString('en-GB') : '';
+        const notes = item.notes || '';
+
+        return `${item.set_number},${item.theme || ''},${item.subtheme || ''},${item.year || ''},${item.name || ''},${retailPrice},${paidPrice},${currentValue},${condition},${date},${notes}`;
+      }).join('\n');
+
+      const csvContent = csvHeader + csvRows;
+
+      // Set headers for file download
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="lego-collection-${type}-${new Date().toISOString().split('T')[0]}.csv"`);
+      
+      res.send(csvContent);
+
+      info('Collection exported successfully', { 
+        userId, 
+        type, 
+        itemCount: collection.length 
+      });
+
+    } catch (error) {
+      error('Error exporting collection', { error: error.message, stack: error.stack });
+      res.status(500).json({
+        success: false,
+        error: 'Błąd podczas eksportu kolekcji'
+      });
+    }
+  }
+
+  // Import user collection from CSV (BrickEconomy format)
+  static async importCollection(req, res) {
+    try {
+      const userId = req.user.id;
+      const { overwrite = false } = req.body;
+
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          error: 'Brak pliku CSV'
+        });
+      }
+
+      info('Importing user collection', { userId, overwrite, filename: req.file.originalname });
+
+      // Parse CSV content
+      const csvContent = req.file.buffer.toString('utf-8');
+      const lines = csvContent.split('\n').filter(line => line.trim());
+      
+      if (lines.length < 2) {
+        return res.status(400).json({
+          success: false,
+          error: 'Plik CSV jest pusty lub nieprawidłowy'
+        });
+      }
+
+      // Parse header and validate format
+      const header = lines[0].split(',').map(h => h.trim());
+      const expectedHeader = ['Number', 'Theme', 'Subtheme', 'Year', 'SetName', 'Retail', 'Paid', 'Value', 'Condition', 'Date', 'Notes'];
+      
+      if (!expectedHeader.every(h => header.includes(h))) {
+        return res.status(400).json({
+          success: false,
+          error: 'Nieprawidłowy format pliku CSV. Oczekiwane kolumny: ' + expectedHeader.join(', ')
+        });
+      }
+
+      const results = {
+        imported: 0,
+        updated: 0,
+        errors: 0,
+        errorDetails: []
+      };
+
+      // Process each row
+      for (let i = 1; i < lines.length; i++) {
+        try {
+          const row = lines[i].split(',').map(cell => cell.trim());
+          
+          if (row.length < expectedHeader.length) {
+            results.errors++;
+            results.errorDetails.push(`Linia ${i + 1}: Nieprawidłowa liczba kolumn`);
+            continue;
+          }
+
+          // Map CSV columns to our data structure
+          const setNumber = row[0];
+          const theme = row[1];
+          const subtheme = row[2];
+          const year = parseInt(row[3]) || null;
+          const setName = row[4];
+          const retailPrice = parseFloat(row[5].replace('€', '')) || null;
+          const paidPrice = parseFloat(row[6].replace('€', '')) || null;
+          const condition = row[8] || 'new';
+          const date = row[9];
+          const notes = row[10] || '';
+
+          if (!setNumber) {
+            results.errors++;
+            results.errorDetails.push(`Linia ${i + 1}: Brak numeru zestawu`);
+            continue;
+          }
+
+          // Check if set exists in our database
+          const existingSet = await LegoSet.findBySetNumber(setNumber);
+          if (!existingSet) {
+            // Create new set entry if it doesn't exist
+            await LegoSet.create({
+              set_number: setNumber,
+              name: setName,
+              theme: theme,
+              subtheme: subtheme,
+              year: year,
+              retail_price: retailPrice,
+              description: 'Imported from BrickEconomy CSV'
+            });
+          }
+
+          // Check if user already has this set in collection
+          const existingCollectionItem = await UserCollection.hasSetInCollection(userId, setNumber, 'owned');
+          
+          if (existingCollectionItem && !overwrite) {
+            results.errors++;
+            results.errorDetails.push(`Linia ${i + 1}: Zestaw ${setNumber} już istnieje w kolekcji`);
+            continue;
+          }
+
+          // Add/update collection item
+          const collectionItem = await UserCollection.addToCollection(
+            userId,
+            setNumber,
+            'owned',
+            1, // quantity
+            paidPrice,
+            condition,
+            notes
+          );
+
+          if (existingCollectionItem) {
+            results.updated++;
+          } else {
+            results.imported++;
+          }
+
+        } catch (rowError) {
+          results.errors++;
+          results.errorDetails.push(`Linia ${i + 1}: ${rowError.message}`);
+        }
+      }
+
+      // Invalidate cache for this user
+      await invalidateUserCollectionCache(userId);
+
+      res.json({
+        success: true,
+        data: results,
+        message: `Import zakończony: ${results.imported} nowych, ${results.updated} zaktualizowanych, ${results.errors} błędów`
+      });
+
+      info('Collection import completed', { 
+        userId, 
+        results 
+      });
+
+    } catch (error) {
+      error('Error importing collection', { error: error.message, stack: error.stack });
+      res.status(500).json({
+        success: false,
+        error: 'Błąd podczas importu kolekcji'
+      });
+    }
+  }
 }
 
 module.exports = LegoController;

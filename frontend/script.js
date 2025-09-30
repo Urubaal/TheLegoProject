@@ -33,6 +33,7 @@ class AuthManager {
     init() {
         this.setupEventListeners();
         this.setupPasswordToggles();
+        this.setupLandingPageButtons();
     }
 
     setupEventListeners() {
@@ -113,8 +114,12 @@ class AuthManager {
         registerForm.classList.remove('hidden');
         this.currentForm = 'register';
         this.clearAllErrors();
-        this.updateHeader('Zarejestruj się', 'Utwórz nowe konto');
+        this.updateHeader('Create Account', 'Join Brick Buy today');
         this.updateFooter('register');
+        
+        // Update modal title if exists
+        const authModalTitle = document.getElementById('authModalTitle');
+        if (authModalTitle) authModalTitle.textContent = 'Create Account';
     }
 
     showForgotPassword(e) {
@@ -122,6 +127,10 @@ class AuthManager {
         this.hideAllForms();
         forgotPasswordForm.classList.remove('hidden');
         this.currentForm = 'forgot';
+        
+        // Update modal title if exists
+        const authModalTitle = document.getElementById('authModalTitle');
+        if (authModalTitle) authModalTitle.textContent = 'Reset Password';
     }
 
     showLogin(e) {
@@ -130,8 +139,12 @@ class AuthManager {
         loginForm.classList.remove('hidden');
         this.currentForm = 'login';
         this.clearAllErrors();
-        this.updateHeader('Zaloguj się', 'Witaj z powrotem! Zaloguj się do swojego konta');
+        this.updateHeader('Sign In', 'Welcome back! Sign in to your account');
         this.updateFooter('login');
+        
+        // Update modal title if exists
+        const authModalTitle = document.getElementById('authModalTitle');
+        if (authModalTitle) authModalTitle.textContent = 'Sign In';
     }
 
     showResetPassword() {
@@ -586,6 +599,87 @@ function checkAuthStatus() {
             localStorage.removeItem('brickBuyToken');
             localStorage.removeItem('brickBuyUser');
             localStorage.removeItem('brickBuyCollection');
+        });
+    }
+
+    setupLandingPageButtons() {
+        // Modal elements
+        const authModal = document.getElementById('authModal');
+        const closeAuthModal = document.getElementById('closeAuthModal');
+        const authModalTitle = document.getElementById('authModalTitle');
+        
+        // Landing page buttons
+        const signInBtn = document.getElementById('signInBtn');
+        const getStartedBtn = document.getElementById('getStartedBtn');
+        const learnMoreBtn = document.getElementById('learnMoreBtn');
+        const ctaSignUpBtn = document.getElementById('ctaSignUpBtn');
+
+        // Open modal functions
+        const openAuthModal = (showRegister = false) => {
+            if (!authModal) return;
+            
+            authModal.style.display = 'flex';
+            
+            if (showRegister) {
+                this.showRegister({ preventDefault: () => {} });
+            } else {
+                this.showLogin({ preventDefault: () => {} });
+            }
+        };
+
+        const closeModal = () => {
+            if (authModal) {
+                authModal.style.display = 'none';
+            }
+        };
+
+        // Event listeners for landing page buttons
+        if (signInBtn) {
+            signInBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                openAuthModal(false);
+            });
+        }
+
+        if (getStartedBtn) {
+            getStartedBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                openAuthModal(true);
+            });
+        }
+
+        if (ctaSignUpBtn) {
+            ctaSignUpBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                openAuthModal(true);
+            });
+        }
+
+        if (learnMoreBtn) {
+            learnMoreBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('features').scrollIntoView({ behavior: 'smooth' });
+            });
+        }
+
+        // Close modal handlers
+        if (closeAuthModal) {
+            closeAuthModal.addEventListener('click', closeModal);
+        }
+
+        if (authModal) {
+            authModal.addEventListener('click', (e) => {
+                if (e.target === authModal) {
+                    closeModal();
+                }
+            });
+        }
+
+        // ESC key to close modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && authModal && authModal.style.display === 'flex') {
+                closeModal();
+            }
         });
     }
 }

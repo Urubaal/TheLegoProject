@@ -93,12 +93,12 @@ class UserCollection {
         ls.name,
         ls.theme,
         ls.subtheme,
-        ls.year,
+        ls.year_released as year,
         ls.pieces,
-        ls.minifigs,
+        ls.minifigures as minifigs,
         ls.retail_price,
-        ls.image_url,
-        ls.availability
+        ls.images->0->>'url' as image_url,
+        ls.availability_status as availability
       FROM user_collections uc
       LEFT JOIN lego_sets ls ON uc.set_number = ls.set_number
       WHERE uc.user_id = $1
@@ -128,12 +128,12 @@ class UserCollection {
         ls.name,
         ls.theme,
         ls.subtheme,
-        ls.year,
+        ls.year_released as year,
         ls.pieces,
-        ls.minifigs,
+        ls.minifigures as minifigs,
         ls.retail_price,
-        ls.image_url,
-        ls.availability
+        ls.images->0->>'url' as image_url,
+        ls.availability_status as availability
       FROM user_collections uc
       LEFT JOIN lego_sets ls ON uc.set_number = ls.set_number
       WHERE uc.user_id = $1 AND uc.set_number = $2 AND uc.collection_type = $3
@@ -216,15 +216,15 @@ class UserCollection {
         ls.name,
         ls.theme,
         ls.subtheme,
-        ls.year,
+        ls.year_released as year,
         ls.pieces,
-        ls.minifigs,
+        ls.minifigures as minifigs,
         ls.retail_price,
-        ls.image_url
+        ls.images->0->>'url' as image_url
       FROM user_collections uc
       LEFT JOIN lego_sets ls ON uc.set_number = ls.set_number
       WHERE uc.user_id = $1 AND ls.theme ILIKE $2
-      ORDER BY ls.year DESC, ls.set_number
+      ORDER BY ls.year_released DESC, ls.set_number
     `;
     
     const values = [userId, `%${theme}%`];
@@ -244,11 +244,11 @@ class UserCollection {
         ls.name,
         ls.theme,
         ls.subtheme,
-        ls.year,
+        ls.year_released as year,
         ls.pieces,
-        ls.minifigs,
+        ls.minifigures as minifigs,
         ls.retail_price,
-        ls.image_url
+        ls.images->0->>'url' as image_url
       FROM user_collections uc
       LEFT JOIN lego_sets ls ON uc.set_number = ls.set_number
       WHERE uc.user_id = $1 
@@ -296,9 +296,9 @@ class UserCollection {
         uc.*,
         ls.name,
         ls.theme,
-        ls.year,
+        ls.year_released as year,
         ls.retail_price,
-        ls.image_url
+        ls.images->0->>'url' as image_url
       FROM user_collections uc
       LEFT JOIN lego_sets ls ON uc.set_number = ls.set_number
       WHERE uc.user_id = $1
