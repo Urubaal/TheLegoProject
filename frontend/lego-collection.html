@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My LEGO Collection - BrickEconomy Clone</title>
+    <title>My LEGO Collection - Brick Buy</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="brickeconomy.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -16,7 +16,7 @@
                 <div class="logo">
                     <div class="logo-icon">🧱</div>
                     <div class="logo-text">
-                        <span class="logo-title">BrickEconomy</span>
+                        <span class="logo-title">Brick Buy</span>
                         <span class="logo-subtitle">the economics of LEGO</span>
                     </div>
                 </div>
@@ -101,23 +101,6 @@
             </div>
         </div>
 
-        <!-- Import/Export Section -->
-        <div class="import-export-section">
-            <div class="import-export-buttons">
-                <button class="btn btn-primary" id="exportBtn">
-                    <i class="fas fa-download"></i>
-                    Export Collection
-                </button>
-                <button class="btn btn-secondary" id="importBtn">
-                    <i class="fas fa-upload"></i>
-                    Import Collection
-                </button>
-            </div>
-            <div class="import-export-info">
-                <p>Import/export your collection in BrickEconomy CSV format</p>
-            </div>
-        </div>
-
         <!-- Collection Stats -->
         <div class="collection-stats">
             <div class="stat-card">
@@ -149,6 +132,18 @@
                 <div class="stat-content">
                     <h3 id="growth">0%</h3>
                     <p>Growth</p>
+                </div>
+            </div>
+
+            <!-- Import/Export Actions -->
+            <div class="stat-card import-export-card">
+                <div class="import-export-buttons-vertical">
+                    <button class="btn btn-primary btn-sm" id="exportBtn">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                    <button class="btn btn-secondary btn-sm" id="importBtn">
+                        <i class="fas fa-upload"></i> Import
+                    </button>
                 </div>
             </div>
         </div>
@@ -207,7 +202,7 @@
                         </label>
                     </div>
                     <div class="import-format-info">
-                        <h4>Expected CSV Format (BrickEconomy):</h4>
+                        <h4>Expected CSV Format (Brick Buy):</h4>
                         <p>Number,Theme,Subtheme,Year,SetName,Retail,Paid,Value,Condition,Date,Notes</p>
                     </div>
                 </div>
