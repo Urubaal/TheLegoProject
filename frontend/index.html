@@ -3,149 +3,364 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strona Logowania</title>
+    <title>Brick Buy - Your LEGO Collection Manager</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="brickeconomy.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body>
-    <div class="container">
-        <div class="login-container">
-            <div class="login-header">
-                <h1>Zaloguj się</h1>
-                <p>Witaj z powrotem! Zaloguj się do swojego konta</p>
+<body class="landing-page">
+    <!-- Navigation Bar -->
+    <nav class="navbar-brickeconomy">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="logo">
+                    <div class="logo-icon">🧱</div>
+                    <div class="logo-text">
+                        <span class="logo-title">Brick Buy</span>
+                        <span class="logo-subtitle">Your LEGO Collection Manager</span>
+                    </div>
+                </div>
             </div>
+            <div class="nav-menu">
+                <a href="#" class="nav-link"><i class="fas fa-th"></i> Browse</a>
+                <a href="#" class="nav-link"><i class="fas fa-tags"></i> Deals</a>
+                <a href="#" class="nav-link"><i class="fas fa-chart-line"></i> Analysis</a>
+                <a href="#features" class="nav-link">Features</a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-primary" id="signInBtn">
+                    <i class="fas fa-sign-in-alt"></i> Sign In or Up
+                </button>
+            </div>
+        </div>
+    </nav>
 
-            <!-- Login Form -->
-            <form id="loginForm" class="form">
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <div class="input-group">
-                        <i class="fas fa-envelope"></i>
-                        <input type="email" id="email" name="email" required>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Manage Your LEGO Collection</h1>
+            <p class="hero-subtitle">Brick Buy helps you organize, track, and value your LEGO sets with ease.</p>
+            <div class="hero-actions">
+                <button class="btn btn-primary btn-large" id="getStartedBtn">
+                    <i class="fas fa-rocket"></i> Get Started
+                </button>
+                <button class="btn btn-secondary btn-large" id="learnMoreBtn">
+                    <i class="fas fa-info-circle"></i> Learn More
+                </button>
+            </div>
+        </div>
+        <div class="hero-stats">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-cubes"></i></div>
+                <div class="stat-content">
+                    <div class="stat-value" id="totalSets">20,447</div>
+                    <div class="stat-label">Sets Tracked</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-percentage"></i></div>
+                <div class="stat-content">
+                    <div class="stat-value">96.25%</div>
+                    <div class="stat-label">Sets with Values</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-euro-sign"></i></div>
+                <div class="stat-content">
+                    <div class="stat-value">€2.4M</div>
+                    <div class="stat-label">Total Market Value</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features">
+        <div class="container">
+            <h2 class="section-title">What Brick Buy Offers</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-list"></i>
                     </div>
-                    <span class="error-message" id="emailError"></span>
+                    <h3 class="feature-title">Manage</h3>
+                    <p class="feature-description">
+                        Organize your entire LEGO collection, track its current value, 
+                        and forecast potential investment returns.
+                    </p>
                 </div>
 
-                <div class="form-group">
-                    <label for="password">Hasło</label>
-                    <div class="input-group">
-                        <i class="fas fa-lock"></i>
-                        <input type="password" id="password" name="password" required>
-                        <button type="button" class="toggle-password" id="togglePassword">
-                            <i class="fas fa-eye"></i>
-                        </button>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
                     </div>
-                    <span class="error-message" id="passwordError"></span>
+                    <h3 class="feature-title">Track</h3>
+                    <p class="feature-description">
+                        Monitor current market values, anticipate detailed future projections, 
+                        returns, and overall growth potential.
+                    </p>
                 </div>
 
-                <div class="form-options">
-                    <label class="checkbox-container">
-                        <input type="checkbox" id="rememberMe">
-                        <span class="checkmark"></span>
-                        Zapamiętaj mnie
-                    </label>
-                    <a href="#" class="forgot-password" id="forgotPasswordLink">Zapomniałeś hasła?</a>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Zaloguj się</button>
-            </form>
-
-            <!-- Register Form -->
-            <form id="registerForm" class="form hidden">
-                <div class="form-group">
-                    <label for="registerName">Imię i nazwisko</label>
-                    <div class="input-group">
-                        <i class="fas fa-user"></i>
-                        <input type="text" id="registerName" name="registerName" required>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-search"></i>
                     </div>
-                    <span class="error-message" id="registerNameError"></span>
+                    <h3 class="feature-title">Discover</h3>
+                    <p class="feature-description">
+                        Explore and evaluate sets while monitoring their growth trends. 
+                        Identify top investment opportunities.
+                    </p>
                 </div>
 
-                <div class="form-group">
-                    <label for="registerEmail">Email</label>
-                    <div class="input-group">
-                        <i class="fas fa-envelope"></i>
-                        <input type="email" id="registerEmail" name="registerEmail" required>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-import"></i>
                     </div>
-                    <span class="error-message" id="registerEmailError"></span>
+                    <h3 class="feature-title">Import/Export</h3>
+                    <p class="feature-description">
+                        Import your collection from CSV files or export your data 
+                        for backup and analysis.
+                    </p>
                 </div>
 
-                <div class="form-group">
-                    <label for="registerPassword">Hasło</label>
-                    <div class="input-group">
-                        <i class="fas fa-lock"></i>
-                        <input type="password" id="registerPassword" name="registerPassword" required>
-                        <button type="button" class="toggle-password" id="toggleRegisterPassword">
-                            <i class="fas fa-eye"></i>
-                        </button>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shopping-cart"></i>
                     </div>
-                    <span class="error-message" id="registerPasswordError"></span>
+                    <h3 class="feature-title">Marketplace</h3>
+                    <p class="feature-description">
+                        Browse real offers from OLX marketplace and find the best deals 
+                        on LEGO sets in your area.
+                    </p>
                 </div>
 
-                <div class="form-group">
-                    <label for="confirmRegisterPassword">Potwierdź hasło</label>
-                    <div class="input-group">
-                        <i class="fas fa-lock"></i>
-                        <input type="password" id="confirmRegisterPassword" name="confirmRegisterPassword" required>
-                        <button type="button" class="toggle-password" id="toggleConfirmRegisterPassword">
-                            <i class="fas fa-eye"></i>
-                        </button>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-bar"></i>
                     </div>
-                    <span class="error-message" id="confirmRegisterPasswordError"></span>
+                    <h3 class="feature-title">Analytics</h3>
+                    <p class="feature-description">
+                        Get detailed statistics, price trends, and investment insights 
+                        powered by machine learning algorithms.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works-section">
+        <div class="container">
+            <h2 class="section-title">How It Works</h2>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h3 class="step-title">Create Account</h3>
+                    <p class="step-description">
+                        Sign up for free and start building your LEGO collection database.
+                    </p>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Zarejestruj się</button>
-                <button type="button" class="btn btn-secondary" id="backToLoginFromRegister">Powrót do logowania</button>
-            </form>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h3 class="step-title">Add Your Sets</h3>
+                    <p class="step-description">
+                        Manually add sets or import your entire collection from CSV.
+                    </p>
+                </div>
 
-            <!-- Forgot Password Form -->
-            <form id="forgotPasswordForm" class="form hidden">
-                <div class="form-group">
-                    <label for="forgotEmail">Email</label>
-                    <div class="input-group">
-                        <i class="fas fa-envelope"></i>
-                        <input type="email" id="forgotEmail" name="forgotEmail" required>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h3 class="step-title">Track Value</h3>
+                    <p class="step-description">
+                        Watch your collection's value grow with real-time market data.
+                    </p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <h3 class="step-title">Make Decisions</h3>
+                    <p class="step-description">
+                        Use insights to decide when to buy, sell, or hold your sets.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2 class="cta-title">Ready to Start Tracking Your Collection?</h2>
+                <p class="cta-description">
+                    Join thousands of LEGO enthusiasts and investors managing their collections with Brick Buy
+                </p>
+                <button class="btn btn-primary btn-large" id="ctaSignUpBtn">
+                    <i class="fas fa-user-plus"></i> Create Free Account
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="logo">
+                        <div class="logo-icon">🧱</div>
+                        <div class="logo-text">
+                        <span class="logo-title">Brick Buy</span>
+                        <span class="logo-subtitle">Your LEGO Collection Manager</span>
+                        </div>
                     </div>
-                    <span class="error-message" id="forgotEmailError"></span>
+                    <p class="footer-text">
+                        Your comprehensive guide to LEGO values and the brick economy.
+                    </p>
                 </div>
+                <div class="footer-section">
+                    <h4 class="footer-heading">Features</h4>
+                    <ul class="footer-links">
+                        <li><a href="#features">Collection Management</a></li>
+                        <li><a href="#features">Price Tracking</a></li>
+                        <li><a href="#features">Market Analysis</a></li>
+                        <li><a href="#features">Import/Export</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-heading">Resources</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API</a></li>
+                        <li><a href="#">Support</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-heading">Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Cookie Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Brick Buy. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 
-                <button type="submit" class="btn btn-primary">Wyślij link resetujący</button>
-                <button type="button" class="btn btn-secondary" id="backToLogin">Powrót do logowania</button>
-            </form>
-
-            <!-- Reset Password Form -->
-            <form id="resetPasswordForm" class="form hidden">
-                <div class="form-group">
-                    <label for="newPassword">Nowe hasło</label>
-                    <div class="input-group">
-                        <i class="fas fa-lock"></i>
-                        <input type="password" id="newPassword" name="newPassword" required>
-                        <button type="button" class="toggle-password" id="toggleNewPassword">
-                            <i class="fas fa-eye"></i>
-                        </button>
+    <!-- Login/Register Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content auth-modal-content">
+            <div class="modal-header">
+                <h2 id="authModalTitle">Sign In</h2>
+                <button class="modal-close" id="closeAuthModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Login Form -->
+                <form id="loginForm" class="form">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <div class="input-group">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="email" name="email" required placeholder="your@email.com">
+                        </div>
+                        <span class="error-message" id="emailError"></span>
                     </div>
-                    <span class="error-message" id="newPasswordError"></span>
-                </div>
 
-                <div class="form-group">
-                    <label for="confirmPassword">Potwierdź hasło</label>
-                    <div class="input-group">
-                        <i class="fas fa-lock"></i>
-                        <input type="password" id="confirmPassword" name="confirmPassword" required>
-                        <button type="button" class="toggle-password" id="toggleConfirmPassword">
-                            <i class="fas fa-eye"></i>
-                        </button>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="password" name="password" required placeholder="••••••••">
+                            <button type="button" class="toggle-password" id="togglePassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <span class="error-message" id="passwordError"></span>
                     </div>
-                    <span class="error-message" id="confirmPasswordError"></span>
+
+                    <div class="form-options">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="rememberMe">
+                            <span class="checkmark"></span>
+                            Remember me
+                        </label>
+                        <a href="#" class="forgot-password" id="forgotPasswordLink">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                </form>
+
+                <!-- Register Form -->
+                <form id="registerForm" class="form hidden">
+                    <div class="form-group">
+                        <label for="registerName">Username</label>
+                        <div class="input-group">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="registerName" name="registerName" required placeholder="Your username">
+                        </div>
+                        <span class="error-message" id="registerNameError"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="registerEmail">Email</label>
+                        <div class="input-group">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="registerEmail" name="registerEmail" required placeholder="your@email.com">
+                        </div>
+                        <span class="error-message" id="registerEmailError"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="registerPassword">Password</label>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="registerPassword" name="registerPassword" required placeholder="••••••••">
+                            <button type="button" class="toggle-password" id="toggleRegisterPassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <span class="error-message" id="registerPasswordError"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmRegisterPassword">Confirm Password</label>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="confirmRegisterPassword" name="confirmRegisterPassword" required placeholder="••••••••">
+                            <button type="button" class="toggle-password" id="toggleConfirmRegisterPassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <span class="error-message" id="confirmRegisterPasswordError"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+                </form>
+
+                <!-- Forgot Password Form -->
+                <form id="forgotPasswordForm" class="form hidden">
+                    <div class="form-group">
+                        <label for="forgotEmail">Email</label>
+                        <div class="input-group">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="forgotEmail" name="forgotEmail" required placeholder="your@email.com">
+                        </div>
+                        <span class="error-message" id="forgotEmailError"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Send Reset Link</button>
+                    <button type="button" class="btn btn-secondary btn-block" id="backToLogin">Back to Sign In</button>
+                </form>
+
+                <div class="auth-footer">
+                    <p id="loginFooterText">Don't have an account? <a href="#" id="signUpLink">Sign Up</a></p>
+                    <p id="registerFooterText" class="hidden">Already have an account? <a href="#" id="signInLink">Sign In</a></p>
                 </div>
-
-                <button type="submit" class="btn btn-primary">Zresetuj hasło</button>
-                <button type="button" class="btn btn-secondary" id="backToLoginFromReset">Powrót do logowania</button>
-            </form>
-
-            <div class="login-footer">
-                <p id="loginFooterText">Nie masz konta? <a href="#" id="signUpLink">Zarejestruj się</a></p>
-                <p id="registerFooterText" class="hidden">Masz już konto? <a href="#" id="signInLink">Zaloguj się</a></p>
             </div>
         </div>
     </div>

@@ -171,8 +171,8 @@ class DashboardManager {
         }
 
         try {
-            console.log('Making profile request to:', `${API_BASE_URL}/profile`);
-            const response = await fetch(`${API_BASE_URL}/profile`, {
+            console.log('Making profile request to:', `${API_BASE_URL}/auth/profile`);
+            const response = await fetch(`${API_BASE_URL}/auth/profile`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }

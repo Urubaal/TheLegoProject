@@ -287,10 +287,10 @@ app.use(helmet({
     directives: {
       defaultSrc: ['\'self\''],
       scriptSrc: ['\'self\'', '\'unsafe-inline\'', '\'unsafe-eval\''],
-      styleSrc: ['\'self\'', '\'unsafe-inline\''],
+      styleSrc: ['\'self\'', '\'unsafe-inline\'', 'https://cdnjs.cloudflare.com'],
       imgSrc: ['\'self\'', 'data:', 'https:'],
       connectSrc: ['\'self\''],
-      fontSrc: ['\'self\'', 'data:'],
+      fontSrc: ['\'self\'', 'data:', 'https://cdnjs.cloudflare.com'],
       objectSrc: ['\'none\''],
       mediaSrc: ['\'self\''],
       frameSrc: ['\'none\''],
