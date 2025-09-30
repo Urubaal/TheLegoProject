@@ -38,64 +38,68 @@ class AuthManager {
 
     setupEventListeners() {
         // Form submissions
-        loginForm.addEventListener('submit', (e) => this.handleLogin(e));
-        registerForm.addEventListener('submit', (e) => this.handleRegister(e));
-        forgotPasswordForm.addEventListener('submit', (e) => this.handleForgotPassword(e));
-        resetPasswordForm.addEventListener('submit', (e) => this.handleResetPassword(e));
+        if (loginForm) loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+        if (registerForm) registerForm.addEventListener('submit', (e) => this.handleRegister(e));
+        if (forgotPasswordForm) forgotPasswordForm.addEventListener('submit', (e) => this.handleForgotPassword(e));
+        if (resetPasswordForm) resetPasswordForm.addEventListener('submit', (e) => this.handleResetPassword(e));
 
         // Navigation
-        forgotPasswordLink.addEventListener('click', (e) => this.showForgotPassword(e));
-        signUpLink.addEventListener('click', (e) => this.showRegister(e));
-        signInLink.addEventListener('click', (e) => this.showLogin(e));
-        backToLogin.addEventListener('click', (e) => this.showLogin(e));
-        backToLoginFromReset.addEventListener('click', (e) => this.showLogin(e));
-        backToLoginFromRegister.addEventListener('click', (e) => this.showLogin(e));
+        if (forgotPasswordLink) forgotPasswordLink.addEventListener('click', (e) => this.showForgotPassword(e));
+        if (signUpLink) signUpLink.addEventListener('click', (e) => this.showRegister(e));
+        if (signInLink) signInLink.addEventListener('click', (e) => this.showLogin(e));
+        if (backToLogin) backToLogin.addEventListener('click', (e) => this.showLogin(e));
+        if (backToLoginFromReset) backToLoginFromReset.addEventListener('click', (e) => this.showLogin(e));
+        if (backToLoginFromRegister) backToLoginFromRegister.addEventListener('click', (e) => this.showLogin(e));
 
         // Real-time validation
         this.setupRealTimeValidation();
     }
 
     setupPasswordToggles() {
-        togglePassword.addEventListener('click', () => this.togglePasswordVisibility('password'));
-        toggleRegisterPassword.addEventListener('click', () => this.togglePasswordVisibility('registerPassword'));
-        toggleConfirmRegisterPassword.addEventListener('click', () => this.togglePasswordVisibility('confirmRegisterPassword'));
-        toggleNewPassword.addEventListener('click', () => this.togglePasswordVisibility('newPassword'));
-        toggleConfirmPassword.addEventListener('click', () => this.togglePasswordVisibility('confirmPassword'));
+        if (togglePassword) togglePassword.addEventListener('click', () => this.togglePasswordVisibility('password'));
+        if (toggleRegisterPassword) toggleRegisterPassword.addEventListener('click', () => this.togglePasswordVisibility('registerPassword'));
+        if (toggleConfirmRegisterPassword) toggleConfirmRegisterPassword.addEventListener('click', () => this.togglePasswordVisibility('confirmRegisterPassword'));
+        if (toggleNewPassword) toggleNewPassword.addEventListener('click', () => this.togglePasswordVisibility('newPassword'));
+        if (toggleConfirmPassword) toggleConfirmPassword.addEventListener('click', () => this.togglePasswordVisibility('confirmPassword'));
     }
 
     setupRealTimeValidation() {
         // Login form validation
         const emailInput = document.getElementById('email');
-        emailInput.addEventListener('blur', () => this.validateEmail(emailInput.value, 'emailError'));
+        if (emailInput) emailInput.addEventListener('blur', () => this.validateEmail(emailInput.value, 'emailError'));
 
         const passwordInput = document.getElementById('password');
-        passwordInput.addEventListener('input', () => this.validatePassword(passwordInput.value, 'passwordError'));
+        if (passwordInput) passwordInput.addEventListener('input', () => this.validatePassword(passwordInput.value, 'passwordError'));
 
         // Register form validation
         const registerNameInput = document.getElementById('registerName');
-        registerNameInput.addEventListener('blur', () => this.validateName(registerNameInput.value, 'registerNameError'));
+        if (registerNameInput) registerNameInput.addEventListener('blur', () => this.validateName(registerNameInput.value, 'registerNameError'));
 
         const registerEmailInput = document.getElementById('registerEmail');
-        registerEmailInput.addEventListener('blur', () => this.validateEmail(registerEmailInput.value, 'registerEmailError'));
+        if (registerEmailInput) registerEmailInput.addEventListener('blur', () => this.validateEmail(registerEmailInput.value, 'registerEmailError'));
 
         const registerPasswordInput = document.getElementById('registerPassword');
-        registerPasswordInput.addEventListener('input', () => this.validatePassword(registerPasswordInput.value, 'registerPasswordError'));
+        if (registerPasswordInput) registerPasswordInput.addEventListener('input', () => this.validatePassword(registerPasswordInput.value, 'registerPasswordError'));
 
         const confirmRegisterPasswordInput = document.getElementById('confirmRegisterPassword');
-        confirmRegisterPasswordInput.addEventListener('input', () => this.validateConfirmRegisterPassword());
+        if (confirmRegisterPasswordInput) confirmRegisterPasswordInput.addEventListener('input', () => this.validateConfirmRegisterPassword());
 
         // Reset password validation
         const newPasswordInput = document.getElementById('newPassword');
-        newPasswordInput.addEventListener('input', () => this.validatePassword(newPasswordInput.value, 'newPasswordError'));
+        if (newPasswordInput) newPasswordInput.addEventListener('input', () => this.validatePassword(newPasswordInput.value, 'newPasswordError'));
 
         const confirmPasswordInput = document.getElementById('confirmPassword');
-        confirmPasswordInput.addEventListener('input', () => this.validateConfirmPassword());
+        if (confirmPasswordInput) confirmPasswordInput.addEventListener('input', () => this.validateConfirmPassword());
     }
 
     togglePasswordVisibility(inputId) {
         const input = document.getElementById(inputId);
         const toggle = document.getElementById(`toggle${inputId.charAt(0).toUpperCase() + inputId.slice(1)}`);
+        
+        if (!input || !toggle) return;
+        
         const icon = toggle.querySelector('i');
+        if (!icon) return;
 
         if (input.type === 'password') {
             input.type = 'text';
@@ -111,7 +115,7 @@ class AuthManager {
     showRegister(e) {
         e.preventDefault();
         this.hideAllForms();
-        registerForm.classList.remove('hidden');
+        if (registerForm) registerForm.classList.remove('hidden');
         this.currentForm = 'register';
         this.clearAllErrors();
         this.updateHeader('Create Account', 'Join Brick Buy today');
@@ -125,7 +129,7 @@ class AuthManager {
     showForgotPassword(e) {
         e.preventDefault();
         this.hideAllForms();
-        forgotPasswordForm.classList.remove('hidden');
+        if (forgotPasswordForm) forgotPasswordForm.classList.remove('hidden');
         this.currentForm = 'forgot';
         
         // Update modal title if exists
@@ -136,7 +140,7 @@ class AuthManager {
     showLogin(e) {
         e.preventDefault();
         this.hideAllForms();
-        loginForm.classList.remove('hidden');
+        if (loginForm) loginForm.classList.remove('hidden');
         this.currentForm = 'login';
         this.clearAllErrors();
         this.updateHeader('Sign In', 'Welcome back! Sign in to your account');
@@ -149,22 +153,22 @@ class AuthManager {
 
     showResetPassword() {
         this.hideAllForms();
-        resetPasswordForm.classList.remove('hidden');
+        if (resetPasswordForm) resetPasswordForm.classList.remove('hidden');
         this.currentForm = 'reset';
     }
 
     hideAllForms() {
-        loginForm.classList.add('hidden');
-        registerForm.classList.add('hidden');
-        forgotPasswordForm.classList.add('hidden');
-        resetPasswordForm.classList.add('hidden');
+        if (loginForm) loginForm.classList.add('hidden');
+        if (registerForm) registerForm.classList.add('hidden');
+        if (forgotPasswordForm) forgotPasswordForm.classList.add('hidden');
+        if (resetPasswordForm) resetPasswordForm.classList.add('hidden');
     }
 
     updateHeader(title, subtitle) {
         const headerTitle = document.querySelector('.login-header h1');
         const headerSubtitle = document.querySelector('.login-header p');
-        headerTitle.textContent = title;
-        headerSubtitle.textContent = subtitle;
+        if (headerTitle) headerTitle.textContent = title;
+        if (headerSubtitle) headerSubtitle.textContent = subtitle;
     }
 
     updateFooter(type) {
@@ -172,11 +176,11 @@ class AuthManager {
         const registerFooter = document.getElementById('registerFooterText');
         
         if (type === 'login') {
-            loginFooter.classList.remove('hidden');
-            registerFooter.classList.add('hidden');
+            if (loginFooter) loginFooter.classList.remove('hidden');
+            if (registerFooter) registerFooter.classList.add('hidden');
         } else if (type === 'register') {
-            loginFooter.classList.add('hidden');
-            registerFooter.classList.remove('hidden');
+            if (loginFooter) loginFooter.classList.add('hidden');
+            if (registerFooter) registerFooter.classList.remove('hidden');
         }
     }
 
@@ -356,9 +360,9 @@ class AuthManager {
                 
                 this.showMessage('Konto zostało utworzone pomyślnie!', false);
                 
-                // Redirect to dashboard or main page
+                // Redirect to home page
                 setTimeout(() => {
-                    window.location.href = '/dashboard.html';
+                    window.location.href = '/home.html';
                 }, 1500);
             } else {
                 // Handle different error statuses
@@ -422,9 +426,9 @@ class AuthManager {
                 
                 this.showMessage('Zalogowano pomyślnie!', false);
                 
-                // Redirect to dashboard or main page
+                // Redirect to home page
                 setTimeout(() => {
-                    window.location.href = '/dashboard.html';
+                    window.location.href = '/home.html';
                 }, 1500);
             } else {
                 // Handle different error statuses
@@ -548,65 +552,16 @@ class AuthManager {
             this.showResetPassword();
         }
     }
-}
-
-// Initialize the application
-document.addEventListener('DOMContentLoaded', () => {
-    const authManager = new AuthManager();
-    
-    // Check if user is on reset password page
-    authManager.checkResetPasswordPage();
-    
-    // Check for remembered user
-    checkRememberedUser();
-});
-
-// Additional utility functions
-function checkRememberedUser() {
-    const rememberedUser = localStorage.getItem('rememberedUser');
-    if (rememberedUser) {
-        document.getElementById('email').value = rememberedUser;
-        document.getElementById('rememberMe').checked = true;
-    }
-}
-
-// Check if user is already logged in
-function checkAuthStatus() {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-        // Verify token with backend
-        fetch(`${API_BASE_URL}/auth/profile`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // User is logged in, redirect to dashboard
-                window.location.href = '/dashboard.html';
-            } else {
-                // Token is invalid, remove it
-                localStorage.removeItem('authToken');
-            localStorage.removeItem('brickBuyToken');
-            localStorage.removeItem('brickBuyUser');
-            localStorage.removeItem('brickBuyCollection');
-            }
-        })
-        .catch(error => {
-            console.error('Auth check failed:', error);
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('brickBuyToken');
-            localStorage.removeItem('brickBuyUser');
-            localStorage.removeItem('brickBuyCollection');
-        });
-    }
 
     setupLandingPageButtons() {
+        console.log('🔧 Setting up landing page buttons...');
+        
         // Modal elements
         const authModal = document.getElementById('authModal');
         const closeAuthModal = document.getElementById('closeAuthModal');
         const authModalTitle = document.getElementById('authModalTitle');
+        
+        console.log('Modal elements:', { authModal: !!authModal, closeAuthModal: !!closeAuthModal });
         
         // Landing page buttons
         const signInBtn = document.getElementById('signInBtn');
@@ -614,11 +569,22 @@ function checkAuthStatus() {
         const learnMoreBtn = document.getElementById('learnMoreBtn');
         const ctaSignUpBtn = document.getElementById('ctaSignUpBtn');
 
+        console.log('Button elements:', { 
+            signInBtn: !!signInBtn, 
+            getStartedBtn: !!getStartedBtn, 
+            ctaSignUpBtn: !!ctaSignUpBtn 
+        });
+
         // Open modal functions
         const openAuthModal = (showRegister = false) => {
-            if (!authModal) return;
+            console.log('🚀 Opening auth modal, showRegister:', showRegister);
+            if (!authModal) {
+                console.error('❌ authModal not found!');
+                return;
+            }
             
-            authModal.style.display = 'flex';
+            authModal.classList.add('active');
+            console.log('✅ Modal activated');
             
             if (showRegister) {
                 this.showRegister({ preventDefault: () => {} });
@@ -629,30 +595,42 @@ function checkAuthStatus() {
 
         const closeModal = () => {
             if (authModal) {
-                authModal.style.display = 'none';
+                authModal.classList.remove('active');
             }
         };
 
         // Event listeners for landing page buttons
         if (signInBtn) {
+            console.log('✅ Adding click listener to signInBtn');
             signInBtn.addEventListener('click', (e) => {
+                console.log('🖱️ signInBtn clicked!');
                 e.preventDefault();
                 openAuthModal(false);
             });
+        } else {
+            console.warn('⚠️ signInBtn not found!');
         }
 
         if (getStartedBtn) {
+            console.log('✅ Adding click listener to getStartedBtn');
             getStartedBtn.addEventListener('click', (e) => {
+                console.log('🖱️ getStartedBtn clicked!');
                 e.preventDefault();
                 openAuthModal(true);
             });
+        } else {
+            console.warn('⚠️ getStartedBtn not found!');
         }
 
         if (ctaSignUpBtn) {
+            console.log('✅ Adding click listener to ctaSignUpBtn');
             ctaSignUpBtn.addEventListener('click', (e) => {
+                console.log('🖱️ ctaSignUpBtn clicked!');
                 e.preventDefault();
                 openAuthModal(true);
             });
+        } else {
+            console.warn('⚠️ ctaSignUpBtn not found!');
         }
 
         if (learnMoreBtn) {
@@ -677,11 +655,164 @@ function checkAuthStatus() {
 
         // ESC key to close modal
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && authModal && authModal.style.display === 'flex') {
+            if (e.key === 'Escape' && authModal && authModal.classList.contains('active')) {
                 closeModal();
             }
         });
     }
+}
+
+// Initialize the application
+document.addEventListener('DOMContentLoaded', () => {
+    const authManager = new AuthManager();
+    
+    // Check if user is on reset password page
+    authManager.checkResetPasswordPage();
+    
+    // Check for remembered user
+    checkRememberedUser();
+});
+
+// Additional utility functions
+function checkRememberedUser() {
+    const rememberedUser = localStorage.getItem('rememberedUser');
+    const emailInput = document.getElementById('email');
+    const rememberMeCheckbox = document.getElementById('rememberMe');
+    
+    if (rememberedUser && emailInput && rememberMeCheckbox) {
+        emailInput.value = rememberedUser;
+        rememberMeCheckbox.checked = true;
+    }
+}
+
+// Check if user is already logged in
+function checkAuthStatus() {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        // No token, user is not logged in
+        showSignInButton();
+        return;
+    }
+    
+    // Verify token with backend
+    fetch(`${API_BASE_URL}/auth/profile`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else if (response.status === 401 || response.status === 403) {
+            // Token is invalid or expired, silently remove it
+            clearAuthData();
+            showSignInButton();
+            return null;
+        }
+        throw new Error(`HTTP ${response.status}`);
+    })
+    .then(data => {
+        if (data && data.success && data.data) {
+            // User is logged in, show user dropdown
+            showUserDropdown(data.data);
+        }
+    })
+    .catch(error => {
+        // Silently handle errors - user is just not logged in
+        console.debug('Auth check:', error.message);
+        clearAuthData();
+        showSignInButton();
+    });
+}
+
+// Show sign in button
+function showSignInButton() {
+    const signInBtn = document.getElementById('signInBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    
+    if (signInBtn) signInBtn.style.display = 'inline-flex';
+    if (userDropdown) userDropdown.style.display = 'none';
+}
+
+// Show user dropdown with user data
+function showUserDropdown(userData) {
+    const signInBtn = document.getElementById('signInBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    const userAvatar = document.getElementById('userAvatar');
+    const userName = document.getElementById('userName');
+    
+    if (signInBtn) signInBtn.style.display = 'none';
+    if (userDropdown) userDropdown.style.display = 'block';
+    
+    // Set user data
+    if (userName && userData.username) {
+        userName.textContent = userData.username;
+    } else if (userName && userData.name) {
+        userName.textContent = userData.name;
+    }
+    
+    if (userAvatar && userData.username) {
+        userAvatar.textContent = userData.username.charAt(0).toUpperCase();
+    } else if (userAvatar && userData.name) {
+        userAvatar.textContent = userData.name.charAt(0).toUpperCase();
+    }
+    
+    // Setup dropdown toggle
+    setupUserDropdown();
+}
+
+// Setup user dropdown toggle
+function setupUserDropdown() {
+    const userButton = document.getElementById('userButton');
+    const userDropdown = document.getElementById('userDropdown');
+    const logoutBtn = document.getElementById('logoutBtn');
+    
+    if (userButton && userDropdown) {
+        userButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('active');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!userDropdown.contains(e.target)) {
+                userDropdown.classList.remove('active');
+            }
+        });
+    }
+    
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
+    }
+}
+
+// Handle logout
+async function handleLogout() {
+    const token = localStorage.getItem('authToken');
+    
+    try {
+        // Call logout endpoint
+        await fetch(`${API_BASE_URL}/auth/logout`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+    } catch (error) {
+        console.error('Logout error:', error);
+    } finally {
+        // Clear local storage and redirect
+        clearAuthData();
+        window.location.reload();
+    }
+}
+
+// Clear authentication data
+function clearAuthData() {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('brickBuyToken');
+    localStorage.removeItem('brickBuyUser');
+    localStorage.removeItem('brickBuyCollection');
 }
 
 // Check authentication status on page load

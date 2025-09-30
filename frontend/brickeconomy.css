@@ -368,12 +368,13 @@ body {
 }
 
 .nav-container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
     height: 60px;
+    gap: 20px;
 }
 
 .nav-brand .logo {
@@ -410,10 +411,13 @@ body {
     font-weight: 400;
 }
 
-.nav-links {
+.nav-links,
+.nav-menu {
     display: flex;
     align-items: center;
-    gap: 32px;
+    gap: 24px;
+    flex: 1;
+    justify-content: center;
 }
 
 .nav-link {
@@ -426,6 +430,7 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
+    white-space: nowrap;
 }
 
 .nav-link:hover {
@@ -459,6 +464,7 @@ body {
     display: flex;
     align-items: center;
     gap: 16px;
+    flex-shrink: 0;
 }
 
 .search-container {
@@ -468,7 +474,7 @@ body {
 }
 
 .search-input {
-    width: 280px;
+    width: 240px;
     padding: 8px 16px 8px 40px;
     border: 1px solid #e0e0e0;
     border-radius: 20px;
